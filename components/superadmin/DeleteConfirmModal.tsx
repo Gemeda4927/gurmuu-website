@@ -1,4 +1,4 @@
-// /components/superadmin/DeleteConfirmModal.tsx
+
 import { Trash2, X } from 'lucide-react';
 
 interface DeleteConfirmModalProps {
