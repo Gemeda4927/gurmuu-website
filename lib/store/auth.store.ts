@@ -1,19 +1,18 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { User } from '@/lib/api/auth';
 
 interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
-  isLoading: boolean;
+  hasHydrated: boolean;
 }
 
 interface AuthActions {
   setAuthData: (token: string, user: User) => void;
   clearAuthData: () => void;
-  checkAuth: () => Promise<boolean>;
-  initializeAuth: () => void;
+  setHasHydrated: (state: boolean) => void;
 }
 
 const useAuthStore = create<AuthState & AuthActions>()(
@@ -22,93 +21,55 @@ const useAuthStore = create<AuthState & AuthActions>()(
       user: null,
       token: null,
       isAuthenticated: false,
-      isLoading: true,
+      hasHydrated: false,
 
       setAuthData: (token: string, user: User) => {
-        // Store in localStorage
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
-        
-        // Update store
         set({ 
           user, 
           token, 
-          isAuthenticated: true, 
-          isLoading: false 
+          isAuthenticated: true 
         });
       },
 
       clearAuthData: () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
         set({ 
           user: null, 
           token: null, 
-          isAuthenticated: false,
-          isLoading: false 
+          isAuthenticated: false 
         });
       },
 
-      checkAuth: async () => {
-        if (typeof window === 'undefined') return false;
-        
-        const token = localStorage.getItem('token');
-        const userStr = localStorage.getItem('user');
-        
-        if (!token || !userStr) {
-          set({ isLoading: false });
-          return false;
-        }
-        
-        try {
-          const user = JSON.parse(userStr);
-          
-          // Optional: Verify token with API
-          // const response = await verifyToken(token);
-          
-          set({ 
-            user, 
-            token, 
-            isAuthenticated: true, 
-            isLoading: false 
-          });
-          return true;
-        } catch (error) {
-          console.error('Auth check failed:', error);
-          get().clearAuthData();
-          return false;
-        }
-      },
-
-      initializeAuth: () => {
-        if (typeof window === 'undefined') return;
-        
-        const token = localStorage.getItem('token');
-        const userStr = localStorage.getItem('user');
-        
-        if (token && userStr) {
-          try {
-            const user = JSON.parse(userStr);
-            set({ 
-              user, 
-              token, 
-              isAuthenticated: true, 
-              isLoading: false 
-            });
-          } catch (error) {
-            get().clearAuthData();
-          }
-        } else {
-          set({ isLoading: false });
-        }
+      setHasHydrated: (state: boolean) => {
+        set({ hasHydrated: state });
       },
     }),
     {
       name: 'auth-storage',
+      storage: createJSONStorage(() => {
+        if (typeof window !== 'undefined') {
+          return localStorage;
+        }
+        return {
+          getItem: () => null,
+          setItem: () => {},
+          removeItem: () => {},
+        };
+      }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.setHasHydrated(true);
+          
+          // Auto-check auth based on stored data
+          if (state.token && state.user) {
+            state.isAuthenticated = true;
+          }
+        }
+      },
       partialize: (state) => ({
         user: state.user,
         token: state.token,
       }),
+      skipHydration: false,
     }
   )
 );
