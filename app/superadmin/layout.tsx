@@ -6,10 +6,10 @@ import useAuthStore from '@/lib/store/auth.store';
 import Link from 'next/link';
 import { 
   Crown, Users, Key, Settings, 
-  BarChart, LogOut, Home,
+  LogOut, Home,
   Menu, X, Bell, Search,
-  Shield, Database, Activity,
-  ChevronRight, UserPlus
+  Shield,
+  ChevronRight
 } from 'lucide-react';
 
 interface SuperadminLayoutProps {
@@ -19,19 +19,27 @@ interface SuperadminLayoutProps {
 export default function SuperadminLayout({ children }: SuperadminLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, clearAuthData, isAuthenticated, isLoading } = useAuthStore();
+  const { user, clearAuthData, isAuthenticated, hasHydrated } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isChecking, setIsChecking] = useState(true);
 
+  // Check auth after hydration
   useEffect(() => {
-    if (!isLoading) {
+    if (hasHydrated) {
+      setIsChecking(false);
+      
       if (!isAuthenticated) {
         router.push('/login');
-      } else if (user?.role !== 'superadmin') {
+        return;
+      }
+      
+      if (user?.role !== 'superadmin') {
         router.push('/dashboard');
+        return;
       }
     }
-  }, [isAuthenticated, isLoading, user, router]);
+  }, [hasHydrated, isAuthenticated, user, router]);
 
   const handleLogout = () => {
     clearAuthData();
@@ -45,7 +53,8 @@ export default function SuperadminLayout({ children }: SuperadminLayoutProps) {
     { name: 'Settings', icon: Settings, path: '/superadmin/settings' },
   ];
 
-  if (isLoading) {
+  // Show loading while checking or before hydration
+  if (isChecking || !hasHydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="text-center">
@@ -53,13 +62,14 @@ export default function SuperadminLayout({ children }: SuperadminLayoutProps) {
             <div className="w-16 h-16 border-4 border-gray-200 rounded-full"></div>
             <div className="absolute top-0 left-0 w-16 h-16 border-4 border-gray-800 rounded-full animate-spin border-t-transparent"></div>
           </div>
-          <p className="mt-4 text-gray-600 font-medium">Verifying Access...</p>
+          <p className="mt-4 text-gray-600 font-medium">Loading Dashboard...</p>
         </div>
       </div>
     );
   }
 
-  if (!user || user.role !== 'superadmin') {
+  // Don't render anything if not authenticated or not superadmin
+  if (!isAuthenticated || user?.role !== 'superadmin') {
     return null;
   }
 
@@ -140,11 +150,11 @@ export default function SuperadminLayout({ children }: SuperadminLayoutProps) {
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 bg-gradient-to-r from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                  {user.name.charAt(0).toUpperCase()}
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{user.name}</p>
-                  <p className="text-sm text-gray-500">{user.email}</p>
+                  <p className="font-medium text-gray-900">{user?.name || 'User'}</p>
+                  <p className="text-sm text-gray-500">{user?.email || 'No email'}</p>
                 </div>
               </div>
               <div className="mt-4">
