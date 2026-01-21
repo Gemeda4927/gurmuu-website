@@ -19,7 +19,7 @@ import {
 export default function LoginPage() {
   const router = useRouter();
   const loginMutation = useLogin();
-  const { initializeAuth, isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, hasHydrated } = useAuthStore();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -32,17 +32,12 @@ export default function LoginPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Initialize auth
-  useEffect(() => {
-    initializeAuth();
-  }, [initializeAuth]);
-
   // Redirect if already authenticated
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (hasHydrated && isAuthenticated) {
       router.push('/dashboard');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [hasHydrated, isAuthenticated, router]);
 
   // Show success message
   useEffect(() => {
@@ -129,7 +124,7 @@ export default function LoginPage() {
     }, 500);
   };
 
-  if (isLoading) {
+  if (!hasHydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100">
         <div className="text-center">

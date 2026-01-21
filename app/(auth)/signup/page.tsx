@@ -38,7 +38,7 @@ import {
 export default function SignupPage() {
   const router = useRouter();
   const signupMutation = useSignup();
-  const { initializeAuth, isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, hasHydrated } = useAuthStore();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -63,15 +63,12 @@ export default function SignupPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Check if already authenticated
   useEffect(() => {
-    initializeAuth();
-  }, [initializeAuth]);
-
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (hasHydrated && isAuthenticated) {
       router.push("/dashboard");
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [hasHydrated, isAuthenticated, router]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -187,7 +184,7 @@ export default function SignupPage() {
     }
   };
 
-  if (isLoading) {
+  if (!hasHydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100">
         <div className="text-center">
@@ -735,4 +732,3 @@ export default function SignupPage() {
     </>
   );
 }
-
