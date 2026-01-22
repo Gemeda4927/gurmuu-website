@@ -567,6 +567,17 @@ export default function UsersPage() {
     });
   };
 
+  // Handle modal open/close
+  const handleOpenCreateModal = () => {
+    console.log("Opening create user modal"); // Debug log
+    setShowCreateModal(true);
+  };
+
+  const handleCloseCreateModal = () => {
+    console.log("Closing create user modal"); // Debug log
+    setShowCreateModal(false);
+  };
+
   // Handle body overflow when modal is open
   useEffect(() => {
     if (
@@ -577,12 +588,15 @@ export default function UsersPage() {
       modalState.role.isOpen
     ) {
       document.body.style.overflow = "hidden";
+      document.body.classList.add("modal-open");
     } else {
       document.body.style.overflow = "unset";
+      document.body.classList.remove("modal-open");
     }
 
     return () => {
       document.body.style.overflow = "unset";
+      document.body.classList.remove("modal-open");
     };
   }, [
     showCreateModal,
@@ -683,9 +697,7 @@ export default function UsersPage() {
                 <RefreshCw className="w-5 h-5 text-gray-600 group-hover:rotate-180 transition-transform duration-500" />
               </button>
               <button
-                onClick={() =>
-                  setShowCreateModal(true)
-                }
+                onClick={handleOpenCreateModal}
                 className="inline-flex items-center px-6 py-3.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-2xl hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 font-medium group overflow-hidden relative"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
@@ -924,7 +936,7 @@ export default function UsersPage() {
                   </div>
                 </div>
 
-                <button
+                {/* <button
                   onClick={() =>
                     setShowExportModal(true)
                   }
@@ -933,7 +945,7 @@ export default function UsersPage() {
                   <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                   <Download className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
                   Export
-                </button>
+                </button> */}
               </div>
             </div>
 
@@ -1146,11 +1158,7 @@ export default function UsersPage() {
                             : "No users in the system yet"}
                         </p>
                         <button
-                          onClick={() =>
-                            setShowCreateModal(
-                              true
-                            )
-                          }
+                          onClick={handleOpenCreateModal}
                           className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-2xl hover:opacity-90 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 font-semibold text-lg flex items-center justify-center mx-auto gap-3"
                         >
                           <UserPlus className="w-6 h-6" />
@@ -1597,9 +1605,7 @@ export default function UsersPage() {
       {showCreateModal && (
         <CreateUserModal
           isOpen={showCreateModal}
-          onClose={() =>
-            setShowCreateModal(false)
-          }
+          onClose={handleCloseCreateModal}
           onSuccess={handleCreateUserSuccess}
         />
       )}
