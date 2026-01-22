@@ -9,7 +9,18 @@ import {
   LogOut, Home,
   Menu, X, Bell, Search,
   Shield,
-  ChevronRight
+  BarChart3,
+  Database,
+  ShieldCheck,
+  UserCheck,
+  CheckCircle,
+  Activity,
+  Filter,
+  Globe,
+  ChevronDown,
+  MoreVertical,
+  Calendar,
+  Clock
 } from 'lucide-react';
 
 interface SuperadminLayoutProps {
@@ -24,7 +35,6 @@ export default function SuperadminLayout({ children }: SuperadminLayoutProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isChecking, setIsChecking] = useState(true);
 
-  // Check auth after hydration
   useEffect(() => {
     if (hasHydrated) {
       setIsChecking(false);
@@ -47,198 +57,363 @@ export default function SuperadminLayout({ children }: SuperadminLayoutProps) {
   };
 
   const navItems = [
-    { name: 'Dashboard', icon: Home, path: '/superadmin' },
-    { name: 'Users', icon: Users, path: '/superadmin/users' },
-    { name: 'Permissions', icon: Key, path: '/superadmin/permissions' },
-    { name: 'Settings', icon: Settings, path: '/superadmin/settings' },
+    { 
+      name: 'Dashboard', 
+      icon: Home, 
+      path: '/superadmin',
+      color: 'bg-blue-50 text-blue-600'
+    },
+    { 
+      name: 'Users', 
+      icon: Users, 
+      path: '/superadmin/users',
+      color: 'bg-emerald-50 text-emerald-600',
+      count: 245
+    },
+    { 
+      name: 'Permissions', 
+      icon: ShieldCheck, 
+      path: '/superadmin/permissions',
+      color: 'bg-purple-50 text-purple-600'
+    },
+    { 
+      name: 'Analytics', 
+      icon: BarChart3, 
+      path: '/superadmin/analytics',
+      color: 'bg-amber-50 text-amber-600'
+    },
+    { 
+      name: 'Settings', 
+      icon: Settings, 
+      path: '/superadmin/settings',
+      color: 'bg-gray-50 text-gray-600'
+    },
   ];
 
-  // Show loading while checking or before hydration
+  const stats = [
+    { label: 'Active Users', value: '1,248', change: '+12%', icon: UserCheck, color: 'bg-blue-500' },
+    { label: 'System Health', value: '98.5%', change: '✓', icon: CheckCircle, color: 'bg-emerald-500' },
+    { label: 'API Requests', value: '24.5k', change: '+23%', icon: Activity, color: 'bg-purple-500' },
+    { label: 'Storage', value: '85%', change: '+5%', icon: Database, color: 'bg-amber-500' },
+  ];
+
   if (isChecking || !hasHydrated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <div className="relative">
-            <div className="w-16 h-16 border-4 border-gray-200 rounded-full"></div>
-            <div className="absolute top-0 left-0 w-16 h-16 border-4 border-gray-800 rounded-full animate-spin border-t-transparent"></div>
+          <div className="relative inline-block mb-6">
+            <div className="w-16 h-16 border-4 border-blue-100 rounded-full"></div>
+            <div className="absolute top-0 left-0 w-16 h-16 border-4 border-blue-500 rounded-full animate-spin border-t-transparent"></div>
+            <Crown className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 text-blue-500" />
           </div>
-          <p className="mt-4 text-gray-600 font-medium">Loading Dashboard...</p>
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">Loading Dashboard</h3>
+          <p className="text-gray-400 text-sm">Please wait...</p>
         </div>
       </div>
     );
   }
 
-  // Don't render anything if not authenticated or not superadmin
   if (!isAuthenticated || user?.role !== 'superadmin') {
     return null;
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile sidebar */}
+      {/* Mobile Sidebar */}
       {sidebarOpen && (
-        <div className="lg:hidden">
-          <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-          <div className="fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl">
+        <>
+          <div 
+            className="fixed inset-0 bg-black/20 z-40 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+          <div className="fixed inset-y-0 left-0 w-72 bg-white z-50 lg:hidden shadow-xl">
             <div className="flex flex-col h-full">
-              <div className="p-6 border-b">
+              {/* Logo & Close */}
+              <div className="px-5 py-4 border-b">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
-                      <Crown className="w-6 h-6 text-white" />
+                    <div className="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center">
+                      <Crown className="w-4 h-4 text-white" />
                     </div>
                     <div>
-                      <h1 className="font-bold text-gray-900">Superadmin</h1>
-                      <p className="text-sm text-gray-500">Full Control</p>
+                      <h1 className="font-bold text-gray-800">Superadmin</h1>
+                      <p className="text-xs text-blue-500">Control Panel</p>
                     </div>
                   </div>
-                  <button onClick={() => setSidebarOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                    <X className="w-5 h-5 text-gray-600" />
+                  <button 
+                    onClick={() => setSidebarOpen(false)}
+                    className="p-2 hover:bg-gray-50 rounded-lg"
+                  >
+                    <X className="w-4 h-4 text-gray-500" />
                   </button>
                 </div>
-                <nav className="space-y-2">
+
+                {/* User Profile - FIXED SPACING */}
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-base">
+                      {user?.name?.charAt(0).toUpperCase() || 'A'}
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-white border border-blue-500 rounded-full flex items-center justify-center">
+                      <Shield className="w-2 h-2 text-blue-500" />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-800 truncate text-sm">{user?.name || 'Admin'}</p>
+                    <p className="text-xs text-gray-500 truncate">{user?.email || 'admin@example.com'}</p>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-600 text-xs font-medium rounded-full">
+                        Super Admin
+                      </span>
+                      <span className="flex items-center text-xs text-emerald-600">
+                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1"></div>
+                        Active
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Navigation - PROPER SPACING */}
+              <div className="flex-1 px-3 py-3">
+                <nav className="space-y-0.5">
                   {navItems.map((item) => (
                     <Link
                       key={item.name}
                       href={item.path}
                       onClick={() => setSidebarOpen(false)}
-                      className={`flex items-center space-x-3 px-4 py-3 rounded-lg ${
+                      className={`flex items-center justify-between px-3 py-2.5 rounded-lg ${
                         pathname === item.path 
-                          ? 'bg-gray-900 text-white' 
-                          : 'text-gray-700 hover:bg-gray-100'
+                          ? `${item.color} border-l-3 border-blue-500` 
+                          : 'text-gray-600 hover:bg-gray-50'
                       }`}
                     >
-                      <item.icon className="w-5 h-5" />
-                      <span>{item.name}</span>
+                      <div className="flex items-center space-x-3">
+                        <item.icon className="w-4 h-4" />
+                        <span className="font-medium text-sm">{item.name}</span>
+                      </div>
+                      {item.count && (
+                        <span className="px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">
+                          {item.count}
+                        </span>
+                      )}
                     </Link>
                   ))}
                 </nav>
               </div>
-              <div className="p-6 mt-auto">
+
+              {/* Logout - PERFECT SPACING */}
+              <div className="px-5 py-4 border-t">
                 <button
                   onClick={handleLogout}
-                  className="flex items-center justify-center w-full px-4 py-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100"
+                  className="flex items-center justify-center w-full px-3 py-2.5 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium"
                 >
-                  <LogOut className="w-5 h-5 mr-2" />
-                  Logout
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout Session
                 </button>
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
 
-      {/* Desktop layout */}
+      {/* Desktop Layout */}
       <div className="lg:flex">
         {/* Sidebar */}
-        <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:z-50">
-          <div className="flex flex-col flex-1 min-h-0 bg-white border-r border-gray-200">
+        <aside className="hidden lg:block w-64 fixed left-0 top-0 h-screen bg-white border-r border-gray-200">
+          <div className="flex flex-col h-full">
             {/* Logo */}
-            <div className="flex items-center h-16 px-6 border-b border-gray-200">
+            <div className="px-5 py-4 border-b">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
-                  <Crown className="w-6 h-6 text-white" />
+                <div className="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <Crown className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <h1 className="font-bold text-gray-900">Superadmin</h1>
-                  <p className="text-sm text-gray-500">Full Control</p>
+                  <h1 className="font-bold text-gray-800 text-base">Superadmin</h1>
+                  <p className="text-xs text-blue-500">Control Panel</p>
                 </div>
               </div>
             </div>
 
-            {/* User info */}
-            <div className="p-6 border-b border-gray-200">
+            {/* User Profile - PERFECTLY ALIGNED */}
+            <div className="px-5 py-4 border-b">
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                <div className="relative">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-base">
+                    {user?.name?.charAt(0).toUpperCase() || 'A'}
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-white border border-blue-500 rounded-full flex items-center justify-center">
+                    <Shield className="w-2 h-2 text-blue-500" />
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-gray-900">{user?.name || 'User'}</p>
-                  <p className="text-sm text-gray-500">{user?.email || 'No email'}</p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="inline-flex items-center px-3 py-1 bg-gray-900 text-white rounded-full text-xs font-medium">
-                  <Shield className="w-3 h-3 mr-1" />
-                  SUPERADMIN
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-800 text-sm truncate">{user?.name || 'Admin'}</p>
+                  <p className="text-xs text-gray-500 truncate">{user?.email || 'admin@example.com'}</p>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-600 text-xs font-medium rounded-full">
+                      Super Admin
+                    </span>
+                    <span className="flex items-center text-xs text-emerald-600">
+                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1"></div>
+                      Active
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Navigation */}
-            <nav className="flex-1 p-6 space-y-2 overflow-y-auto">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.path}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                    pathname === item.path 
-                      ? 'bg-gray-900 text-white' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span className="font-medium">{item.name}</span>
-                  {pathname === item.path && (
-                    <ChevronRight className="w-4 h-4 ml-auto" />
-                  )}
-                </Link>
-              ))}
-            </nav>
+            {/* Navigation - PERFECT SPACING */}
+            <div className="flex-1 px-3 py-4">
+              <nav className="space-y-0.5">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.path}
+                    className={`flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors ${
+                      pathname === item.path 
+                        ? `${item.color} border-l-3 border-blue-500` 
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <item.icon className="w-4 h-4" />
+                      <span className="font-medium text-sm">{item.name}</span>
+                    </div>
+                    {item.count && (
+                      <span className="px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">
+                        {item.count}
+                      </span>
+                    )}
+                  </Link>
+                ))}
+              </nav>
+            </div>
 
-            {/* Logout */}
-            <div className="p-6 border-t border-gray-200">
+            {/* Logout - PERFECT SPACING */}
+            <div className="px-5 py-4 border-t">
               <button
                 onClick={handleLogout}
-                className="flex items-center justify-center w-full px-4 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
+                className="flex items-center justify-center w-full px-3 py-2.5 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium"
               >
-                <LogOut className="w-5 h-5 mr-2" />
-                Logout
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout Session
               </button>
             </div>
           </div>
         </aside>
 
-        {/* Main content */}
+        {/* Main Content */}
         <div className="lg:pl-64 flex flex-col flex-1">
-          {/* Header */}
-          <header className="sticky top-0 z-40 flex items-center h-16 px-6 bg-white border-b border-gray-200 lg:px-8">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 -ml-2 text-gray-500 hover:text-gray-900"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
+          {/* Header - FIXED SPACING */}
+          <header className="sticky top-0 z-30 bg-white border-b border-gray-200">
+            <div className="px-5 lg:px-6 py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="lg:hidden p-2 -ml-1 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-50 mr-3"
+                  >
+                    <Menu className="w-4 h-4" />
+                  </button>
+                  
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-800">Dashboard</h2>
+                    <p className="text-xs text-gray-500 flex items-center mt-0.5">
+                      <Calendar className="w-3 h-3 mr-1" />
+                      {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
+                  </div>
+                </div>
 
-            <div className="flex-1 ml-4">
-              <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search users, permissions..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                />
+                <div className="flex items-center space-x-3">
+                  {/* Search - PERFECT SPACING */}
+                  <div className="hidden md:block relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search users, permissions, settings..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-9 pr-4 py-2 w-56 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                  </div>
+
+                  <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg">
+                    <Filter className="w-4 h-4" />
+                  </button>
+                  
+                  <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg relative">
+                    <Bell className="w-4 h-4" />
+                    <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                  </button>
+
+                  <div className="hidden lg:flex items-center space-x-2 text-xs text-gray-500">
+                    <Clock className="w-3 h-3" />
+                    <span>{new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <button className="relative p-2 text-gray-500 hover:text-gray-900">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
             </div>
           </header>
 
-          {/* Page content */}
+          {/* Stats Bar - PERFECT GRID SPACING */}
+          <div className="px-5 lg:px-6 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+              {stats.map((stat, index) => (
+                <div 
+                  key={index} 
+                  className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className={`p-2 ${stat.color} rounded-lg`}>
+                      <stat.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <span className={`text-xs font-medium ${
+                      stat.change.includes('+') ? 'text-emerald-500' : 
+                      stat.change === '✓' ? 'text-blue-500' : 'text-gray-500'
+                    }`}>
+                      {stat.change}
+                    </span>
+                  </div>
+                  <p className="text-xl font-semibold text-gray-800">{stat.value}</p>
+                  <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Main Content Area - PROPER PADDING */}
           <main className="flex-1">
-            <div className="py-6">
-              <div className="px-6 lg:px-8">
+            <div className="px-5 lg:px-6 pb-6">
+              <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
                 {children}
               </div>
             </div>
           </main>
+
+          {/* Footer - PERFECT ALIGNMENT */}
+          <footer className="border-t border-gray-200">
+            <div className="px-5 lg:px-6 py-3">
+              <div className="flex flex-col md:flex-row justify-between items-center">
+                <div className="flex items-center space-x-4 mb-2 md:mb-0">
+                  <div className="flex items-center">
+                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2"></div>
+                    <p className="text-xs text-gray-600">All systems operational</p>
+                  </div>
+                  <span className="hidden md:inline text-gray-300">•</span>
+                  <p className="text-xs text-gray-500">Version 3.0.1</p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center text-xs text-gray-500">
+                    <Globe className="w-3 h-3 mr-1" />
+                    <span>GMT+3</span>
+                  </div>
+                  <span className="hidden md:inline text-gray-300">•</span>
+                  <p className="text-xs text-gray-500">© 2024 Superadmin Panel</p>
+                </div>
+              </div>
+            </div>
+          </footer>
         </div>
       </div>
     </div>

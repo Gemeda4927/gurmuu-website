@@ -1,6 +1,18 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { User } from '@/lib/api/auth';
+
+// Types
+interface User {
+  id: string;
+  _id?: string;
+  role: 'user' | 'admin' | 'superadmin';
+  name: string;
+  email: string;
+  phone?: string;
+  isActive: boolean;
+  avatar?: string;
+  createdAt: string;
+}
 
 interface AuthState {
   user: User | null;
@@ -15,7 +27,7 @@ interface AuthActions {
   setHasHydrated: (state: boolean) => void;
 }
 
-const useAuthStore = create<AuthState & AuthActions>()(
+export const useAuthStore = create<AuthState & AuthActions>()(
   persist(
     (set, get) => ({
       user: null,

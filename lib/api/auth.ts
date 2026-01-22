@@ -1,3 +1,6 @@
+import useAuthStore from "../store/auth.store";
+import { usePersimmonStore } from "../store/persimmon.store";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://gurmuu.onrender.com/api/v1';
 
 export interface User {
@@ -123,4 +126,26 @@ export const verifyToken = async (token: string): Promise<{success: boolean; use
   }
 
   return data;
+};
+
+export const useCurrentUserPermissions = () => {
+  const { user } = useAuthStore();
+  const store = usePersimmonStore();
+  
+  if (!user) return { permissions: [], rolePermissions: [] };
+  
+  // Get role permissions
+  const rolePerms = Permissions[user.role as keyof typeof ROLES] || [];
+  // Get custom permissions from store
+  const customPerms = store.getUserPermissions(user.id) || [];
+  
+  // Merge and remove duplicates
+  const allPerms = Array.from(new Set([...rolePerms, ...customPerms]));
+  
+  return {
+    permissions: allPerms,
+    rolePermissions: rolePerms,
+    customPermissions: customPerms,
+    count: allPerms.length,
+  };
 };
