@@ -1,366 +1,718 @@
+// lib/store/persimmon.store.ts
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import {
+  devtools,
+  persist,
+} from "zustand/middleware";
+import type {
+  PersimmonStore,
+  PersimmonState,
+  Permission,
+  UserPermissionsResponse,
+  PermissionCheckResponse,
+  Role,
+} from "../types/persimmon.types";
+import { persimmonApi } from "../api/persimmon";
 
-// Types based on your backend responses
-interface PermissionState {
-  // Cached permissions from backend
-  availablePermissions: string[];
-  userPermissions: Record<string, string[]>; // userId -> permissions[]
-  permissionChecks: Record<string, boolean>; // userId_permission -> boolean
-  permissionsData: {
-    permissions: Record<string, string>; // e.g., "MANAGE_USERS": "manage_users"
-    roles: Record<string, string>; // e.g., "USER": "user"
-    rolePermissions: Record<string, string>; // e.g., "user": "No default permissions"
-  } | null;
-
-  // UI State
-  isLoading: boolean;
-  error: string | null;
-
-  // Actions
-  setPermissionsData: (data: {
-    permissions: Record<string, string>;
-    roles: Record<string, string>;
-    rolePermissions: Record<string, string>;
-  }) => void;
-  setAvailablePermissions: (permissions: string[]) => void;
-  setUserPermissions: (userId: string, permissions: string[]) => void;
-  setPermissionCheck: (userId: string, permission: string, hasPermission: boolean) => void;
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
-
-  // Getters
-  getUserPermissions: (userId: string) => string[];
-  hasPermission: (userId: string, permission: string) => boolean;
-  getRolePermissions: (role: string) => string[];
-
-  // Helper functions
-  getPermissionLabel: (permission: string) => string;
-  getRoleLabel: (role: string) => string;
-  getAllPermissionValues: () => string[];
-  getAllRoles: () => string[];
-  getPermissionsByCategory: (permissions: string[]) => Record<string, string[]>;
-
-  // Permission management (local cache only - real changes happen via API)
-  grantPermission: (userId: string, permission: string) => void;
-  revokePermission: (userId: string, permission: string) => void;
-  resetUserPermissions: (userId: string) => void;
-
-  // Cache management
-  clearCache: () => void;
-  clearUserCache: (userId: string) => void;
-}
-
-const initialState = {
-  availablePermissions: [],
+const initialState: PersimmonState = {
+  allPermissions: [],
   userPermissions: {},
+  userRoles: {},
   permissionChecks: {},
-  permissionsData: null,
-  isLoading: false,
+  loading: false,
   error: null,
+  successMessage: null,
+  currentUserId: undefined,
+  currentUserRole: undefined,
+  currentUserPermissions: undefined,
 };
 
-export const usePersimmonStore = create<PermissionState>()(
-  persist(
-    (set, get) => ({
-      ...initialState,
+export const usePersimmonStore =
+  create<PersimmonStore>()(
+    devtools(
+      persist(
+        (set, get) => ({
+          ...initialState,
 
-      // Set permissions data from backend
-      setPermissionsData: (data) =>
-        set({
-          permissionsData: data,
-          availablePermissions: Object.values(data.permissions || {}),
-        }),
+          // ========== API Actions ==========
+          fetchAllPermissions: async () => {
+            set({ loading: true, error: null });
+            try {
+              const response =
+                await persimmonApi.getAllPermissions();
+              const permissions = response.data
+                ?.permissions
+                ? Object.values(
+                    response.data.permissions
+                  )
+                    .flat()
+                    .map((code) => ({
+                      id: code,
+                      code,
+                      name: code
+                        .split("_")
+                        .map(
+                          (word) =>
+                            word
+                              .charAt(0)
+                              .toUpperCase() +
+                            word.slice(1)
+                        )
+                        .join(" "),
+                      category:
+                        Object.keys(
+                          response.data
+                            ?.permissions || {}
+                        ).find((cat) =>
+                          response.data?.permissions[
+                            cat
+                          ]?.includes(code)
+                        ) || "Uncategorized",
+                      createdAt:
+                        new Date().toISOString(),
+                      updatedAt:
+                        new Date().toISOString(),
+                    }))
+                : [];
 
-      // Set available permissions
-      setAvailablePermissions: (permissions) =>
-        set({
-          availablePermissions: permissions,
-        }),
-
-      // Set user permissions
-      setUserPermissions: (userId, permissions) =>
-        set((state) => ({
-          userPermissions: {
-            ...state.userPermissions,
-            [userId]: permissions,
-          },
-        })),
-
-      // Cache permission check results
-      setPermissionCheck: (userId, permission, hasPermission) =>
-        set((state) => ({
-          permissionChecks: {
-            ...state.permissionChecks,
-            [`${userId}_${permission}`]: hasPermission,
-          },
-        })),
-
-      setLoading: (loading) => set({ isLoading: loading }),
-
-      setError: (error) => set({ error }),
-
-      // Get user's permissions from cache
-      getUserPermissions: (userId) => {
-        const state = get();
-        return state.userPermissions[userId] || [];
-      },
-
-      // Check if user has permission (cached)
-      hasPermission: (userId, permission) => {
-        const state = get();
-        const cacheKey = `${userId}_${permission}`;
-
-        // Check cache first
-        if (cacheKey in state.permissionChecks) {
-          return state.permissionChecks[cacheKey];
-        }
-
-        // Check user's specific permissions
-        const userPerms = state.userPermissions[userId] || [];
-        const hasUserPermission = userPerms.includes(permission);
-
-        // Cache the result
-        get().setPermissionCheck(userId, permission, hasUserPermission);
-
-        return hasUserPermission;
-      },
-
-      // Get permissions for a role - now dynamic based on backend data
-      getRolePermissions: (role) => {
-        const state = get();
-        const rolePermissions = state.permissionsData?.rolePermissions;
-        
-        // Return empty array by default - actual permissions come from backend
-        return [];
-      },
-
-      // Helper: Get permission label from backend data
-      getPermissionLabel: (permission: string) => {
-        const state = get();
-        const permissionsData = state.permissionsData?.permissions;
-        
-        if (!permissionsData) {
-          return permission.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        }
-        
-        const entry = Object.entries(permissionsData).find(([_, value]) => value === permission);
-        return entry ? entry[0].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : permission;
-      },
-
-      // Helper: Get role label from backend data
-      getRoleLabel: (role: string) => {
-        const state = get();
-        const rolesData = state.permissionsData?.roles;
-        
-        if (!rolesData) {
-          return role.charAt(0).toUpperCase() + role.slice(1);
-        }
-        
-        const entry = Object.entries(rolesData).find(([_, value]) => value === role);
-        return entry ? entry[0].replace(/_/g, ' ') : role;
-      },
-
-      // Helper: Get all permission values from backend data
-      getAllPermissionValues: () => {
-        const state = get();
-        return state.availablePermissions;
-      },
-
-      // Helper: Get all roles from backend data
-      getAllRoles: () => {
-        const state = get();
-        const rolesData = state.permissionsData?.roles;
-        
-        if (!rolesData) return ['user', 'admin', 'superadmin'];
-        return Object.values(rolesData);
-      },
-
-      // Helper: Group permissions by category based on backend data
-      getPermissionsByCategory: (permissions: string[]) => {
-        const state = get();
-        const permissionsData = state.permissionsData?.permissions;
-        
-        if (!permissionsData) return {};
-        
-        const categories: Record<string, string[]> = {
-          user_management: [
-            'MANAGE_USERS',
-            'DEACTIVATE_USERS',
-            'VIEW_ALL_USERS',
-          ],
-          content_management: [
-            'MANAGE_CONTENT',
-            'CREATE_CONTENT',
-            'EDIT_CONTENT',
-            'DELETE_CONTENT',
-            'PUBLISH_CONTENT',
-          ],
-          settings: [
-            'MANAGE_SETTINGS',
-            'UPDATE_SYSTEM_SETTINGS',
-            'VIEW_AUDIT_LOGS',
-          ],
-          roles_permissions: [
-            'MANAGE_ROLES',
-            'ASSIGN_PERMISSIONS',
-          ],
-          analytics: [
-            'VIEW_ANALYTICS',
-            'EXPORT_DATA',
-          ],
-          notifications: [
-            'SEND_NOTIFICATIONS',
-            'MANAGE_NOTIFICATIONS',
-          ],
-        };
-
-        const result: Record<string, string[]> = {};
-        
-        Object.entries(categories).forEach(([category, categoryPerms]) => {
-          // Find which permissions in the list belong to this category
-          const matchingPermissions = permissions.filter(permission => {
-            // Get the key for this permission value
-            const permissionKey = Object.entries(permissionsData).find(([key, value]) => value === permission)?.[0];
-            if (!permissionKey) return false;
-            
-            // Check if it's in this category
-            return categoryPerms.includes(permissionKey);
-          });
-          
-          if (matchingPermissions.length > 0) {
-            result[category] = matchingPermissions;
-          }
-        });
-
-        return result;
-      },
-
-      // Grant permission to user (local cache only - real changes via API)
-      grantPermission: (userId, permission) => {
-        const state = get();
-        const currentPerms = state.userPermissions[userId] || [];
-
-        if (!currentPerms.includes(permission)) {
-          const newPerms = [...currentPerms, permission];
-          get().setUserPermissions(userId, newPerms);
-
-          // Update cache
-          get().setPermissionCheck(userId, permission, true);
-        }
-      },
-
-      // Revoke permission from user (local cache only - real changes via API)
-      revokePermission: (userId, permission) => {
-        const state = get();
-        const currentPerms = state.userPermissions[userId] || [];
-
-        const newPerms = currentPerms.filter((p) => p !== permission);
-        get().setUserPermissions(userId, newPerms);
-
-        // Update cache
-        get().setPermissionCheck(userId, permission, false);
-      },
-
-      // Reset all permissions for user (local cache only - real changes via API)
-      resetUserPermissions: (userId) => {
-        set((state) => {
-          const newUserPerms = { ...state.userPermissions };
-          delete newUserPerms[userId];
-
-          // Clear permission checks for this user
-          const newPermissionChecks = { ...state.permissionChecks };
-          Object.keys(newPermissionChecks).forEach((key) => {
-            if (key.startsWith(`${userId}_`)) {
-              delete newPermissionChecks[key];
+              set({
+                allPermissions: permissions,
+                loading: false,
+              });
+              return permissions;
+            } catch (error: any) {
+              set({
+                error:
+                  error.response?.data?.message ||
+                  "Failed to fetch permissions",
+                loading: false,
+              });
+              throw error;
             }
-          });
+          },
 
-          return {
-            userPermissions: newUserPerms,
-            permissionChecks: newPermissionChecks,
-          };
-        });
-      },
+          setPermissionsData: (
+            permissions: Permission[]
+          ) => {
+            set({ allPermissions: permissions });
+          },
 
-      // Clear user cache
-      clearUserCache: (userId) => {
-        set((state) => {
-          const newUserPerms = { ...state.userPermissions };
-          delete newUserPerms[userId];
+          setUserPermissions: (
+            userId: string,
+            permissions: string[]
+          ) => {
+            set((state) => {
+              const existingUserPerms =
+                state.userPermissions[userId];
+              const updatedUserPerms: UserPermissionsResponse =
+                existingUserPerms
+                  ? {
+                      ...existingUserPerms,
+                      permissions,
+                    }
+                  : {
+                      userId,
+                      role:
+                        state.userRoles[userId] ||
+                        "user",
+                      permissions,
+                      directPermissions:
+                        permissions,
+                      inheritedPermissions: [],
+                      lastUpdated:
+                        new Date().toISOString(),
+                    };
 
-          const newPermissionChecks = { ...state.permissionChecks };
-          Object.keys(newPermissionChecks).forEach((key) => {
-            if (key.startsWith(`${userId}_`)) {
-              delete newPermissionChecks[key];
+              return {
+                userPermissions: {
+                  ...state.userPermissions,
+                  [userId]: updatedUserPerms,
+                },
+              };
+            });
+          },
+
+          checkPermission: async (
+            userId: string,
+            permissionCode: string
+          ) => {
+            set({ loading: true, error: null });
+            try {
+              const response =
+                await persimmonApi.checkPermission(
+                  userId,
+                  permissionCode
+                );
+              const checkResult: PermissionCheckResponse =
+                response.data;
+
+              // Cache the result
+              const cacheKey = `${userId}_${permissionCode}`;
+              set((state) => ({
+                permissionChecks: {
+                  ...state.permissionChecks,
+                  [cacheKey]: checkResult,
+                },
+                loading: false,
+              }));
+
+              return checkResult;
+            } catch (error: any) {
+              set({
+                error:
+                  error.response?.data?.message ||
+                  "Failed to check permission",
+                loading: false,
+              });
+              throw error;
             }
-          });
+          },
 
-          return {
-            userPermissions: newUserPerms,
-            permissionChecks: newPermissionChecks,
-          };
-        });
-      },
+          fetchUserPermissions: async (
+            userId: string
+          ) => {
+            set({ loading: true, error: null });
+            try {
+              const response =
+                await persimmonApi.getUserPermissions(
+                  userId
+                );
+              const userPerms: UserPermissionsResponse =
+                response.data;
 
-      // Clear all cache
-      clearCache: () => set(initialState),
-    }),
-    {
-      name: "persimmon-store",
-      partialize: (state) => ({
-        userPermissions: state.userPermissions,
-        permissionChecks: state.permissionChecks,
-        permissionsData: state.permissionsData,
-        availablePermissions: state.availablePermissions,
-      }),
-    }
-  )
-);
+              set((state) => ({
+                userPermissions: {
+                  ...state.userPermissions,
+                  [userId]: userPerms,
+                },
+                userRoles: {
+                  ...state.userRoles,
+                  [userId]: userPerms.role,
+                },
+                loading: false,
+              }));
 
-// Helper hooks that use the store with real backend data
-export const usePermission = (permission: string, targetUserId?: string) => {
-  const store = usePersimmonStore();
-  const { user } = useAuthStore(); // You need to import your auth store
-  
-  const userId = targetUserId || user?._id;
-  if (!userId) return { hasPermission: false, isLoading: store.isLoading };
-  
-  const hasPermission = store.hasPermission(userId, permission);
-  
-  return {
-    hasPermission,
-    isLoading: store.isLoading,
-    permissionLabel: store.getPermissionLabel(permission),
-  };
-};
+              if (
+                get().currentUserId === userId
+              ) {
+                set({
+                  currentUserRole: userPerms.role,
+                  currentUserPermissions:
+                    userPerms.permissions,
+                });
+              }
 
-export const useUserPermissions = (userId: string) => {
-  const store = usePersimmonStore();
-  const permissions = store.getUserPermissions(userId);
-  
-  const grantPermission = (permission: string) => {
-    store.grantPermission(userId, permission);
-  };
-  
-  const revokePermission = (permission: string) => {
-    store.revokePermission(userId, permission);
-  };
-  
-  const resetPermissions = () => {
-    store.resetUserPermissions(userId);
-  };
-  
-  return {
-    permissions,
-    grantPermission,
-    revokePermission,
-    resetPermissions,
-    isLoading: store.isLoading,
-    getPermissionLabel: store.getPermissionLabel,
-    getPermissionsByCategory: () => store.getPermissionsByCategory(permissions),
-  };
-};
+              return userPerms;
+            } catch (error: any) {
+              set({
+                error:
+                  error.response?.data?.message ||
+                  "Failed to fetch user permissions",
+                loading: false,
+              });
+              throw error;
+            }
+          },
 
-// You'll need to import your auth store
-import useAuthStore from "./auth.store";
+          grantPermissionToUser: async (
+            userId: string,
+            permissionCode: string
+          ) => {
+            set({ loading: true, error: null });
+            try {
+              await persimmonApi.grantPermission(
+                userId,
+                { permission: permissionCode }
+              );
+
+              set((state) => {
+                const userPerms =
+                  state.userPermissions[userId];
+                if (userPerms) {
+                  return {
+                    userPermissions: {
+                      ...state.userPermissions,
+                      [userId]: {
+                        ...userPerms,
+                        permissions: [
+                          ...new Set([
+                            ...userPerms.permissions,
+                            permissionCode,
+                          ]),
+                        ],
+                        directPermissions: [
+                          ...new Set([
+                            ...userPerms.directPermissions,
+                            permissionCode,
+                          ]),
+                        ],
+                        lastUpdated:
+                          new Date().toISOString(),
+                      },
+                    },
+                    loading: false,
+                    successMessage: `Permission "${permissionCode}" granted to user`,
+                  };
+                }
+                return {
+                  loading: false,
+                  successMessage: `Permission "${permissionCode}" granted to user`,
+                };
+              });
+
+              // Clear cache
+              const newCache = {
+                ...get().permissionChecks,
+              };
+              Object.keys(newCache).forEach(
+                (key) => {
+                  if (
+                    key.startsWith(`${userId}_`)
+                  )
+                    delete newCache[key];
+                }
+              );
+              set({ permissionChecks: newCache });
+            } catch (error: any) {
+              set({
+                error:
+                  error.response?.data?.message ||
+                  "Failed to grant permission",
+                loading: false,
+              });
+              throw error;
+            }
+          },
+
+          revokePermissionFromUser: async (
+            userId: string,
+            permissionCode: string
+          ) => {
+            set({ loading: true, error: null });
+            try {
+              await persimmonApi.revokePermission(
+                userId,
+                { permission: permissionCode }
+              );
+
+              set((state) => {
+                const userPerms =
+                  state.userPermissions[userId];
+                if (userPerms) {
+                  return {
+                    userPermissions: {
+                      ...state.userPermissions,
+                      [userId]: {
+                        ...userPerms,
+                        permissions:
+                          userPerms.permissions.filter(
+                            (p) =>
+                              p !== permissionCode
+                          ),
+                        directPermissions:
+                          userPerms.directPermissions.filter(
+                            (p) =>
+                              p !== permissionCode
+                          ),
+                        lastUpdated:
+                          new Date().toISOString(),
+                      },
+                    },
+                    loading: false,
+                    successMessage: `Permission "${permissionCode}" revoked from user`,
+                  };
+                }
+                return {
+                  loading: false,
+                  successMessage: `Permission "${permissionCode}" revoked from user`,
+                };
+              });
+
+              // Clear cache
+              const newCache = {
+                ...get().permissionChecks,
+              };
+              Object.keys(newCache).forEach(
+                (key) => {
+                  if (
+                    key.startsWith(`${userId}_`)
+                  )
+                    delete newCache[key];
+                }
+              );
+              set({ permissionChecks: newCache });
+            } catch (error: any) {
+              set({
+                error:
+                  error.response?.data?.message ||
+                  "Failed to revoke permission",
+                loading: false,
+              });
+              throw error;
+            }
+          },
+
+          resetUserPermissions: async (
+            userId: string
+          ) => {
+            set({ loading: true, error: null });
+            try {
+              await persimmonApi.resetPermissions(
+                userId,
+                {}
+              );
+
+              set((state) => {
+                const userPerms =
+                  state.userPermissions[userId];
+                if (userPerms) {
+                  return {
+                    userPermissions: {
+                      ...state.userPermissions,
+                      [userId]: {
+                        ...userPerms,
+                        permissions:
+                          userPerms.inheritedPermissions ||
+                          [],
+                        directPermissions: [],
+                        lastUpdated:
+                          new Date().toISOString(),
+                      },
+                    },
+                    loading: false,
+                    successMessage:
+                      "User permissions reset successfully",
+                  };
+                }
+                return {
+                  loading: false,
+                  successMessage:
+                    "User permissions reset successfully",
+                };
+              });
+
+              // Clear cache
+              const newCache = {
+                ...get().permissionChecks,
+              };
+              Object.keys(newCache).forEach(
+                (key) => {
+                  if (
+                    key.startsWith(`${userId}_`)
+                  )
+                    delete newCache[key];
+                }
+              );
+              set({ permissionChecks: newCache });
+            } catch (error: any) {
+              set({
+                error:
+                  error.response?.data?.message ||
+                  "Failed to reset permissions",
+                loading: false,
+              });
+              throw error;
+            }
+          },
+
+          changeUserRole: async (
+            userId: string,
+            newRole: Role
+          ) => {
+            set({ loading: true, error: null });
+            try {
+              await persimmonApi.changeUserRole(
+                userId,
+                { role: newRole }
+              );
+              set((state) => ({
+                userRoles: {
+                  ...state.userRoles,
+                  [userId]: newRole,
+                },
+                loading: false,
+                successMessage: `User role changed to ${newRole}`,
+              }));
+
+              const newCache = {
+                ...get().permissionChecks,
+              };
+              Object.keys(newCache).forEach(
+                (key) => {
+                  if (
+                    key.startsWith(`${userId}_`)
+                  )
+                    delete newCache[key];
+                }
+              );
+              set({ permissionChecks: newCache });
+            } catch (error: any) {
+              set({
+                error:
+                  error.response?.data?.message ||
+                  "Failed to change user role",
+                loading: false,
+              });
+              throw error;
+            }
+          },
+
+          promoteToAdmin: async (
+            userId: string
+          ) => {
+            set({ loading: true, error: null });
+            try {
+              await persimmonApi.promoteToAdmin(
+                userId
+              );
+              set((state) => ({
+                userRoles: {
+                  ...state.userRoles,
+                  [userId]: "admin",
+                },
+                loading: false,
+                successMessage:
+                  "User promoted to admin",
+              }));
+
+              const newCache = {
+                ...get().permissionChecks,
+              };
+              Object.keys(newCache).forEach(
+                (key) => {
+                  if (
+                    key.startsWith(`${userId}_`)
+                  )
+                    delete newCache[key];
+                }
+              );
+              set({ permissionChecks: newCache });
+            } catch (error: any) {
+              set({
+                error:
+                  error.response?.data?.message ||
+                  "Failed to promote user",
+                loading: false,
+              });
+              throw error;
+            }
+          },
+
+          demoteToUser: async (
+            userId: string
+          ) => {
+            set({ loading: true, error: null });
+            try {
+              await persimmonApi.demoteToUser(
+                userId
+              );
+              set((state) => ({
+                userRoles: {
+                  ...state.userRoles,
+                  [userId]: "user",
+                },
+                loading: false,
+                successMessage:
+                  "Admin demoted to user",
+              }));
+
+              const newCache = {
+                ...get().permissionChecks,
+              };
+              Object.keys(newCache).forEach(
+                (key) => {
+                  if (
+                    key.startsWith(`${userId}_`)
+                  )
+                    delete newCache[key];
+                }
+              );
+              set({ permissionChecks: newCache });
+            } catch (error: any) {
+              set({
+                error:
+                  error.response?.data?.message ||
+                  "Failed to demote user",
+                loading: false,
+              });
+              throw error;
+            }
+          },
+
+          // In persimmon.store.ts, update the hasPermission method to be safer:
+          hasPermission: (
+            permissionCode: string,
+            userId?: string
+          ) => {
+            try {
+              const targetUserId =
+                userId || get().currentUserId;
+              if (!targetUserId) return false;
+
+              const userPerms =
+                get().userPermissions[
+                  targetUserId
+                ];
+              if (!userPerms) return false;
+
+              const permissions =
+                userPerms.permissions;
+              if (
+                !permissions ||
+                !Array.isArray(permissions)
+              )
+                return false;
+
+              return permissions.includes(
+                permissionCode
+              );
+            } catch (error) {
+              console.error(
+                "Error checking permission:",
+                error
+              );
+              return false;
+            }
+          },
+
+          hasAnyPermission: (
+            permissionCodes: string[],
+            userId?: string
+          ) => {
+            const targetUserId =
+              userId || get().currentUserId;
+            if (!targetUserId) return false;
+            const userPerms =
+              get().userPermissions[targetUserId];
+            return (
+              !!userPerms &&
+              permissionCodes.some((code) =>
+                userPerms.permissions.includes(
+                  code
+                )
+              )
+            );
+          },
+
+          hasAllPermissions: (
+            permissionCodes: string[],
+            userId?: string
+          ) => {
+            const targetUserId =
+              userId || get().currentUserId;
+            if (!targetUserId) return false;
+            const userPerms =
+              get().userPermissions[targetUserId];
+            return (
+              !!userPerms &&
+              permissionCodes.every((code) =>
+                userPerms.permissions.includes(
+                  code
+                )
+              )
+            );
+          },
+
+          isSuperadmin: (userId?: string) => {
+            const targetUserId =
+              userId || get().currentUserId;
+            if (!targetUserId) return false;
+            return (
+              get().userRoles[targetUserId] ===
+              "superadmin"
+            );
+          },
+
+          isAdmin: (userId?: string) => {
+            const targetUserId =
+              userId || get().currentUserId;
+            if (!targetUserId) return false;
+            const role =
+              get().userRoles[targetUserId];
+            return (
+              role === "admin" ||
+              role === "superadmin"
+            );
+          },
+
+          isUser: (userId?: string) => {
+            const targetUserId =
+              userId || get().currentUserId;
+            if (!targetUserId) return false;
+            const role =
+              get().userRoles[targetUserId];
+            return (
+              role === "user" ||
+              role === "admin" ||
+              role === "superadmin"
+            );
+          },
+
+          hasRole: (
+            role: Role | Role[],
+            userId?: string
+          ) => {
+            const targetUserId =
+              userId || get().currentUserId;
+            if (!targetUserId) return false;
+            const userRole =
+              get().userRoles[targetUserId];
+            if (!userRole) return false;
+            return Array.isArray(role)
+              ? role.includes(userRole)
+              : userRole === role;
+          },
+
+          setCurrentUser: async (
+            userId: string
+          ) => {
+            set({ currentUserId: userId });
+            try {
+              const userPerms =
+                await get().fetchUserPermissions(
+                  userId
+                );
+              set({
+                currentUserRole: userPerms.role,
+                currentUserPermissions:
+                  userPerms.permissions,
+              });
+            } catch (error) {
+              console.error(
+                "Failed to fetch current user permissions:",
+                error
+              );
+            }
+          },
+
+          clearCurrentUser: () => {
+            set({
+              currentUserId: undefined,
+              currentUserRole: undefined,
+              currentUserPermissions: undefined,
+            });
+          },
+
+          clearError: () => set({ error: null }),
+          clearSuccessMessage: () =>
+            set({ successMessage: null }),
+          reset: () => set(initialState),
+        }),
+        {
+          name: "persimmon-store",
+          partialize: (state) => ({
+            allPermissions: state.allPermissions,
+            userPermissions:
+              state.userPermissions,
+            userRoles: state.userRoles,
+            currentUserId: state.currentUserId,
+            currentUserRole:
+              state.currentUserRole,
+            currentUserPermissions:
+              state.currentUserPermissions,
+          }),
+        }
+      ),
+      { name: "PersimmonStore" }
+    )
+  );

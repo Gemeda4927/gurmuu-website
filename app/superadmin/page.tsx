@@ -2,8 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import useAuthStore from "@/lib/store/auth.store";
-
+import { useAuthStore } from "@/lib/store/auth.store";
 
 import {
   Users,
@@ -51,21 +50,31 @@ import {
   useSuperadminStatus,
 } from "@/lib/hooks/useSuperadmin";
 import Link from "next/link";
+
 export default function SuperadminDashboard() {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading } =
-    useAuthStore();
+  const {
+    user,
+    isAuthenticated,
+    isLoading,
+    hasHydrated,
+  } = useAuthStore();
   const { isSuperadmin } = useSuperadminStatus();
+
+  console.log(isAuthenticated);
 
   const {
     data: usersData,
     isLoading: usersLoading,
     refetch,
   } = useGetAllUsers();
-  const { data: statsData, refetch: refetchStats } = useGetUserStats();
+  const {
+    data: statsData,
+    refetch: refetchStats,
+  } = useGetUserStats();
 
   useEffect(() => {
-    if (!isLoading) {
+    if (hasHydrated && !isLoading) {
       if (!isAuthenticated) {
         router.push("/login");
       } else if (!isSuperadmin) {
@@ -77,6 +86,7 @@ export default function SuperadminDashboard() {
     isLoading,
     isSuperadmin,
     router,
+    hasHydrated,
   ]);
 
   const handleRefresh = () => {
@@ -84,7 +94,7 @@ export default function SuperadminDashboard() {
     refetchStats();
   };
 
-  if (isLoading || usersLoading) {
+  if (!hasHydrated || isLoading || usersLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -103,7 +113,11 @@ export default function SuperadminDashboard() {
     );
   }
 
-  if (!user || !isSuperadmin) {
+  if (
+    !isAuthenticated ||
+    !user ||
+    !isSuperadmin
+  ) {
     return null;
   }
 
@@ -111,23 +125,31 @@ export default function SuperadminDashboard() {
   const stats = {
     totalUsers: usersData?.total || 0,
     activeUsers:
-      usersData?.users?.filter((u) => u.isActive)
-        .length || 0,
+      usersData?.users?.filter(
+        (u: any) => u.isActive
+      ).length || 0,
     admins:
       usersData?.users?.filter(
-        (u) => u.role === "admin"
+        (u: any) => u.role === "admin"
       ).length || 0,
     superadmins:
       usersData?.users?.filter(
-        (u) => u.role === "superadmin"
+        (u: any) => u.role === "superadmin"
       ).length || 0,
     inactiveUsers:
-      usersData?.users?.filter((u) => !u.isActive)
-        .length || 0,
+      usersData?.users?.filter(
+        (u: any) => !u.isActive
+      ).length || 0,
   };
 
-  const activityRate = Math.round((stats.activeUsers / stats.totalUsers) * 100) || 0;
-  const adminPercentage = Math.round((stats.admins / stats.totalUsers) * 100) || 0;
+  const activityRate =
+    Math.round(
+      (stats.activeUsers / stats.totalUsers) * 100
+    ) || 0;
+  const adminPercentage =
+    Math.round(
+      (stats.admins / stats.totalUsers) * 100
+    ) || 0;
 
   const quickActions = [
     {
@@ -136,7 +158,8 @@ export default function SuperadminDashboard() {
       icon: UserPlus,
       path: "/superadmin/users/new",
       color: "from-blue-500 to-cyan-500",
-      iconBg: "bg-gradient-to-br from-blue-100 to-cyan-100",
+      iconBg:
+        "bg-gradient-to-br from-blue-100 to-cyan-100",
       iconColor: "text-blue-600",
     },
     {
@@ -145,7 +168,8 @@ export default function SuperadminDashboard() {
       icon: Lock,
       path: "/superadmin/permissions",
       color: "from-purple-500 to-pink-500",
-      iconBg: "bg-gradient-to-br from-purple-100 to-pink-100",
+      iconBg:
+        "bg-gradient-to-br from-purple-100 to-pink-100",
       iconColor: "text-purple-600",
     },
     {
@@ -154,7 +178,8 @@ export default function SuperadminDashboard() {
       icon: Cog,
       path: "/superadmin/settings",
       color: "from-green-500 to-emerald-500",
-      iconBg: "bg-gradient-to-br from-green-100 to-emerald-100",
+      iconBg:
+        "bg-gradient-to-br from-green-100 to-emerald-100",
       iconColor: "text-green-600",
     },
     {
@@ -163,12 +188,14 @@ export default function SuperadminDashboard() {
       icon: BarChart3,
       path: "/superadmin/analytics",
       color: "from-orange-500 to-red-500",
-      iconBg: "bg-gradient-to-br from-orange-100 to-red-100",
+      iconBg:
+        "bg-gradient-to-br from-orange-100 to-red-100",
       iconColor: "text-orange-600",
     },
   ];
 
-  const recentUsers = usersData?.users?.slice(0, 5) || [];
+  const recentUsers =
+    usersData?.users?.slice(0, 5) || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 p-4 md:p-6">
@@ -186,7 +213,8 @@ export default function SuperadminDashboard() {
                 </h1>
                 <p className="text-gray-600 mt-2 flex items-center">
                   <Sparkles className="w-4 h-4 mr-2 text-amber-500" />
-                  You have complete control over the entire system
+                  You have complete control over
+                  the entire system
                 </p>
               </div>
             </div>
@@ -223,8 +251,12 @@ export default function SuperadminDashboard() {
               </div>
               <TrendingUp className="w-5 h-5 text-white/80" />
             </div>
-            <div className="text-4xl font-bold mb-2">{stats.totalUsers}</div>
-            <div className="text-sm font-medium opacity-90">Total Users</div>
+            <div className="text-4xl font-bold mb-2">
+              {stats.totalUsers}
+            </div>
+            <div className="text-sm font-medium opacity-90">
+              Total Users
+            </div>
             <div className="mt-4 text-sm flex items-center">
               <div className="bg-white/20 px-3 py-1 rounded-full text-xs">
                 +12% from last month
@@ -239,17 +271,25 @@ export default function SuperadminDashboard() {
               </div>
               <Activity className="w-5 h-5 text-white/80" />
             </div>
-            <div className="text-4xl font-bold mb-2">{stats.activeUsers}</div>
-            <div className="text-sm font-medium opacity-90">Active Users</div>
+            <div className="text-4xl font-bold mb-2">
+              {stats.activeUsers}
+            </div>
+            <div className="text-sm font-medium opacity-90">
+              Active Users
+            </div>
             <div className="mt-4">
               <div className="flex items-center justify-between text-sm mb-1">
                 <span>Activity Rate</span>
-                <span className="font-bold">{activityRate}%</span>
+                <span className="font-bold">
+                  {activityRate}%
+                </span>
               </div>
               <div className="w-full bg-white/20 rounded-full h-2">
-                <div 
-                  className="bg-white rounded-full h-2 transition-all duration-500" 
-                  style={{ width: `${activityRate}%` }}
+                <div
+                  className="bg-white rounded-full h-2 transition-all duration-500"
+                  style={{
+                    width: `${activityRate}%`,
+                  }}
                 ></div>
               </div>
             </div>
@@ -262,8 +302,12 @@ export default function SuperadminDashboard() {
               </div>
               <Zap className="w-5 h-5 text-white/80" />
             </div>
-            <div className="text-4xl font-bold mb-2">{stats.admins}</div>
-            <div className="text-sm font-medium opacity-90">Administrators</div>
+            <div className="text-4xl font-bold mb-2">
+              {stats.admins}
+            </div>
+            <div className="text-sm font-medium opacity-90">
+              Administrators
+            </div>
             <div className="mt-4 flex items-center gap-4">
               <div className="text-xs bg-white/20 px-3 py-1 rounded-full">
                 {stats.superadmins} superadmins
@@ -281,8 +325,12 @@ export default function SuperadminDashboard() {
               </div>
               <Target className="w-5 h-5 text-white/80" />
             </div>
-            <div className="text-4xl font-bold mb-2">{stats.inactiveUsers}</div>
-            <div className="text-sm font-medium opacity-90">Inactive Users</div>
+            <div className="text-4xl font-bold mb-2">
+              {stats.inactiveUsers}
+            </div>
+            <div className="text-sm font-medium opacity-90">
+              Inactive Users
+            </div>
             <div className="mt-4 text-sm">
               <span className="bg-white/20 px-3 py-1 rounded-full text-xs">
                 Needs attention
@@ -302,40 +350,53 @@ export default function SuperadminDashboard() {
                     <div className="p-2 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-xl">
                       <Rocket className="w-5 h-5 text-blue-600" />
                     </div>
-                    <h2 className="text-xl font-bold text-gray-900">Quick Actions</h2>
+                    <h2 className="text-xl font-bold text-gray-900">
+                      Quick Actions
+                    </h2>
                   </div>
                   <div className="text-sm text-gray-500">
-                    Need help? <span className="text-blue-600 font-medium">View docs</span>
+                    Need help?{" "}
+                    <span className="text-blue-600 font-medium">
+                      View docs
+                    </span>
                   </div>
                 </div>
               </div>
 
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {quickActions.map((action, index) => (
-                    <Link
-                      key={index}
-                      href={action.path}
-                      className="group block"
-                    >
-                      <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-5 hover:border-gray-300 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                        <div className="flex items-center gap-4">
-                          <div className={`p-3 ${action.iconBg} rounded-xl`}>
-                            <action.icon className={`w-6 h-6 ${action.iconColor}`} />
+                  {quickActions.map(
+                    (action, index) => (
+                      <Link
+                        key={index}
+                        href={action.path}
+                        className="group block"
+                      >
+                        <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-5 hover:border-gray-300 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                          <div className="flex items-center gap-4">
+                            <div
+                              className={`p-3 ${action.iconBg} rounded-xl`}
+                            >
+                              <action.icon
+                                className={`w-6 h-6 ${action.iconColor}`}
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-900 group-hover:text-gray-700">
+                                {action.title}
+                              </h3>
+                              <p className="text-sm text-gray-600 mt-1">
+                                {
+                                  action.description
+                                }
+                              </p>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:translate-x-1" />
                           </div>
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 group-hover:text-gray-700">
-                              {action.title}
-                            </h3>
-                            <p className="text-sm text-gray-600 mt-1">
-                              {action.description}
-                            </p>
-                          </div>
-                          <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:translate-x-1" />
                         </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    )
+                  )}
                 </div>
               </div>
             </div>
@@ -349,57 +410,77 @@ export default function SuperadminDashboard() {
                   <div className="p-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl">
                     <UserCog className="w-5 h-5 text-purple-600" />
                   </div>
-                  <h2 className="text-xl font-bold text-gray-900">Recent Users</h2>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Recent Users
+                  </h2>
                 </div>
-                <span className="text-sm text-gray-500">{recentUsers.length} users</span>
+                <span className="text-sm text-gray-500">
+                  {recentUsers.length} users
+                </span>
               </div>
             </div>
 
             <div className="divide-y divide-gray-100">
-              {recentUsers.map((user, index) => (
-                <div
-                  key={user._id}
-                  className="p-4 hover:bg-gray-50 transition-colors duration-200 group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-white font-bold">
-                        {user.name?.charAt(0).toUpperCase()}
+              {recentUsers.map(
+                (user: any, index: number) => (
+                  <div
+                    key={user._id}
+                    className="p-4 hover:bg-gray-50 transition-colors duration-200 group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-white font-bold">
+                          {user.name
+                            ?.charAt(0)
+                            .toUpperCase()}
+                        </div>
+                        <div
+                          className={`absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white ${
+                            user.isActive
+                              ? "bg-green-500"
+                              : "bg-gray-400"
+                          }`}
+                        />
                       </div>
-                      <div className={`absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white ${
-                        user.isActive ? 'bg-green-500' : 'bg-gray-400'
-                      }`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium text-gray-900 truncate">
-                          {user.name}
-                        </h4>
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${
-                          user.role === 'superadmin'
-                            ? 'bg-purple-100 text-purple-800'
-                            : user.role === 'admin'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {user.role}
-                        </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium text-gray-900 truncate">
+                            {user.name}
+                          </h4>
+                          <span
+                            className={`text-xs px-2 py-0.5 rounded-full ${
+                              user.role ===
+                              "superadmin"
+                                ? "bg-purple-100 text-purple-800"
+                                : user.role ===
+                                    "admin"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {user.role}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 truncate">
+                          {user.email}
+                        </p>
                       </div>
-                      <p className="text-sm text-gray-600 truncate">{user.email}</p>
+                      <button className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-gray-100 rounded-lg transition-all duration-200">
+                        <MoreVertical className="w-4 h-4 text-gray-400" />
+                      </button>
                     </div>
-                    <button className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-gray-100 rounded-lg transition-all duration-200">
-                      <MoreVertical className="w-4 h-4 text-gray-400" />
-                    </button>
                   </div>
-                </div>
-              ))}
-              
+                )
+              )}
+
               {recentUsers.length === 0 && (
                 <div className="p-8 text-center">
                   <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
                     <Users className="w-6 h-6 text-gray-400" />
                   </div>
-                  <p className="text-gray-500">No users found</p>
+                  <p className="text-gray-500">
+                    No users found
+                  </p>
                 </div>
               )}
             </div>
@@ -427,12 +508,16 @@ export default function SuperadminDashboard() {
                     <div className="p-2 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl">
                       <ShieldCheck className="w-5 h-5 text-green-600" />
                     </div>
-                    <h2 className="text-xl font-bold text-gray-900">System Health</h2>
+                    <h2 className="text-xl font-bold text-gray-900">
+                      System Health
+                    </h2>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1">
                       <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                      <span className="text-xs text-gray-600">Good</span>
+                      <span className="text-xs text-gray-600">
+                        Good
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -441,26 +526,38 @@ export default function SuperadminDashboard() {
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-gray-900 mb-2">99.9%</div>
-                    <div className="text-sm text-gray-600">Uptime</div>
+                    <div className="text-3xl font-bold text-gray-900 mb-2">
+                      99.9%
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      Uptime
+                    </div>
                     <div className="mt-2 text-xs text-green-600 flex items-center justify-center">
                       <CheckCircle className="w-3 h-3 mr-1" />
                       All systems operational
                     </div>
                   </div>
-                  
+
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-gray-900 mb-2">42ms</div>
-                    <div className="text-sm text-gray-600">Response Time</div>
+                    <div className="text-3xl font-bold text-gray-900 mb-2">
+                      42ms
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      Response Time
+                    </div>
                     <div className="mt-2 text-xs text-green-600 flex items-center justify-center">
                       <TrendingUp className="w-3 h-3 mr-1" />
                       Optimal performance
                     </div>
                   </div>
-                  
+
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-gray-900 mb-2">2.3K</div>
-                    <div className="text-sm text-gray-600">Daily Requests</div>
+                    <div className="text-3xl font-bold text-gray-900 mb-2">
+                      2.3K
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      Daily Requests
+                    </div>
                     <div className="mt-2 text-xs text-blue-600 flex items-center justify-center">
                       <Activity className="w-3 h-3 mr-1" />
                       +15% from yesterday
@@ -470,7 +567,9 @@ export default function SuperadminDashboard() {
 
                 <div className="mt-6 pt-6 border-t border-gray-100">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Last updated: Just now</span>
+                    <span className="text-gray-600">
+                      Last updated: Just now
+                    </span>
                     <button className="text-blue-600 hover:text-blue-700 font-medium">
                       View detailed metrics →
                     </button>
@@ -486,39 +585,62 @@ export default function SuperadminDashboard() {
               <div className="p-2 bg-white/10 rounded-xl">
                 <LineChart className="w-5 h-5 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-white">Quick Stats</h2>
+              <h2 className="text-xl font-bold text-white">
+                Quick Stats
+              </h2>
             </div>
 
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-white/10">
-                <div className="text-sm text-gray-300">Avg. Session Duration</div>
-                <div className="font-medium text-white">4m 32s</div>
+                <div className="text-sm text-gray-300">
+                  Avg. Session Duration
+                </div>
+                <div className="font-medium text-white">
+                  4m 32s
+                </div>
               </div>
-              
+
               <div className="flex items-center justify-between py-3 border-b border-white/10">
-                <div className="text-sm text-gray-300">API Success Rate</div>
-                <div className="font-medium text-green-400">99.7%</div>
+                <div className="text-sm text-gray-300">
+                  API Success Rate
+                </div>
+                <div className="font-medium text-green-400">
+                  99.7%
+                </div>
               </div>
-              
+
               <div className="flex items-center justify-between py-3 border-b border-white/10">
-                <div className="text-sm text-gray-300">Active Sessions</div>
-                <div className="font-medium text-white">247</div>
+                <div className="text-sm text-gray-300">
+                  Active Sessions
+                </div>
+                <div className="font-medium text-white">
+                  247
+                </div>
               </div>
-              
+
               <div className="flex items-center justify-between py-3 border-b border-white/10">
-                <div className="text-sm text-gray-300">Error Rate</div>
-                <div className="font-medium text-red-400">0.03%</div>
+                <div className="text-sm text-gray-300">
+                  Error Rate
+                </div>
+                <div className="font-medium text-red-400">
+                  0.03%
+                </div>
               </div>
-              
+
               <div className="flex items-center justify-between py-3">
-                <div className="text-sm text-gray-300">Data Storage</div>
-                <div className="font-medium text-white">78%</div>
+                <div className="text-sm text-gray-300">
+                  Data Storage
+                </div>
+                <div className="font-medium text-white">
+                  78%
+                </div>
               </div>
             </div>
 
             <div className="mt-6 pt-6 border-t border-white/10">
               <div className="text-xs text-gray-400">
-                Real-time monitoring enabled • Auto-scaling active
+                Real-time monitoring enabled •
+                Auto-scaling active
               </div>
             </div>
           </div>
@@ -533,11 +655,16 @@ export default function SuperadminDashboard() {
                   <PieChart className="w-5 h-5 text-indigo-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Users Overview</h2>
-                  <p className="text-sm text-gray-600">Detailed breakdown of user roles and status</p>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Users Overview
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    Detailed breakdown of user
+                    roles and status
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <button className="px-4 py-2 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium">
                   <Download className="w-4 h-4 mr-2 inline" />
@@ -566,8 +693,13 @@ export default function SuperadminDashboard() {
                     {
                       role: "Superadmin",
                       count: stats.superadmins,
-                      percentage: Math.round((stats.superadmins / stats.totalUsers) * 100),
-                      color: "from-purple-500 to-pink-500",
+                      percentage: Math.round(
+                        (stats.superadmins /
+                          stats.totalUsers) *
+                          100
+                      ),
+                      color:
+                        "from-purple-500 to-pink-500",
                       bg: "bg-purple-100",
                       text: "text-purple-800",
                     },
@@ -575,27 +707,49 @@ export default function SuperadminDashboard() {
                       role: "Admin",
                       count: stats.admins,
                       percentage: adminPercentage,
-                      color: "from-blue-500 to-cyan-500",
+                      color:
+                        "from-blue-500 to-cyan-500",
                       bg: "bg-blue-100",
                       text: "text-blue-800",
                     },
                     {
                       role: "User",
-                      count: stats.totalUsers - stats.admins - stats.superadmins,
-                      percentage: Math.round(((stats.totalUsers - stats.admins - stats.superadmins) / stats.totalUsers) * 100),
-                      color: "from-gray-500 to-gray-600",
+                      count:
+                        stats.totalUsers -
+                        stats.admins -
+                        stats.superadmins,
+                      percentage: Math.round(
+                        ((stats.totalUsers -
+                          stats.admins -
+                          stats.superadmins) /
+                          stats.totalUsers) *
+                          100
+                      ),
+                      color:
+                        "from-gray-500 to-gray-600",
                       bg: "bg-gray-100",
                       text: "text-gray-800",
                     },
                   ].map((item, index) => (
-                    <div key={index} className="flex items-center justify-between">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between"
+                    >
                       <div className="flex items-center gap-3">
-                        <div className={`h-3 w-3 rounded-full bg-gradient-to-r ${item.color}`}></div>
-                        <span className="font-medium text-gray-900">{item.role}</span>
+                        <div
+                          className={`h-3 w-3 rounded-full bg-gradient-to-r ${item.color}`}
+                        ></div>
+                        <span className="font-medium text-gray-900">
+                          {item.role}
+                        </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="font-bold text-gray-900">{item.count}</span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.bg} ${item.text}`}>
+                        <span className="font-bold text-gray-900">
+                          {item.count}
+                        </span>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${item.bg} ${item.text}`}
+                        >
                           {item.percentage}%
                         </span>
                       </div>
@@ -612,26 +766,38 @@ export default function SuperadminDashboard() {
                 <div className="space-y-4">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-gray-900">Active Users</span>
-                      <span className="font-bold text-gray-900">{stats.activeUsers}</span>
+                      <span className="font-medium text-gray-900">
+                        Active Users
+                      </span>
+                      <span className="font-bold text-gray-900">
+                        {stats.activeUsers}
+                      </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-full h-2 transition-all duration-700" 
-                        style={{ width: `${activityRate}%` }}
+                      <div
+                        className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-full h-2 transition-all duration-700"
+                        style={{
+                          width: `${activityRate}%`,
+                        }}
                       ></div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-gray-900">Inactive Users</span>
-                      <span className="font-bold text-gray-900">{stats.inactiveUsers}</span>
+                      <span className="font-medium text-gray-900">
+                        Inactive Users
+                      </span>
+                      <span className="font-bold text-gray-900">
+                        {stats.inactiveUsers}
+                      </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-full h-2 transition-all duration-700" 
-                        style={{ width: `${Math.round((stats.inactiveUsers / stats.totalUsers) * 100)}%` }}
+                      <div
+                        className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-full h-2 transition-all duration-700"
+                        style={{
+                          width: `${Math.round((stats.inactiveUsers / stats.totalUsers) * 100)}%`,
+                        }}
                       ></div>
                     </div>
                   </div>
@@ -647,23 +813,29 @@ export default function SuperadminDashboard() {
                   <button className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all duration-200">
                     <div className="flex items-center gap-3">
                       <UserPlus className="w-5 h-5 text-blue-600" />
-                      <span className="font-medium text-gray-900">Add New User</span>
+                      <span className="font-medium text-gray-900">
+                        Add New User
+                      </span>
                     </div>
                     <ArrowRight className="w-4 h-4 text-gray-400" />
                   </button>
-                  
+
                   <button className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl hover:border-purple-300 hover:shadow-md transition-all duration-200">
                     <div className="flex items-center gap-3">
                       <Shield className="w-5 h-5 text-purple-600" />
-                      <span className="font-medium text-gray-900">Bulk Actions</span>
+                      <span className="font-medium text-gray-900">
+                        Bulk Actions
+                      </span>
                     </div>
                     <ArrowRight className="w-4 h-4 text-gray-400" />
                   </button>
-                  
+
                   <button className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl hover:border-green-300 hover:shadow-md transition-all duration-200">
                     <div className="flex items-center gap-3">
                       <Settings className="w-5 h-5 text-green-600" />
-                      <span className="font-medium text-gray-900">System Audit</span>
+                      <span className="font-medium text-gray-900">
+                        System Audit
+                      </span>
                     </div>
                     <ArrowRight className="w-4 h-4 text-gray-400" />
                   </button>
@@ -676,11 +848,16 @@ export default function SuperadminDashboard() {
         {/* Footer Note */}
         <div className="text-center py-6">
           <p className="text-sm text-gray-500">
-            Last refreshed: Just now • 
+            Last refreshed: Just now •
             <span className="mx-2">•</span>
-            <span className="text-green-600 font-medium">All systems operational</span>
+            <span className="text-green-600 font-medium">
+              All systems operational
+            </span>
             <span className="mx-2">•</span>
-            Need help? <span className="text-blue-600 cursor-pointer hover:underline">Contact support</span>
+            Need help?{" "}
+            <span className="text-blue-600 cursor-pointer hover:underline">
+              Contact support
+            </span>
           </p>
         </div>
       </div>

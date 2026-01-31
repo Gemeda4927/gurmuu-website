@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSignup } from "@/lib/hooks/useAuth";
-import useAuthStore from "@/lib/store/auth.store";
+import {useAuthStore} from "@/lib/store/auth.store";
 import {
   User,
   Mail,

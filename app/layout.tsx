@@ -6,8 +6,8 @@ import QueryProvider from './providers/QueryProvider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Gurmuu - Signup',
-  description: 'Create your Gurmuu account',
+  title: 'Gurmuu - Events Platform',
+  description: 'Create, discover and manage amazing events',
 };
 
 export default function RootLayout({
@@ -16,11 +16,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <QueryProvider>
-          {children}
-        </QueryProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className} suppressHydrationWarning>
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );

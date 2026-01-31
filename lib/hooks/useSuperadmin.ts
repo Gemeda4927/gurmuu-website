@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-query";
 import * as superadminApi from "@/lib/api/superadmin";
 import { User } from "@/lib/api/auth";
-import useAuthStore from "@/lib/store/auth.store";
+import {useAuthStore} from "@/lib/store/auth.store";
 
 // ==================== QUERY KEYS ====================
 

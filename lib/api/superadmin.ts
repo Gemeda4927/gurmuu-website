@@ -1,6 +1,8 @@
+import api from "./api";
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
-  "https://gurmuu.onrender.com/api/v1";
+  "https://hayyuu.onrender.com/api/v1";
 
 // ================= USER INTERFACES =================
 export interface User {
@@ -574,12 +576,13 @@ export const grantPermission = async (
 /**
  * Revoke a permission from a user (Superadmin only)
  */
+
 export const revokePermission = async (
   token: string,
   userId: string,
-  request: RevokePermissionRequest
-): Promise<RevokePermissionResponse> => {
-  console.log("Revoke Permission API Call:", {
+  request: GrantPermissionRequest
+): Promise<GrantPermissionResponse> => {
+  console.log("Grant Permission API Call:", {
     url: `${API_BASE_URL}/permissions/user/${userId}/revoke`,
     data: request,
   });
@@ -594,20 +597,20 @@ export const revokePermission = async (
   );
 
   const data = await response.json();
-  console.log("Revoke Permission API Response:", {
+  console.log("Grant Permission API Response:", {
     status: response.status,
     data,
   });
 
   if (!response.ok || !data.success) {
     throw new Error(
-      data.message ||
-        "Failed to revoke permission"
+      data.message || "Failed to grant permission"
     );
   }
 
   return data;
 };
+
 
 /**
  * Reset all permissions for a user (Superadmin only)
@@ -663,7 +666,7 @@ export const changeUserRole = async (
   const response = await fetch(
     `${API_BASE_URL}/permissions/user/${userId}/role`,
     {
-      method: "PUT",
+      method: "POST",
       headers: getAuthHeaders(token),
       body: JSON.stringify(request),
     }
