@@ -1,42 +1,74 @@
 // lib/api/api.ts
-import axios from 'axios';
+import axios, { AxiosError } from "axios";
 
-// Base API URL
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+/* =========================
+   BASE URL
+========================= */
 
-// Create Axios instance
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://hayyuu.onrender.com/api/v1";
+
+/* =========================
+   AXIOS INSTANCE
+========================= */
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
+  withCredentials: false, // set true only if backend uses cookies
 });
 
-// Request interceptor to add auth token
+/* =========================
+   REQUEST INTERCEPTOR
+========================= */
+
 api.interceptors.request.use(
   (config) => {
-    // Get token from localStorage or your auth storage
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Guard for SSR
+    if (typeof window !== "undefined") {
+      const token =
+        localStorage.getItem("token") ||
+        sessionStorage.getItem("token");
+
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
+
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor for error handling
+/* =========================
+   RESPONSE INTERCEPTOR
+========================= */
+
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized access
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+  (error: AxiosError<any>) => {
+    if (
+      typeof window !== "undefined" &&
+      error.response?.status === 401
+    ) {
+      // Clear auth state
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      sessionStorage.removeItem("token");
+
+      // Avoid infinite redirect loops
+      if (
+        !window.location.pathname.startsWith(
+          "/login"
+        )
+      ) {
+        window.location.href = "/login";
+      }
     }
+
     return Promise.reject(error);
   }
 );

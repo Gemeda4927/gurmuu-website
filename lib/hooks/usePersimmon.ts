@@ -1,154 +1,306 @@
 // lib/hooks/usePersimmon.ts
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { persimmonApi, permissionHelpers, AllPermissionsResponse, PermissionCheckResponse } from "@/lib/api/persimmon";
-import useAuthStore from "@/lib/store/auth.store";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+
+import { usePersimmonStore } from "@/lib/store/persimmon.store";
+import { useAuthStore } from "@/lib/store/auth.store";
+
+import {
+  AllPermissionsResponse,
+  AuditLog,
+  PermissionStats,
+  Role,
+  UserPermissionsResponse,
+} from "@/lib/types/persimmon.types";
+import { persimmonApi } from "../api/persimmon";
+import api from "../api/api";
+
+/* =========================
+   QUERY KEYS
+========================= */
+
+const keys = {
+  permissions: ["permissions"] as const,
+
+  userPermissions: (userId: string) =>
+    ["permissions", "user", userId] as const,
+
+  userStats: (userId: string) =>
+    ["permissions", "stats", userId] as const,
+
+  userAudit: (userId: string) =>
+    ["permissions", "audit", userId] as const,
+};
+
+/* =========================
+   MAIN HOOK
+========================= */
 
 export const usePersimmon = () => {
   const queryClient = useQueryClient();
+  const store = usePersimmonStore();
   const { user } = useAuthStore();
 
-  const currentUserRole = user?.role as 'user' | 'admin' | 'superadmin' | undefined;
-  const isSuperadmin = currentUserRole === 'superadmin';
-  const isAdmin = currentUserRole === 'admin' || isSuperadmin;
+  /* =========================
+     QUERIES
+  ========================= */
 
-  // Get all permissions and roles
-  const useGetAllPermissions = () => {
-    return useQuery<AllPermissionsResponse>({
-      queryKey: ["permissions", "all"],
-      queryFn: persimmonApi.getAllPermissions,
-      enabled: !!user && (isAdmin || isSuperadmin),
-      staleTime: 5 * 60 * 1000,
+  const useAllPermissions = () =>
+    useQuery<AllPermissionsResponse>({
+      queryKey: keys.permissions,
+      queryFn: async () => {
+        const res =
+          await persimmonApi.getAllPermissions();
+
+        // console.debug(
+        //   "getAllPermissions:",
+        //   res.data
+        // );
+
+        return res.data;
+      },
+      enabled: !!user,
+      staleTime: 10 * 60 * 1000,
+    });
+
+  const useUserPermissions = (userId: string) =>
+    useQuery<UserPermissionsResponse>({
+      queryKey: keys.userPermissions(userId),
+      queryFn: async () => {
+        const res =
+          await persimmonApi.getUserPermissions(
+            userId
+          );
+
+        if (res.data) {
+          store.setUserPermissions(
+            userId,
+            res.data.permissions
+          );
+        }
+
+        return res.data;
+      },
+      enabled: !!userId,
+    });
+
+  const useUserPermissionStats = (
+    userId: string
+  ) =>
+    useQuery<PermissionStats>({
+      queryKey: keys.userStats(userId),
+      queryFn: async () => {
+        const res =
+          await persimmonApi.getUserPermissionStats(
+            userId
+          );
+        return res.data;
+      },
+      enabled: !!userId,
+    });
+
+  const useUserAuditLogs = (userId: string) =>
+    useQuery<AuditLog[]>({
+      queryKey: keys.userAudit(userId),
+      queryFn: async () => {
+        const res =
+          await persimmonApi.getUserAuditLogs(
+            userId
+          );
+        return res.data ?? [];
+      },
+      enabled: !!userId,
+    });
+
+  /* =========================
+     MUTATIONS
+  ========================= */
+
+  const invalidateUser = (userId: string) => {
+    queryClient.invalidateQueries({
+      queryKey: keys.userPermissions(userId),
+    });
+    queryClient.invalidateQueries({
+      queryKey: keys.userStats(userId),
+    });
+    queryClient.invalidateQueries({
+      queryKey: keys.userAudit(userId),
     });
   };
 
-  // Get user permissions
-  const useGetUserPermissions = (userId: string) => {
-    return useQuery<PermissionCheckResponse>({
-      queryKey: ["permissions", "user", userId],
-      queryFn: () => persimmonApi.getUserPermissions(userId),
-      enabled: !!user && !!userId && (isAdmin || isSuperadmin),
-    });
-  };
-
-  // Check user permission
-  const useCheckUserPermission = (userId: string, permission: string) => {
-    return useQuery<PermissionCheckResponse>({
-      queryKey: ["permissions", "check", userId, permission],
-      queryFn: () => persimmonApi.checkUserPermission(userId, permission),
-      enabled: !!user && !!userId && !!permission && (isAdmin || isSuperadmin),
-    });
-  };
-
-  // Grant permission mutation
+  // useSuperadmin.ts
   const useGrantPermission = () => {
     return useMutation({
-      mutationFn: ({ userId, data }: { userId: string; data: { permission: string; reason: string } }) =>
-        persimmonApi.grantPermission(userId, data),
-      onSuccess: (_, { userId }) => {
-        queryClient.invalidateQueries({ queryKey: ["permissions", "user", userId] });
-        queryClient.invalidateQueries({ queryKey: ["permissions", "check"] });
-        queryClient.invalidateQueries({ queryKey: ["users"] });
+      mutationFn: async ({
+        userId,
+        data,
+      }: {
+        userId: string;
+        data: {
+          permission: string;
+          reason: string;
+        };
+      }) => {
+        const response = await api.post(
+          `/permissions/user/${userId}/grant`,
+          data
+        );
+        return response.data;
       },
     });
   };
 
-  // Revoke permission mutation
   const useRevokePermission = () => {
     return useMutation({
-      mutationFn: ({ userId, data }: { userId: string; data: { permission: string; reason: string } }) =>
-        persimmonApi.revokePermission(userId, data),
-      onSuccess: (_, { userId }) => {
-        queryClient.invalidateQueries({ queryKey: ["permissions", "user", userId] });
-        queryClient.invalidateQueries({ queryKey: ["permissions", "check"] });
-        queryClient.invalidateQueries({ queryKey: ["users"] });
+      mutationFn: async ({
+        userId,
+        data,
+      }: {
+        userId: string;
+        data: {
+          permission: string;
+          reason: string;
+        };
+      }) => {
+        const response = await api.post(
+          `/permissions/user/${userId}/revoke`,
+          data
+        );
+        return response.data;
       },
     });
   };
 
-  // Reset permissions mutation
-  const useResetPermissions = () => {
-    return useMutation({
-      mutationFn: (userId: string) => persimmonApi.resetPermissions(userId),
-      onSuccess: (_, userId) => {
-        queryClient.invalidateQueries({ queryKey: ["permissions", "user", userId] });
-        queryClient.invalidateQueries({ queryKey: ["permissions", "check"] });
-        queryClient.invalidateQueries({ queryKey: ["users"] });
+  const useChangeUserRole = () =>
+    useMutation({
+      mutationFn: async ({
+        userId,
+        role,
+        reason,
+      }: {
+        userId: string;
+        role: Role;
+        reason?: string;
+      }) => {
+        const res =
+          await persimmonApi.changeUserRole(
+            userId,
+            { role, reason }
+          );
+        return res.data;
       },
+      onSuccess: (_, { userId }) =>
+        invalidateUser(userId),
     });
-  };
 
-  // Change user role mutation
-  const useChangeUserRole = () => {
-    return useMutation({
-      mutationFn: ({ userId, data }: { userId: string; data: { role: string; reason: string } }) =>
-        persimmonApi.changeUserRole(userId, data),
-      onSuccess: (_, { userId }) => {
-        queryClient.invalidateQueries({ queryKey: ["permissions", "user", userId] });
-        queryClient.invalidateQueries({ queryKey: ["permissions", "check"] });
-        queryClient.invalidateQueries({ queryKey: ["users"] });
+  const usePromoteToAdmin = () =>
+    useMutation({
+      mutationFn: async (userId: string) => {
+        const res =
+          await persimmonApi.promoteToAdmin(
+            userId
+          );
+        return res.data;
       },
+      onSuccess: (_, userId) =>
+        invalidateUser(userId),
     });
-  };
 
-  // Promote to admin mutation
-  const usePromoteToAdmin = () => {
-    return useMutation({
-      mutationFn: ({ userId, reason }: { userId: string; reason: string }) =>
-        persimmonApi.promoteToAdmin(userId, { reason }),
-      onSuccess: (_, { userId }) => {
-        queryClient.invalidateQueries({ queryKey: ["permissions", "user", userId] });
-        queryClient.invalidateQueries({ queryKey: ["permissions", "check"] });
-        queryClient.invalidateQueries({ queryKey: ["users"] });
+  const useDemoteToUser = () =>
+    useMutation({
+      mutationFn: async (userId: string) => {
+        const res =
+          await persimmonApi.demoteToUser(userId);
+        return res.data;
       },
+      onSuccess: (_, userId) =>
+        invalidateUser(userId),
     });
-  };
 
-  // Demote to user mutation
-  const useDemoteToUser = () => {
-    return useMutation({
-      mutationFn: ({ userId, reason }: { userId: string; reason: string }) =>
-        persimmonApi.demoteToUser(userId, { reason }),
-      onSuccess: (_, { userId }) => {
-        queryClient.invalidateQueries({ queryKey: ["permissions", "user", userId] });
-        queryClient.invalidateQueries({ queryKey: ["permissions", "check"] });
-        queryClient.invalidateQueries({ queryKey: ["users"] });
-      },
-    });
-  };
+  /* =========================
+     STORE HELPERS (SYNC)
+  ========================= */
 
-  // Helper functions
-  const isPermissionGranted = (userPermissions: string[] | undefined, permission: string): boolean => {
-    return userPermissions?.includes(permission) || false;
-  };
+  const hasPermissionLocal = (
+    permissionCode: string,
+    userId?: string
+  ) =>
+    store.hasPermission(permissionCode, userId);
 
-  const usePermissionCapabilities = () => {
-    return {
-      canManagePermissions: isSuperadmin,
-      canChangeRoles: isSuperadmin,
-      isSuperadmin,
-      isAdmin,
-      currentUserRole,
-    };
-  };
+  const hasAnyPermissionLocal = (
+    permissionCodes: string[],
+    userId?: string
+  ) =>
+    store.hasAnyPermission(
+      permissionCodes,
+      userId
+    );
+
+  const hasAllPermissionsLocal = (
+    permissionCodes: string[],
+    userId?: string
+  ) =>
+    store.hasAllPermissions(
+      permissionCodes,
+      userId
+    );
+
+  const isSuperadminLocal = (userId?: string) =>
+    store.isSuperadmin(userId);
+
+  const isAdminLocal = (userId?: string) =>
+    store.isAdmin(userId);
+
+  const isUserLocal = (userId?: string) =>
+    store.isUser(userId);
+
+  const hasRoleLocal = (
+    role: Role | Role[],
+    userId?: string
+  ) => store.hasRole(role, userId);
+
+  /* =========================
+     RETURN API
+  ========================= */
 
   return {
-    persimmonApi,
-    permissionHelpers,
-    useGetAllPermissions,
-    useGetUserPermissions,
-    useCheckUserPermission,
+    // Queries
+    useAllPermissions,
+    useUserPermissions,
+    useUserPermissionStats,
+    useUserAuditLogs,
+
+    // Mutations
     useGrantPermission,
     useRevokePermission,
-    useResetPermissions,
     useChangeUserRole,
     usePromoteToAdmin,
     useDemoteToUser,
-    usePermissionCapabilities,
-    isPermissionGranted,
-    isSuperadmin,
-    isAdmin,
+
+    // Store (raw)
+    ...store,
+
+    // Permission helpers
+    hasPermissionLocal,
+    hasAnyPermissionLocal,
+    hasAllPermissionsLocal,
+
+    // Role helpers
+    isSuperadminLocal,
+    isAdminLocal,
+    isUserLocal,
+    hasRoleLocal,
+
+    // Current user helpers
     currentUser: user,
-    currentUserRole,
+    isAdmin:
+      user?.role === "admin" ||
+      user?.role === "superadmin",
+    isSuperadmin: user?.role === "superadmin",
+    isUser: !!user,
   };
 };
 
