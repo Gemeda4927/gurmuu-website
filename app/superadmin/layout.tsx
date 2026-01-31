@@ -97,7 +97,7 @@ export default function SuperadminLayout({
       {
         name: "Events",
         icon: BarChart3,
-        path: "/dashboard/events",
+        path: "/superadmin/events",
         color: "bg-amber-50 text-amber-600",
       },
       {
