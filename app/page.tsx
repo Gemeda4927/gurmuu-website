@@ -1,725 +1,666 @@
 "use client";
 
-import {
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import {
-  format,
-  isToday,
-  isTomorrow,
-  isPast,
-  isFuture,
-} from "date-fns";
 import { toast, Toaster } from "react-hot-toast";
 import {
-  Calendar,
-  MapPin,
   Users,
   Star,
-  AlertCircle,
-  Eye,
-  Search,
-  Filter,
   ChevronRight,
-  ChevronLeft,
-  ArrowLeft,
-  Share2,
-  Globe,
-  Clock,
-  Tag,
-  Users as UsersIcon,
-  Activity,
-  Image as ImageIcon,
-  Copy,
-  Check,
-  Home,
+  Search,
   Menu,
-  LogOut,
+  X,
   User,
-  Bell,
-  Grid,
-  List,
-  Heart,
-  Bookmark,
-  Share,
-  MoreVertical,
-  ChevronDown,
-  CalendarDays,
-  MapPin as MapPinIcon,
-  Ticket,
-  Phone,
-  Mail,
-  Map,
-  Navigation,
-  UsersRound,
-  CalendarCheck,
-  MapPinned,
-  Clock3,
-  Sparkles,
-  TrendingUp,
-  Award,
-  Shield,
-  CheckCircle,
-  BadgePercent,
   LogIn,
-  UserPlus,
-  Settings,
-  EyeOff,
-  BookOpen,
-  Hash,
-  Building,
+  Sparkles,
+  Award,
+  CheckCircle,
+  Globe,
   Target,
-  Mic,
+  Quote,
+  Play,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Mail,
+  Phone,
+  MapPin,
+  GraduationCap,
+  HeartHandshake,
+  Scale,
+  BookOpen,
+  Brain,
+  UsersRound,
+  CalendarDays,
+  ArrowRight,
+  Sparkle,
+  ChevronUp,
+  BookCheck,
+  Award as AwardIcon,
+  Target as TargetIcon,
+  Users as UsersIcon,
+  Map,
+  Book,
+  Lightbulb,
+  Shield,
+  Clock,
+  Trophy,
+  TrendingUp,
+  Heart,
+  Home,
+  Info,
+  MessageCircle,
+  Video,
   Music,
   Coffee,
   Dumbbell,
   Palette,
   Code,
-  GraduationCap,
   Briefcase,
-  HeartHandshake,
+  Mic,
+  Camera,
+  Cloud,
+  Zap,
+  Rocket,
+  Sun,
+  Moon,
+  Gift,
+  Bell,
+  Download,
+  Upload,
+  Settings,
+  HelpCircle,
+  Globe as GlobeIcon,
+  PhoneCall,
+  Mail as MailIcon,
+  Map as MapIcon,
+  UserPlus,
+  Lock,
+  Eye,
+  EyeOff,
+  Calendar,
+  Clock as ClockIcon,
+  Check,
+  X as XIcon,
+  Plus,
+  Minus,
+  Filter,
+  Grid,
+  List,
+  Share2,
+  Bookmark,
+  Eye as EyeIcon,
+  MessageSquare,
+  ThumbsUp,
+  DownloadCloud,
+  UploadCloud,
+  BarChart3,
+  PieChart,
+  LineChart,
+  Activity,
+  Target as TargetIcon2,
+  Users as UsersIcon2,
+  Book as BookIcon,
+  Award as AwardIcon2,
+  GraduationCap as GraduationCapIcon,
+  Briefcase as BriefcaseIcon,
+  Heart as HeartIcon,
   Leaf,
+  Wind,
+  Waves,
+  Mountain,
+  Trees,
+  Flower,
+  Sunrise,
+  Sunset,
+  CloudRain,
+  CloudSnow,
+  CloudLightning,
+  Droplets,
+  Thermometer,
+  Wind as WindIcon,
+  Waves as WavesIcon,
+  Mountain as MountainIcon,
+  Trees as TreesIcon,
+  Flower as FlowerIcon,
 } from "lucide-react";
-import { useEventStore } from "@/lib/store/events.store";
 import {
-  useAuthStore,
-  isAuthenticated,
-  getUserRole,
-} from "@/lib/store/auth.store";
-import { EventData } from "@/lib/types/event";
+  motion,
+  AnimatePresence,
+} from "framer-motion";
 
-export default function UserHomePage() {
+// Enhanced content data
+const heroData = {
+  title: "Nutii Dhaabbati Gurmuu Tola Oltummaa",
+  subtitle: "Abbooti Muldhataa Dammassitu",
+  description:
+    "Woggaa saddeen darbaan keessatti dhaloota kana gorsaa ture. Baroota 2014 hanga ammatti dhaloota barsiisuu, qotee bulaan, horiissee bulan, hojjataan mootummaa fi kkf kaayyoo isaanirratti dammaqanii socho'an.",
+  cta: {
+    primary: "Makkana Keessatti Hirmaadhaa",
+    secondary: "Waa'ee Keenya Beekuuf",
+  },
+  stats: [
+    {
+      value: "10+",
+      label: "Woggaa Oolcha",
+      icon: <CalendarDays className="w-5 h-5" />,
+    },
+    {
+      value: "5000+",
+      label: "Dhaloota Gorsame",
+      icon: <Users className="w-5 h-5" />,
+    },
+    {
+      value: "100+",
+      label: "Leenjii Addaa",
+      icon: <BookOpen className="w-5 h-5" />,
+    },
+    {
+      value: "All",
+      label: "Magaalaa Oromiyaa",
+      icon: <MapPin className="w-5 h-5" />,
+    },
+  ],
+};
+
+// Core Values
+const coreValues = [
+  {
+    title: "Dhaloota Gorsuu",
+    description:
+      "Woggaa saddeen darbaan dhaloota kana gorsaa ture. Barataan, qotee bulaan, horiissee bulan hundaaf.",
+    icon: <GraduationCap className="w-8 h-8" />,
+    color: "from-blue-600 to-cyan-500",
+    benefits: [
+      "Gorsaa Addummaa",
+      "Leenjii Qabatamaa",
+      "Hordoffii Dheeressaa",
+    ],
+  },
+  {
+    title: "Oltummaa",
+    description:
+      "Nama amantaa fi gosaan nama gargar hin baanyee. Oromiyaa keessatti bakka kamiiyyuu deeme.",
+    icon: <UsersRound className="w-8 h-8" />,
+    color: "from-green-600 to-emerald-500",
+    benefits: [
+      "Wal-simannaa",
+      "Hawaasa",
+      "Gosoota Hundaa",
+    ],
+  },
+  {
+    title: "Kaayyoo Qabatamaa",
+    description:
+      "Kaayyoo isaanirratti dammaqanii socho'an. Dhaloota ijjeessuu waan jirtan dhiifama gaafanna.",
+    icon: <Target className="w-8 h-8" />,
+    color: "from-purple-600 to-pink-500",
+    benefits: [
+      "Kaayyoo Qulqulluu",
+      "Socho'ina",
+      "Gumaa Mul'ataa",
+    ],
+  },
+  {
+    title: "Sirna fi Hawaasa",
+    description:
+      "Hojjataan mootummaa fi kkf waliin hojjachuun dhalootaf gargaaruuf.",
+    icon: <Scale className="w-8 h-8" />,
+    color: "from-orange-600 to-amber-500",
+    benefits: [
+      "Waliigaltee",
+      "Hojii Waliin",
+      "Misooma Hawaasaa",
+    ],
+  },
+];
+
+// Programs
+const programs = [
+  {
+    title: "Leenjii Barataa",
+    description:
+      "Barataan barnootaa fi kaayyoo qabachuuf leenjii addaa kenna. Baroota 10 ol oolchaa ture.",
+    icon: <Brain className="w-10 h-10" />,
+    stats: "10,000+ Students",
+    color: "bg-blue-500/10",
+    duration: "12 Months",
+    features: [
+      "Online Courses",
+      "Mentorship",
+      "Career Guidance",
+    ],
+  },
+  {
+    title: "Horsiisaa Qotee Bulaa",
+    description:
+      "Qotee bulaan, horsiissee bulan hundaaf gargaarsa qabatamaa fi leenjii kenna.",
+    icon: (
+      <HeartHandshake className="w-10 h-10" />
+    ),
+    stats: "5,000+ Helped",
+    color: "bg-green-500/10",
+    duration: "Ongoing",
+    features: [
+      "Financial Aid",
+      "Counseling",
+      "Skill Training",
+    ],
+  },
+  {
+    title: "Hojjataa Mootummaa",
+    description:
+      "Hojjataan mootummaa waliin hojjachuun dhalootaf gargaarsa sirnaa fi malaawwan kenna.",
+    icon: <AwardIcon className="w-10 h-10" />,
+    stats: "50+ Partners",
+    color: "bg-purple-500/10",
+    duration: "Continuous",
+    features: [
+      "Government Partnerships",
+      "Policy Advocacy",
+      "Community Programs",
+    ],
+  },
+  {
+    title: "Oltummaa fi Wal-simatu",
+    description:
+      "Nama amantaa fi gosaan nama gargar hin baanyee. Oromiyaa keessatti hunda wal-simachuuf.",
+    icon: <Globe className="w-10 h-10" />,
+    stats: "All Regions",
+    color: "bg-amber-500/10",
+    duration: "Year-round",
+    features: [
+      "Cultural Events",
+      "Interfaith Dialogue",
+      "Community Building",
+    ],
+  },
+];
+
+// Success Stories
+const successStories = [
+  {
+    id: 1,
+    name: "Tolasa Bekele",
+    role: "Software Engineer @ Google",
+    story:
+      "Dhaabbata kanaa keessatti leenjii irra deebi'anii barnoota Computer Science kootti guddaa na gargaare. Amma Silicon Valley keessatti hojjachaa jira.",
+    year: "2018",
+    achievement: "Tech Career",
+    icon: <Code className="w-6 h-6" />,
+  },
+  {
+    id: 2,
+    name: "Hirut Abebe",
+    role: "Social Entrepreneur",
+    story:
+      "Gorsaa fi gargaarsa dhaabbata kanaa irra deebi'anii dhaabbata NGO guddaa ijare. Har'a dhaloota 500 ol gargaara.",
+    year: "2019",
+    achievement: "Social Impact",
+    icon: <HeartHandshake className="w-6 h-6" />,
+  },
+  {
+    id: 3,
+    name: "Kebede Hailu",
+    role: "Public Servant",
+    story:
+      "Leenjii hojjataa mootummaa irra deebi'anii ministeera keessatti hojii argadhe. Amma dhaloota biraaf gargaara.",
+    year: "2020",
+    achievement: "Leadership",
+    icon: <Award className="w-6 h-6" />,
+  },
+  {
+    id: 4,
+    name: "Mekdes Tadesse",
+    role: "University Professor",
+    story:
+      "Gorsaa fi leenjii dhaabbata kanaa irra deebi'anii PhD argadhe. Amma university keessatti barsiisaa jira.",
+    year: "2021",
+    achievement: "Education",
+    icon: <GraduationCap className="w-6 h-6" />,
+  },
+];
+
+// Upcoming Events
+const upcomingEvents = [
+  {
+    id: 1,
+    title: "Leenjii Tech for Youth",
+    date: "December 15, 2024",
+    time: "9:00 AM - 4:00 PM",
+    location: "Addis Ababa",
+    description:
+      "Dhalootaaf leenjii technology fi programming. Barataan university fi high school hundaaf.",
+    seats: "150/200",
+    category: "Technology",
+    price: "Free",
+  },
+  {
+    id: 2,
+    title: "Wal-gahii Oltummaa",
+    date: "December 20, 2024",
+    time: "10:00 AM - 2:00 PM",
+    location: "Jimma",
+    description:
+      "Gosoota, amantoota fi hawaasa hundaa wal-simachuuf wal-gahii guddaa.",
+    seats: "300/500",
+    category: "Community",
+    price: "Free",
+  },
+  {
+    id: 3,
+    title: "Career Fair 2024",
+    date: "January 10, 2025",
+    time: "8:00 AM - 6:00 PM",
+    location: "Adama",
+    description:
+      "Dhalootaaf iddoo hojii fi internship argachuuf karriira faayya.",
+    seats: "50/100",
+    category: "Business",
+    price: "$10",
+  },
+  {
+    id: 4,
+    title: "Leadership Training",
+    date: "January 25, 2025",
+    time: "9:00 AM - 5:00 PM",
+    location: "Hawassa",
+    description:
+      "Dhalootaaf leenjii leadership fi management qabatamaa.",
+    seats: "75/100",
+    category: "Education",
+    price: "$25",
+  },
+];
+
+// Partners
+const partners = [
+  {
+    name: "Ministry of Education",
+    logo: "ME",
+    type: "Government",
+  },
+  {
+    name: "Ethiopian Universities",
+    logo: "EU",
+    type: "Education",
+  },
+  {
+    name: "Local NGOs",
+    logo: "NGO",
+    type: "Non-profit",
+  },
+  {
+    name: "Community Leaders",
+    logo: "CL",
+    type: "Community",
+  },
+  {
+    name: "Private Sector",
+    logo: "PS",
+    type: "Business",
+  },
+  {
+    name: "International Donors",
+    logo: "ID",
+    type: "Funding",
+  },
+];
+
+// Testimonials
+const testimonials = [
+  {
+    id: 1,
+    name: "Obbo Mi'eessaa Goollo",
+    role: "Hojjataa Mootummaa",
+    content:
+      "Dhaabbanni kun dhaloota kanaaf gorsaa addaa fi leenjii kennuu isaa bayyee guddaadha. Woggaa saddeen darbaan oolchaa ture.",
+    avatar: "MG",
+  },
+  {
+    id: 2,
+    name: "Dr. Alemayehu Teklu",
+    role: "University President",
+    content:
+      "Dhaabbata kana waliin hojjachuun barataan keenyaaf guddaa ta'e. Leenjii isaanii barataan hundaa naannoo keenyaa keessatti mul'ata.",
+    avatar: "AT",
+  },
+  {
+    id: 3,
+    name: "W/ro Selamawit Bekele",
+    role: "Community Leader",
+    content:
+      "Oltummaa fi wal-simannaa dhaabbata kanaa naannoo keenyaa keessatti bareedha. Gosoota hundaa waliin hojjachuu danda'an.",
+    avatar: "SB",
+  },
+];
+
+// FAQ Section
+const faqs = [
+  {
+    question: "Dhaabbanni kun maalii?",
+    answer:
+      "Nutii Dhaabbati Gurmuu Tola Oltummaa dha. Dhaloota kana gorsuu, leenjii kennuu fi wal-simachuuf kaayyoo qabna.",
+  },
+  {
+    question:
+      "Maaliif makkana keessatti hirmaadhu?",
+    answer:
+      "Hirmaachuun sirratti guddaadha: leenjii argatta, hiriyyaa argatta, kaayyoo qabachuuf gargaarsa argatta.",
+  },
+  {
+    question: "Kessatti maalii argatta?",
+    answer:
+      "Leenjii addaa, gorsaa, hiriyyaa, iddoo hojii, internship, fi gargaarsa qabatamaa argattu.",
+  },
+  {
+    question: "Maaliif kan dhaloota qofa?",
+    answer:
+      "Dhaloota kana gorsuuf kaayyoo qabna, garuu hawaasa hundaa waliin hojjachuu danda'anna.",
+  },
+];
+
+export default function ComprehensiveHomePage() {
   const router = useRouter();
-  const {
-    events,
-    loading,
-    error,
-    fetchEvents,
-    clearError,
-  } = useEventStore();
-  const {
-    user,
-    isAuthenticated: isUserAuthenticated,
-    clearAuthData,
-  } = useAuthStore();
-
-  // State
-  const [selectedEvent, setSelectedEvent] =
-    useState<EventData | null>(null);
-  const [viewMode, setViewMode] = useState<
-    "list" | "details"
-  >("list");
-  const [layoutMode, setLayoutMode] = useState<
-    "grid" | "list"
-  >("grid");
-  const [searchTerm, setSearchTerm] =
-    useState("");
-  const [filterCategory, setFilterCategory] =
-    useState("all");
-  const [filterDate, setFilterDate] =
-    useState("all");
   const [mobileMenuOpen, setMobileMenuOpen] =
     useState(false);
-  const [userMenuOpen, setUserMenuOpen] =
+  const [
+    activeTestimonial,
+    setActiveTestimonial,
+  ] = useState(0);
+  const [showScrollTop, setShowScrollTop] =
     useState(false);
-  const [activeTab, setActiveTab] =
-    useState("upcoming");
-  const [bookmarkedEvents, setBookmarkedEvents] =
-    useState<string[]>([]);
-  const [likedEvents, setLikedEvents] = useState<
-    string[]
-  >([]);
-  const [copiedLink, setCopiedLink] =
+  const [hoveredProgram, setHoveredProgram] =
+    useState<number | null>(null);
+  const [showLoginModal, setShowLoginModal] =
     useState(false);
-  const [isClient, setIsClient] = useState(false);
+  const [
+    showRegisterModal,
+    setShowRegisterModal,
+  ] = useState(false);
+  const [activeFaq, setActiveFaq] = useState<
+    number | null
+  >(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] =
+    useState(false);
 
-  // Check authentication and fetch events
+  // Handle scroll
   useEffect(() => {
-    setIsClient(true);
-
-    if (!isUserAuthenticated || !user) {
-      toast.error("Please login to view events");
-      router.push("/login");
-      return;
-    }
-
-    fetchEvents();
-  }, [
-    isUserAuthenticated,
-    user,
-    fetchEvents,
-    router,
-  ]);
-
-  // Handle errors
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-      clearError();
-    }
-  }, [error, clearError]);
-
-  // Load user preferences from localStorage
-  useEffect(() => {
-    if (isClient && user) {
-      const savedBookmarks = localStorage.getItem(
-        `bookmarks_${user.id}`
-      );
-      const savedLikes = localStorage.getItem(
-        `likes_${user.id}`
-      );
-
-      if (savedBookmarks) {
-        setBookmarkedEvents(
-          JSON.parse(savedBookmarks)
-        );
-      }
-      if (savedLikes) {
-        setLikedEvents(JSON.parse(savedLikes));
-      }
-    }
-  }, [isClient, user]);
-
-  // Save user preferences to localStorage
-  const saveBookmarks = useCallback(
-    (bookmarks: string[]) => {
-      if (user) {
-        localStorage.setItem(
-          `bookmarks_${user.id}`,
-          JSON.stringify(bookmarks)
-        );
-      }
-    },
-    [user]
-  );
-
-  const saveLikes = useCallback(
-    (likes: string[]) => {
-      if (user) {
-        localStorage.setItem(
-          `likes_${user.id}`,
-          JSON.stringify(likes)
-        );
-      }
-    },
-    [user]
-  );
-
-  // Filter events based on active tab
-  const filteredEvents = events.filter(
-    (event) => {
-      // Only show published events to users
-      if (event.status !== "published")
-        return false;
-
-      // Filter by search term
-      const matchesSearch =
-        event.title
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        event.description
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        event.location
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
-
-      // Filter by category
-      const matchesCategory =
-        filterCategory === "all" ||
-        event.category === filterCategory;
-
-      // Filter by date
-      const eventDate = new Date(event.date);
-      const now = new Date();
-      let matchesDate = true;
-
-      if (filterDate === "upcoming") {
-        matchesDate = eventDate >= now;
-      } else if (filterDate === "past") {
-        matchesDate = eventDate < now;
-      } else if (filterDate === "today") {
-        matchesDate = isToday(eventDate);
-      } else if (filterDate === "tomorrow") {
-        matchesDate = isTomorrow(eventDate);
-      }
-
-      // Filter by tab
-      let matchesTab = true;
-      const today = new Date();
-
-      if (activeTab === "upcoming") {
-        matchesTab =
-          isFuture(eventDate) ||
-          isToday(eventDate);
-      } else if (activeTab === "featured") {
-        matchesTab = event.isFeatured;
-      } else if (activeTab === "bookmarked") {
-        matchesTab = bookmarkedEvents.includes(
-          event._id
-        );
-      } else if (activeTab === "nearby") {
-        matchesTab = true; // For demo, show all events as nearby
-      } else if (activeTab === "today") {
-        matchesTab = isToday(eventDate);
-      } else if (activeTab === "weekend") {
-        const day = eventDate.getDay();
-        matchesTab = day === 0 || day === 6; // Saturday or Sunday
-      }
-
-      return (
-        matchesSearch &&
-        matchesCategory &&
-        matchesDate &&
-        matchesTab
-      );
-    }
-  );
-
-  // Get category icon
-  const getCategoryIcon = (category: string) => {
-    const icons: Record<string, React.ReactNode> =
-      {
-        Education: (
-          <GraduationCap
-            size={16}
-            className="text-blue-600"
-          />
-        ),
-        Technology: (
-          <Code
-            size={16}
-            className="text-purple-600"
-          />
-        ),
-        Business: (
-          <Briefcase
-            size={16}
-            className="text-indigo-600"
-          />
-        ),
-        Health: (
-          <HeartHandshake
-            size={16}
-            className="text-pink-600"
-          />
-        ),
-        Arts: (
-          <Palette
-            size={16}
-            className="text-rose-600"
-          />
-        ),
-        Sports: (
-          <Dumbbell
-            size={16}
-            className="text-orange-600"
-          />
-        ),
-        Community: (
-          <UsersRound
-            size={16}
-            className="text-teal-600"
-          />
-        ),
-        Environment: (
-          <Leaf
-            size={16}
-            className="text-emerald-600"
-          />
-        ),
-        Charity: (
-          <Award
-            size={16}
-            className="text-amber-600"
-          />
-        ),
-        Music: (
-          <Music
-            size={16}
-            className="text-red-600"
-          />
-        ),
-        Food: (
-          <Coffee
-            size={16}
-            className="text-yellow-600"
-          />
-        ),
-        Conference: (
-          <Mic
-            size={16}
-            className="text-blue-600"
-          />
-        ),
-      };
-    return (
-      icons[category] || (
-        <Tag
-          size={16}
-          className="text-gray-600"
-        />
-      )
-    );
-  };
-
-  // Get category color
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      Education:
-        "bg-blue-50 text-blue-700 border-blue-200",
-      Technology:
-        "bg-purple-50 text-purple-700 border-purple-200",
-      Business:
-        "bg-indigo-50 text-indigo-700 border-indigo-200",
-      Health:
-        "bg-pink-50 text-pink-700 border-pink-200",
-      Arts: "bg-rose-50 text-rose-700 border-rose-200",
-      Sports:
-        "bg-orange-50 text-orange-700 border-orange-200",
-      Community:
-        "bg-teal-50 text-teal-700 border-teal-200",
-      Environment:
-        "bg-emerald-50 text-emerald-700 border-emerald-200",
-      Charity:
-        "bg-amber-50 text-amber-700 border-amber-200",
-      Music:
-        "bg-red-50 text-red-700 border-red-200",
-      Food: "bg-yellow-50 text-yellow-700 border-yellow-200",
-      Conference:
-        "bg-blue-50 text-blue-700 border-blue-200",
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 500);
     };
-    return (
-      colors[category] ||
-      "bg-gray-50 text-gray-700 border-gray-200"
+    window.addEventListener(
+      "scroll",
+      handleScroll
     );
-  };
-
-  // Format date display
-  const formatDateDisplay = (
-    dateString: string
-  ) => {
-    const date = new Date(dateString);
-    const now = new Date();
-
-    if (isToday(date)) {
-      return "Today";
-    } else if (isTomorrow(date)) {
-      return "Tomorrow";
-    } else if (
-      date.getTime() - now.getTime() <
-      7 * 24 * 60 * 60 * 1000
-    ) {
-      return format(date, "EEEE");
-    } else {
-      return format(date, "MMM dd, yyyy");
-    }
-  };
-
-  // Format time display
-  const formatTimeDisplay = (
-    dateString: string
-  ) => {
-    return format(new Date(dateString), "h:mm a");
-  };
-
-  // Handle bookmark toggle
-  const handleBookmarkToggle = (
-    eventId: string
-  ) => {
-    setBookmarkedEvents((prev) => {
-      const newBookmarks = prev.includes(eventId)
-        ? prev.filter((id) => id !== eventId)
-        : [...prev, eventId];
-      saveBookmarks(newBookmarks);
-
-      toast.success(
-        prev.includes(eventId)
-          ? "Removed from bookmarks"
-          : "Added to bookmarks"
+    return () =>
+      window.removeEventListener(
+        "scroll",
+        handleScroll
       );
-      return newBookmarks;
+  }, []);
+
+  // Auto-rotate testimonials
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveTestimonial(
+        (prev) => (prev + 1) % testimonials.length
+      );
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Scroll to top
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
     });
   };
 
-  // Handle like toggle
-  const handleLikeToggle = (eventId: string) => {
-    setLikedEvents((prev) => {
-      const newLikes = prev.includes(eventId)
-        ? prev.filter((id) => id !== eventId)
-        : [...prev, eventId];
-      saveLikes(newLikes);
-
-      toast.success(
-        prev.includes(eventId)
-          ? "Unliked event"
-          : "Liked event"
-      );
-      return newLikes;
-    });
-  };
-
-  // Handle share
-  const handleShare = (event: EventData) => {
-    if (navigator.share) {
-      navigator.share({
-        title: event.title,
-        text: event.description.substring(0, 100),
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(
-        window.location.href
-      );
-      setCopiedLink(true);
-      toast.success("Link copied to clipboard!");
-      setTimeout(
-        () => setCopiedLink(false),
-        2000
-      );
-    }
-  };
-
-  // Handle logout
-  const handleLogout = () => {
-    clearAuthData();
-    toast.success("Logged out successfully");
-    router.push("/login");
-  };
-
-  // Get user initials for avatar
-  const getUserInitials = () => {
-    if (!user?.name) return "U";
-    return user.name
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  // Categories for filter
-  const categories = [
-    "all",
-    "Education",
-    "Technology",
-    "Business",
-    "Health",
-    "Arts",
-    "Sports",
-    "Community",
-    "Environment",
-    "Charity",
-    "Music",
-    "Food",
-    "Conference",
-  ];
-
-  // Date filters
-  const dateFilters = [
-    { value: "all", label: "All Dates" },
-    { value: "upcoming", label: "Upcoming" },
-    { value: "today", label: "Today" },
-    { value: "tomorrow", label: "Tomorrow" },
-    { value: "weekend", label: "This Weekend" },
-    { value: "past", label: "Past Events" },
-  ];
-
-  // Tabs
-  const tabs = [
-    {
-      id: "upcoming",
-      label: "Upcoming",
-      icon: <Calendar size={18} />,
-      count: filteredEvents.filter(
-        (e) =>
-          isFuture(new Date(e.date)) ||
-          isToday(new Date(e.date))
-      ).length,
-    },
-    {
-      id: "featured",
-      label: "Featured",
-      icon: <Star size={18} />,
-      count: events.filter(
-        (e) =>
-          e.isFeatured && e.status === "published"
-      ).length,
-    },
-    {
-      id: "today",
-      label: "Today",
-      icon: <CalendarDays size={18} />,
-      count: events.filter(
-        (e) =>
-          isToday(new Date(e.date)) &&
-          e.status === "published"
-      ).length,
-    },
-    {
-      id: "bookmarked",
-      label: "Saved",
-      icon: <Bookmark size={18} />,
-      count: bookmarkedEvents.length,
-    },
-    {
-      id: "nearby",
-      label: "Nearby",
-      icon: <MapPin size={18} />,
-      count: events.filter(
-        (e) => e.status === "published"
-      ).length,
-    },
-  ];
-
-  // If not authenticated, show loading
-  if (!isUserAuthenticated || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">
-            Checking authentication...
-          </p>
-        </div>
-      </div>
+  // Handle login
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.success(
+      "Welcome back! Redirecting to dashboard..."
     );
-  }
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 1500);
+    setShowLoginModal(false);
+  };
+
+  // Handle register
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.success(
+      "Account created successfully! Welcome aboard!"
+    );
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 1500);
+    setShowRegisterModal(false);
+  };
+
+  // Newsletter subscription
+  const handleNewsletter = (
+    e: React.FormEvent
+  ) => {
+    e.preventDefault();
+    toast.success(
+      "Thank you for subscribing! Welcome to our community!"
+    );
+    setEmail("");
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white">
       <Toaster
         position="top-right"
         toastOptions={{
-          duration: 3000,
+          duration: 4000,
           style: {
+            borderRadius: "16px",
             background: "#1f2937",
             color: "#f9fafb",
+            border: "1px solid #374151",
           },
         }}
       />
 
+      {/* Progress bar */}
+      <div className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-green-500 to-purple-500 z-50">
+        <motion.div
+          className="h-full bg-white"
+          style={{ width: "100%" }}
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{
+            duration: 0.5,
+            ease: "easeInOut",
+          }}
+        />
+      </div>
+
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-gray-100/50">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link
               href="/"
-              className="flex items-center space-x-3"
+              className="flex items-center space-x-3 group"
             >
-              <div className="bg-blue-600 p-2 rounded-lg">
-                <Calendar className="h-6 w-6 text-white" />
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 200,
+                }}
+                className="relative"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-green-500 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity" />
+                <div className="relative w-12 h-12 bg-gradient-to-br from-blue-600 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Users className="w-7 h-7 text-white" />
+                </div>
+              </motion.div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-green-600 to-purple-600 bg-clip-text text-transparent">
+                  Nutii Dhaabbati
+                </h1>
+                <p className="text-xs text-gray-500 font-medium">
+                  Gurmuu Tola Oltummaa
+                </p>
               </div>
-              <span className="text-xl font-bold text-gray-900">
-                EventHub
-              </span>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() =>
-                    setActiveTab(tab.id)
-                  }
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
-                    activeTab === tab.id
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                  }`}
+            <nav className="hidden lg:flex items-center space-x-1">
+              {[
+                "Makkana",
+                "Kaayyoo",
+                "Leenjii",
+                "Oolcha",
+                "Wal-simatu",
+                "Qabsiina",
+                "Events",
+                "Blog",
+              ].map((item) => (
+                <Link
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  className="px-4 py-2.5 text-gray-700 hover:text-blue-600 font-medium rounded-xl hover:bg-gray-50/50 transition-all duration-300 text-sm"
                 >
-                  {tab.icon}
-                  <span className="font-medium">
-                    {tab.label}
-                  </span>
-                  {tab.count > 0 && (
-                    <span
-                      className={`px-2 py-0.5 text-xs rounded-full ${
-                        activeTab === tab.id
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {tab.count}
-                    </span>
-                  )}
-                </button>
+                  {item}
+                </Link>
               ))}
             </nav>
 
-            {/* User Menu */}
-            <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-                <Bell size={20} />
+            {/* Action Buttons */}
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() =>
+                  setShowLoginModal(true)
+                }
+                className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 text-gray-700 font-medium rounded-xl hover:bg-gray-50/50 transition-all duration-300"
+              >
+                <LogIn className="w-4 h-4" />
+                Seeni
               </button>
-
-              <div className="relative">
-                <button
-                  onClick={() =>
-                    setUserMenuOpen(!userMenuOpen)
-                  }
-                  className="flex items-center space-x-3 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-medium">
-                    {getUserInitials()}
-                  </div>
-                  <div className="hidden md:block text-left">
-                    <p className="text-sm font-medium text-gray-900">
-                      {user.name}
-                    </p>
-                    <p className="text-xs text-gray-500 capitalize">
-                      {user.role}
-                    </p>
-                  </div>
-                  <ChevronDown
-                    size={16}
-                    className="text-gray-500"
-                  />
-                </button>
-
-                {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-                    <Link
-                      href="/profile"
-                      className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50"
-                    >
-                      <User
-                        size={16}
-                        className="mr-3"
-                      />
-                      Profile
-                    </Link>
-                    <Link
-                      href="/settings"
-                      className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50"
-                    >
-                      <Settings
-                        size={16}
-                        className="mr-3"
-                      />
-                      Settings
-                    </Link>
-                    <div className="border-t border-gray-200 my-1"></div>
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center w-full px-4 py-2 text-red-600 hover:bg-red-50"
-                    >
-                      <LogOut
-                        size={16}
-                        className="mr-3"
-                      />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
+              <button
+                onClick={() =>
+                  setShowRegisterModal(true)
+                }
+                className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/25 transition-all duration-300"
+              >
+                <UserPlus className="w-4 h-4" />
+                Galmaa'i
+              </button>
 
               {/* Mobile Menu Button */}
               <button
@@ -728,1100 +669,1394 @@ export default function UserHomePage() {
                     !mobileMenuOpen
                   )
                 }
-                className="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                className="lg:hidden p-2.5 text-gray-700 hover:text-blue-600 hover:bg-gray-50/50 rounded-xl transition-colors"
               >
-                <Menu size={24} />
+                {mobileMenuOpen ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
               </button>
             </div>
           </div>
+        </div>
 
-          {/* Mobile Navigation */}
+        {/* Mobile Menu */}
+        <AnimatePresence>
           {mobileMenuOpen && (
-            <div className="md:hidden py-4 border-t border-gray-200">
-              <div className="grid grid-cols-2 gap-2">
-                {tabs.map((tab) => (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{
+                opacity: 1,
+                height: "auto",
+              }}
+              exit={{ opacity: 0, height: 0 }}
+              className="lg:hidden border-t border-gray-100/50 bg-white/95 backdrop-blur-xl overflow-hidden"
+            >
+              <div className="container mx-auto px-4 py-6 space-y-2">
+                {[
+                  "Makkana",
+                  "Kaayyoo",
+                  "Leenjii",
+                  "Oolcha",
+                  "Wal-simatu",
+                  "Qabsiina",
+                  "Events",
+                  "Blog",
+                ].map((item) => (
+                  <Link
+                    key={item}
+                    href={`#${item.toLowerCase()}`}
+                    className="block py-3 text-gray-700 hover:text-blue-600 font-medium hover:bg-gray-50/50 rounded-xl px-4 transition-colors text-sm"
+                    onClick={() =>
+                      setMobileMenuOpen(false)
+                    }
+                  >
+                    {item}
+                  </Link>
+                ))}
+                <div className="pt-4 border-t border-gray-100/50 space-y-3">
                   <button
-                    key={tab.id}
                     onClick={() => {
-                      setActiveTab(tab.id);
+                      setShowLoginModal(true);
                       setMobileMenuOpen(false);
                     }}
-                    className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-lg transition-colors ${
-                      activeTab === tab.id
-                        ? "bg-blue-50 text-blue-600 border border-blue-200"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-gray-200"
-                    }`}
+                    className="block w-full py-3 text-center text-gray-700 font-medium rounded-xl border border-gray-200 hover:bg-gray-50"
                   >
-                    {tab.icon}
-                    <span className="font-medium">
-                      {tab.label}
-                    </span>
-                    {tab.count > 0 && (
+                    Seeni
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowRegisterModal(true);
+                      setMobileMenuOpen(false);
+                    }}
+                    className="block w-full py-3 text-center bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-lg"
+                  >
+                    Galmaa'i
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
+
+      {/* Hero Section */}
+      <section className="relative overflow-hidden py-20 lg:py-32">
+        {/* Background elements */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-green-50/30 to-purple-50/50" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-blue-400/10 to-green-400/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-purple-400/10 to-blue-400/10 rounded-full blur-3xl" />
+
+        <div className="container mx-auto px-4 lg:px-8 relative">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Left Column */}
+              <div>
+                {/* Badge */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-200/50 mb-8 shadow-lg"
+                >
+                  <Sparkle className="w-4 h-4 text-blue-500" />
+                  <span className="text-sm font-semibold text-gray-700">
+                    Woggaa 10 Oolcha
+                  </span>
+                </motion.div>
+
+                {/* Main Title */}
+                <motion.h1
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-5xl lg:text-6xl font-bold mb-6"
+                >
+                  <span className="bg-gradient-to-r from-blue-600 via-green-600 to-purple-600 bg-clip-text text-transparent">
+                    {heroData.title}
+                  </span>
+                </motion.h1>
+
+                {/* Subtitle */}
+                <motion.h2
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-2xl lg:text-3xl text-gray-800 mb-8 font-semibold"
+                >
+                  {heroData.subtitle}
+                </motion.h2>
+
+                {/* Description */}
+                <motion.p
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-lg text-gray-600 mb-8 leading-relaxed"
+                >
+                  {heroData.description}
+                </motion.p>
+
+                {/* CTA Buttons */}
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="flex flex-wrap gap-4"
+                >
+                  <button
+                    onClick={() =>
+                      setShowRegisterModal(true)
+                    }
+                    className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 flex items-center gap-3"
+                  >
+                    {heroData.cta.primary}
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                  </button>
+                  <button
+                    onClick={() =>
+                      document
+                        .getElementById("about")
+                        ?.scrollIntoView({
+                          behavior: "smooth",
+                        })
+                    }
+                    className="px-8 py-4 bg-white text-gray-700 font-semibold rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
+                  >
+                    {heroData.cta.secondary}
+                  </button>
+                </motion.div>
+              </div>
+
+              {/* Right Column - Stats */}
+              <div className="grid grid-cols-2 gap-6">
+                {heroData.stats.map(
+                  (stat, index) => (
+                    <motion.div
+                      key={stat.label}
+                      initial={{
+                        opacity: 0,
+                        y: 30,
+                      }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                      }}
+                      transition={{
+                        delay: 0.5 + index * 0.1,
+                      }}
+                      className="bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-6 hover:shadow-xl hover:border-blue-200/50 transition-all duration-300"
+                    >
+                      <div className="inline-flex p-3 bg-gradient-to-br from-blue-100 to-green-100 rounded-xl mb-4">
+                        <div className="text-blue-600">
+                          {stat.icon}
+                        </div>
+                      </div>
+                      <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent mb-2">
+                        {stat.value}
+                      </div>
+                      <div className="text-gray-700 font-medium">
+                        {stat.label}
+                      </div>
+                    </motion.div>
+                  )
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section
+        id="about"
+        className="py-20 bg-white"
+      >
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-green-50 rounded-full mb-6"
+            >
+              <Info className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-semibold text-blue-700">
+                Waa'ee Keenya
+              </span>
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
+            >
+              Maaliif Nuti?
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="text-lg text-gray-600"
+            >
+              Woggaa saddeen darbaan dhaloota kana
+              keessatti baroota 2014 hanga ammatti
+              kaayyoo addaa waliin oolchaa ture.
+              Dhaloota ijjeessuu waan jirtan
+              dhiifama gaafanna.
+            </motion.p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+            {coreValues.map((value, index) => (
+              <motion.div
+                key={value.title}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{
+                  delay: index * 0.1,
+                }}
+                className="group relative"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-50 rounded-3xl border border-gray-200/50 group-hover:border-blue-200/50 transition-all duration-500" />
+                <div className="relative p-8">
+                  <div
+                    className={`inline-flex p-4 bg-gradient-to-br ${value.color} rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300`}
+                  >
+                    <div className="text-white">
+                      {value.icon}
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    {value.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed mb-4">
+                    {value.description}
+                  </p>
+                  <ul className="space-y-2">
+                    {value.benefits.map(
+                      (benefit, i) => (
+                        <li
+                          key={i}
+                          className="flex items-center gap-2 text-sm text-gray-500"
+                        >
+                          <Check className="w-4 h-4 text-green-500" />
+                          {benefit}
+                        </li>
+                      )
+                    )}
+                  </ul>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Programs Section */}
+      <section
+        id="programs"
+        className="py-20 bg-gradient-to-b from-gray-50 to-white"
+      >
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-50 to-blue-50 rounded-full mb-6"
+            >
+              <BookOpen className="w-4 h-4 text-green-600" />
+              <span className="text-sm font-semibold text-green-700">
+                Leenjii fi Gorsa
+              </span>
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
+            >
+              Leenjii Addaa fi Gorsa
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-lg text-gray-600"
+            >
+              Baroota 10 ol oolchaa ture. Dhaloota
+              kana keessatti leenjii addaa fi
+              gorsaa kennuu keenya irra
+              deddeebi'anii socho'aa jirra.
+            </motion.p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+            {programs.map((program, index) => (
+              <motion.div
+                key={program.title}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -10 }}
+                viewport={{ once: true }}
+                transition={{
+                  delay: index * 0.1,
+                }}
+                onMouseEnter={() =>
+                  setHoveredProgram(index)
+                }
+                onMouseLeave={() =>
+                  setHoveredProgram(null)
+                }
+                className="relative group"
+              >
+                <div className="absolute inset-0 bg-white rounded-3xl border border-gray-200/50 shadow-lg group-hover:shadow-2xl group-hover:border-blue-300/50 transition-all duration-500" />
+                <div className="relative p-8 h-full flex flex-col">
+                  <div
+                    className={`inline-flex p-4 ${program.color} rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300 self-start`}
+                  >
+                    {program.icon}
+                  </div>
+                  <div className="mb-4">
+                    <div className="text-sm font-semibold text-gray-500 mb-2">
+                      {program.duration}
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">
+                      {program.title}
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed mb-6">
+                      {program.description}
+                    </p>
+                  </div>
+
+                  <div className="mt-auto">
+                    <div className="text-lg font-bold text-gray-900 mb-4">
+                      {program.stats}
+                    </div>
+                    <div className="space-y-2">
+                      {program.features.map(
+                        (feature, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center gap-2 text-sm text-gray-500"
+                          >
+                            <CheckCircle className="w-4 h-4 text-green-500" />
+                            {feature}
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+
+                  {hoveredProgram === index && (
+                    <motion.div
+                      initial={{
+                        opacity: 0,
+                        scale: 0.8,
+                      }}
+                      animate={{
+                        opacity: 1,
+                        scale: 1,
+                      }}
+                      className="absolute bottom-6 right-6"
+                    >
+                      <ChevronRight className="w-6 h-6 text-blue-500" />
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Success Stories */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-full mb-6"
+            >
+              <Trophy className="w-4 h-4 text-amber-600" />
+              <span className="text-sm font-semibold text-amber-700">
+                Milkaa'inaa
+              </span>
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
+            >
+              Ijoo Dhalootaa
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-lg text-gray-600"
+            >
+              Dhaloota keenya irra deebi'anii maal
+              hojjachaa jiran? Akkaataa leenjii
+              keenyaan jireenya isaanii
+              jijjiirran.
+            </motion.p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+            {successStories.map(
+              (story, index) => (
+                <motion.div
+                  key={story.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  viewport={{ once: true }}
+                  transition={{
+                    delay: index * 0.1,
+                  }}
+                  className="group"
+                >
+                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl border border-gray-200/50 p-8 hover:shadow-xl hover:border-blue-200/50 transition-all duration-500 h-full">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="p-3 bg-gradient-to-br from-blue-100 to-green-100 rounded-xl">
+                        {story.icon}
+                      </div>
+                      <span className="text-sm font-semibold text-gray-500">
+                        {story.year}
+                      </span>
+                    </div>
+                    <div className="mb-6">
+                      <div className="text-lg font-bold text-gray-900 mb-1">
+                        {story.name}
+                      </div>
+                      <div className="text-sm text-gray-600 mb-4">
+                        {story.role}
+                      </div>
+                      <p className="text-gray-700 italic">
+                        "{story.story}"
+                      </p>
+                    </div>
+                    <div className="px-4 py-2 bg-gradient-to-r from-blue-50 to-green-50 rounded-full inline-block">
+                      <span className="text-sm font-semibold text-blue-700">
+                        {story.achievement}
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+              )
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Upcoming Events */}
+      <section
+        id="events"
+        className="py-20 bg-gradient-to-b from-gray-50 to-white"
+      >
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-50 to-pink-50 rounded-full mb-6"
+            >
+              <Calendar className="w-4 h-4 text-purple-600" />
+              <span className="text-sm font-semibold text-purple-700">
+                Oolcha Dhihoo
+              </span>
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
+            >
+              Oolcha Dhihoo
+            </motion.h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-12">
+            {upcomingEvents.map(
+              (event, index) => (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  viewport={{ once: true }}
+                  transition={{
+                    delay: index * 0.1,
+                  }}
+                  className="group"
+                >
+                  <div className="bg-white rounded-3xl border border-gray-200/50 p-6 hover:shadow-xl hover:border-blue-200/50 transition-all duration-500 h-full">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="px-3 py-1 bg-gradient-to-r from-blue-50 to-green-50 rounded-full text-sm font-semibold text-blue-700">
+                        {event.category}
+                      </span>
                       <span
-                        className={`px-2 py-0.5 text-xs rounded-full ${
-                          activeTab === tab.id
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-gray-100 text-gray-700"
+                        className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                          event.price === "Free"
+                            ? "bg-green-50 text-green-700"
+                            : "bg-amber-50 text-amber-700"
                         }`}
                       >
-                        {tab.count}
+                        {event.price}
                       </span>
-                    )}
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">
+                      {event.title}
+                    </h3>
+                    <p className="text-gray-600 mb-6">
+                      {event.description}
+                    </p>
+
+                    <div className="space-y-3 mb-6">
+                      <div className="flex items-center gap-2 text-gray-500">
+                        <Calendar className="w-4 h-4" />
+                        <span className="text-sm">
+                          {event.date}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-500">
+                        <Clock className="w-4 h-4" />
+                        <span className="text-sm">
+                          {event.time}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-500">
+                        <MapPin className="w-4 h-4" />
+                        <span className="text-sm">
+                          {event.location}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-600">
+                        {event.seats} seats
+                      </div>
+                      <button
+                        onClick={() =>
+                          setShowRegisterModal(
+                            true
+                          )
+                        }
+                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-green-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all"
+                      >
+                        Register
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )
+            )}
+          </div>
+
+          <div className="text-center">
+            <button className="inline-flex items-center gap-2 px-8 py-4 bg-white text-gray-700 font-semibold rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
+              <Calendar className="w-5 h-5" />
+              Oolcha Hundaa Ilaaluuf
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Partners */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center mb-12">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6"
+            >
+              Hiriyaa fi Waliigaltee
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-gray-600 max-w-2xl mx-auto"
+            >
+              Waliin hojjachuun dhalootaf
+              gargaaruuf hiriyaa fi waliigaltee
+              hedduu waliin hojjachaa jirra.
+            </motion.p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+            {partners.map((partner, index) => (
+              <motion.div
+                key={partner.name}
+                initial={{
+                  opacity: 0,
+                  scale: 0.8,
+                }}
+                whileInView={{
+                  opacity: 1,
+                  scale: 1,
+                }}
+                viewport={{ once: true }}
+                transition={{
+                  delay: index * 0.1,
+                }}
+                className="group"
+              >
+                <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-200/50 p-6 hover:shadow-lg hover:border-blue-200/50 transition-all duration-300">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-green-500 rounded-xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
+                    {partner.logo}
+                  </div>
+                  <div className="text-center">
+                    <div className="font-semibold text-gray-900 mb-1">
+                      {partner.name}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {partner.type}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section
+        id="testimonials"
+        className="py-20 bg-gradient-to-b from-white to-gray-50"
+      >
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-50 to-pink-50 rounded-full mb-6"
+            >
+              <Quote className="w-4 h-4 text-rose-600" />
+              <span className="text-sm font-semibold text-rose-700">
+                Ijoo fi Madaala
+              </span>
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
+            >
+              Namootni Maal Jettu
+            </motion.h2>
+          </div>
+
+          <div className="relative max-w-4xl mx-auto">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTestimonial}
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -100 }}
+                className="bg-gradient-to-br from-white to-gray-50 rounded-3xl border border-gray-200/50 p-8 lg:p-12 shadow-xl"
+              >
+                <div className="flex flex-col lg:flex-row items-center gap-8">
+                  <div className="lg:w-1/4">
+                    <div className="relative">
+                      <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+                        {
+                          testimonials[
+                            activeTestimonial
+                          ].avatar
+                        }
+                      </div>
+                      <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                        <Quote className="w-6 h-6" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="lg:w-3/4">
+                    <div className="flex items-center gap-1 mb-6">
+                      {[...Array(5)].map(
+                        (_, i) => (
+                          <Star
+                            key={i}
+                            className="w-5 h-5 text-amber-500 fill-amber-500"
+                          />
+                        )
+                      )}
+                    </div>
+                    <p className="text-lg lg:text-xl text-gray-700 italic mb-8 leading-relaxed">
+                      "
+                      {
+                        testimonials[
+                          activeTestimonial
+                        ].content
+                      }
+                      "
+                    </p>
+                    <div>
+                      <div className="font-bold text-gray-900 text-lg">
+                        {
+                          testimonials[
+                            activeTestimonial
+                          ].name
+                        }
+                      </div>
+                      <div className="text-gray-600">
+                        {
+                          testimonials[
+                            activeTestimonial
+                          ].role
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+
+            <div className="flex justify-center items-center gap-3 mt-8">
+              {testimonials.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() =>
+                    setActiveTestimonial(index)
+                  }
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    index === activeTestimonial
+                      ? "bg-gradient-to-r from-blue-600 to-green-600 w-8"
+                      : "bg-gray-300 hover:bg-gray-400"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-16">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-full mb-6"
+              >
+                <HelpCircle className="w-4 h-4 text-indigo-600" />
+                <span className="text-sm font-semibold text-indigo-700">
+                  Gaaffii fi Deebii
+                </span>
+              </motion.div>
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
+              >
+                Gaaffiiwwan Dhihoo
+              </motion.h2>
+            </div>
+
+            <div className="space-y-4">
+              {faqs.map((faq, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  viewport={{ once: true }}
+                  transition={{
+                    delay: index * 0.1,
+                  }}
+                  className="border border-gray-200/50 rounded-2xl overflow-hidden"
+                >
+                  <button
+                    onClick={() =>
+                      setActiveFaq(
+                        activeFaq === index
+                          ? null
+                          : index
+                      )
+                    }
+                    className="w-full px-6 py-4 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="text-lg font-semibold text-gray-900 text-left">
+                      {faq.question}
+                    </span>
+                    <ChevronRight
+                      className={`w-5 h-5 text-gray-500 transition-transform ${
+                        activeFaq === index
+                          ? "rotate-90"
+                          : ""
+                      }`}
+                    />
                   </button>
+                  <AnimatePresence>
+                    {activeFaq === index && (
+                      <motion.div
+                        initial={{
+                          height: 0,
+                          opacity: 0,
+                        }}
+                        animate={{
+                          height: "auto",
+                          opacity: 1,
+                        }}
+                        exit={{
+                          height: 0,
+                          opacity: 0,
+                        }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-200/50">
+                          <p className="text-gray-700">
+                            {faq.answer}
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter */}
+      <section className="py-20 bg-gradient-to-br from-blue-600 via-green-600 to-purple-600">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center text-white">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-8"
+            >
+              <Mail className="w-4 h-4" />
+              <span className="text-sm font-semibold">
+                Oduu fi Oolcha
+              </span>
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl lg:text-5xl font-bold mb-6"
+            >
+              Oduu fi Oolcha Argadhu
+            </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-xl text-blue-100 mb-12 max-w-2xl mx-auto"
+            >
+              Oduu dhihoo, oolcha fi leenjii addaa
+              email keessanitti argadhaa.
+            </motion.p>
+
+            <motion.form
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              onSubmit={handleNewsletter}
+              className="flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto"
+            >
+              <input
+                type="email"
+                value={email}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
+                placeholder="Email keessan galchaa..."
+                className="flex-1 px-6 py-4 bg-white/20 backdrop-blur-sm border-2 border-white/30 rounded-xl text-white placeholder-white/70 focus:outline-none focus:border-white/50"
+                required
+              />
+              <button
+                type="submit"
+                className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl hover:bg-gray-50 hover:shadow-2xl transition-all duration-300 whitespace-nowrap"
+              >
+                Galchaa
+              </button>
+            </motion.form>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{
+                opacity: 1,
+                scale: 1,
+              }}
+              viewport={{ once: true }}
+              className="inline-flex p-4 bg-gradient-to-br from-blue-100 to-green-100 rounded-2xl mb-8"
+            >
+              <Rocket className="w-12 h-12 text-blue-600" />
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
+            >
+              Har'a Eegaluu!
+            </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto"
+            >
+              Dhaloota kana keessatti hiriyaa
+              ta'i. Leenjii argadhaa, hiriyyaa
+              argadhaa, jireenya keessan
+              jijjiradhaa.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="flex flex-col sm:flex-row gap-4 justify-center"
+            >
+              <button
+                onClick={() =>
+                  setShowRegisterModal(true)
+                }
+                className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 flex items-center justify-center gap-3"
+              >
+                Har'a Galmaa'i
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+              </button>
+              <button
+                onClick={() =>
+                  setShowLoginModal(true)
+                }
+                className="px-8 py-4 bg-white text-gray-700 font-semibold rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
+              >
+                Seeni
+              </button>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gradient-to-b from-gray-900 to-black text-white pt-16 pb-8">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
+            <div>
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-green-500 rounded-2xl flex items-center justify-center">
+                  <Users className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">
+                    Nutii Dhaabbati
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    Gurmuu Tola Oltummaa
+                  </p>
+                </div>
+              </div>
+              <p className="text-gray-400 mb-6 text-sm leading-relaxed">
+                Woggaa saddeen darbaan dhaloota
+                kana keessatti baroota 2014 hanga
+                ammatti kaayyoo addaa waliin
+                oolchaa ture. Dhaloota ijjeessuu
+                waan jirtan dhiifama gaafanna.
+              </p>
+              <div className="flex gap-4">
+                {[
+                  Facebook,
+                  Twitter,
+                  Instagram,
+                  Linkedin,
+                ].map((Icon, i) => (
+                  <a
+                    key={i}
+                    href="#"
+                    className="w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded-xl flex items-center justify-center transition-colors"
+                  >
+                    <Icon className="w-5 h-5" />
+                  </a>
                 ))}
               </div>
             </div>
-          )}
-        </div>
-      </header>
 
-      {/* Search and Filter Bar */}
-      <div className="sticky top-16 z-40 bg-white border-b border-gray-200 py-4 shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1">
-              <div className="relative">
-                <Search
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  size={20}
-                />
-                <input
-                  type="text"
-                  placeholder="Search events by title, location, or description..."
-                  value={searchTerm}
-                  onChange={(e) =>
-                    setSearchTerm(e.target.value)
-                  }
-                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Filters */}
-            <div className="flex gap-3">
-              <div className="relative">
-                <Filter
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <select
-                  value={filterCategory}
-                  onChange={(e) =>
-                    setFilterCategory(
-                      e.target.value
-                    )
-                  }
-                  className="pl-10 pr-8 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none min-w-[160px]"
-                >
-                  <option value="all">
-                    All Categories
-                  </option>
-                  {categories
-                    .filter((c) => c !== "all")
-                    .map((cat) => (
-                      <option
-                        key={cat}
-                        value={cat}
+            {[
+              {
+                title: "Leenjii",
+                links: [
+                  "Barataa",
+                  "Qotee Bulaa",
+                  "Horsiisaa",
+                  "Hojjataa",
+                  "Technology",
+                  "Business",
+                ],
+              },
+              {
+                title: "Kaayyoo",
+                links: [
+                  "Dhaloota Gorsuu",
+                  "Oltummaa",
+                  "Wal-simatu",
+                  "Hawaasa",
+                  "Sirna",
+                  "Misooma",
+                ],
+              },
+              {
+                title: "Qabsiina",
+                links: [
+                  "Natti Bilbilaa",
+                  "Email",
+                  "Magaalaa",
+                  "Facebook",
+                  "Twitter",
+                  "Office",
+                ],
+              },
+            ].map((section) => (
+              <div key={section.title}>
+                <h4 className="font-bold text-lg mb-6">
+                  {section.title}
+                </h4>
+                <ul className="space-y-3">
+                  {section.links.map((link) => (
+                    <li key={link}>
+                      <Link
+                        href="#"
+                        className="text-gray-400 hover:text-white transition-colors text-sm"
                       >
-                        {cat}
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              <div className="relative">
-                <Calendar
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <select
-                  value={filterDate}
-                  onChange={(e) =>
-                    setFilterDate(e.target.value)
-                  }
-                  className="pl-10 pr-8 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none min-w-[160px]"
-                >
-                  {dateFilters.map((filter) => (
-                    <option
-                      key={filter.value}
-                      value={filter.value}
-                    >
-                      {filter.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex items-center bg-gray-100 rounded-xl p-1">
-                <button
-                  onClick={() =>
-                    setLayoutMode("grid")
-                  }
-                  className={`p-2 rounded-lg transition-all ${
-                    layoutMode === "grid"
-                      ? "bg-white shadow-sm text-blue-600"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  <Grid size={20} />
-                </button>
-                <button
-                  onClick={() =>
-                    setLayoutMode("list")
-                  }
-                  className={`p-2 rounded-lg transition-all ${
-                    layoutMode === "list"
-                      ? "bg-white shadow-sm text-blue-600"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  <List size={20} />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Active filters */}
-          {(searchTerm ||
-            filterCategory !== "all" ||
-            filterDate !== "all") && (
-            <div className="flex items-center gap-2 mt-4">
-              <span className="text-sm text-gray-600">
-                Active filters:
-              </span>
-              {searchTerm && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm">
-                  Search: {searchTerm}
-                  <button
-                    onClick={() =>
-                      setSearchTerm("")
-                    }
-                    className="ml-2 text-blue-500 hover:text-blue-700"
-                  >
-                    <X size={14} />
-                  </button>
-                </span>
-              )}
-              {filterCategory !== "all" && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-sm">
-                  {filterCategory}
-                  <button
-                    onClick={() =>
-                      setFilterCategory("all")
-                    }
-                    className="ml-2 text-purple-500 hover:text-purple-700"
-                  >
-                    <X size={14} />
-                  </button>
-                </span>
-              )}
-              {filterDate !== "all" && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-50 text-green-700 text-sm">
-                  {
-                    dateFilters.find(
-                      (f) =>
-                        f.value === filterDate
-                    )?.label
-                  }
-                  <button
-                    onClick={() =>
-                      setFilterDate("all")
-                    }
-                    className="ml-2 text-green-500 hover:text-green-700"
-                  >
-                    <X size={14} />
-                  </button>
-                </span>
-              )}
-              <button
-                onClick={() => {
-                  setSearchTerm("");
-                  setFilterCategory("all");
-                  setFilterDate("all");
-                }}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Clear all
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {loading ? (
-          <div className="flex justify-center items-center h-96">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">
-                Loading events...
-              </p>
-            </div>
-          </div>
-        ) : viewMode === "details" &&
-          selectedEvent ? (
-          // Event Details View
-          <div className="animate-fadeIn">
-            <div className="mb-6">
-              <button
-                onClick={() =>
-                  setViewMode("list")
-                }
-                className="inline-flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors"
-              >
-                <ArrowLeft
-                  size={20}
-                  className="mr-2"
-                />
-                Back to Events
-              </button>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              {/* Hero Image */}
-              <div className="relative h-96">
-                {selectedEvent.files &&
-                selectedEvent.files.length > 0 ? (
-                  <Image
-                    src={
-                      selectedEvent.files[0].url
-                    }
-                    alt={selectedEvent.title}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                    <Calendar className="h-24 w-24 text-white/30" />
-                  </div>
-                )}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-8">
-                  <div className="flex flex-wrap items-center gap-3 mb-4">
-                    <span
-                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${getCategoryColor(selectedEvent.category)}`}
-                    >
-                      {getCategoryIcon(
-                        selectedEvent.category
-                      )}
-                      {selectedEvent.category}
-                    </span>
-                    {selectedEvent.isFeatured && (
-                      <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold">
-                        <Star size={14} />
-                        Featured
-                      </span>
-                    )}
-                    {selectedEvent.isUrgent && (
-                      <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm font-semibold">
-                        <AlertCircle size={14} />
-                        Urgent
-                      </span>
-                    )}
-                  </div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                    {selectedEvent.title}
-                  </h1>
-                  <p className="text-white/90 max-w-3xl">
-                    {selectedEvent.description.substring(
-                      0,
-                      200
-                    )}
-                    ...
-                  </p>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="absolute top-6 right-6 flex items-center gap-3">
-                  <button
-                    onClick={() =>
-                      handleBookmarkToggle(
-                        selectedEvent._id
-                      )
-                    }
-                    className={`p-3 rounded-full backdrop-blur-sm ${
-                      bookmarkedEvents.includes(
-                        selectedEvent._id
-                      )
-                        ? "bg-red-500/20 text-red-500 hover:bg-red-500/30"
-                        : "bg-white/20 text-white hover:bg-white/30"
-                    } transition-colors`}
-                  >
-                    <Bookmark
-                      size={20}
-                      fill={
-                        bookmarkedEvents.includes(
-                          selectedEvent._id
-                        )
-                          ? "currentColor"
-                          : "none"
-                      }
-                    />
-                  </button>
-                  <button
-                    onClick={() =>
-                      handleShare(selectedEvent)
-                    }
-                    className="p-3 rounded-full backdrop-blur-sm bg-white/20 text-white hover:bg-white/30 transition-colors"
-                  >
-                    <Share size={20} />
-                  </button>
-                  <button
-                    onClick={() =>
-                      handleLikeToggle(
-                        selectedEvent._id
-                      )
-                    }
-                    className={`p-3 rounded-full backdrop-blur-sm ${
-                      likedEvents.includes(
-                        selectedEvent._id
-                      )
-                        ? "bg-pink-500/20 text-pink-500 hover:bg-pink-500/30"
-                        : "bg-white/20 text-white hover:bg-white/30"
-                    } transition-colors`}
-                  >
-                    <Heart
-                      size={20}
-                      fill={
-                        likedEvents.includes(
-                          selectedEvent._id
-                        )
-                          ? "currentColor"
-                          : "none"
-                      }
-                    />
-                  </button>
-                </div>
-              </div>
-
-              {/* Event Content */}
-              <div className="p-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {/* Left Column */}
-                  <div className="lg:col-span-2 space-y-8">
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                        Event Details
-                      </h2>
-                      <p className="text-gray-700 whitespace-pre-line leading-relaxed">
-                        {
-                          selectedEvent.description
-                        }
-                      </p>
-                    </div>
-
-                    {selectedEvent.theme && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                          Theme
-                        </h3>
-                        <p className="text-gray-700">
-                          {selectedEvent.theme}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Gallery */}
-                    {selectedEvent.files &&
-                      selectedEvent.files.length >
-                        1 && (
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                            Gallery
-                          </h3>
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {selectedEvent.files
-                              .slice(1)
-                              .map(
-                                (file, index) => (
-                                  <div
-                                    key={index}
-                                    className="relative aspect-square rounded-xl overflow-hidden"
-                                  >
-                                    <Image
-                                      src={
-                                        file.url
-                                      }
-                                      alt={`${selectedEvent.title} ${index + 2}`}
-                                      fill
-                                      className="object-cover hover:scale-105 transition-transform duration-300"
-                                    />
-                                  </div>
-                                )
-                              )}
-                          </div>
-                        </div>
-                      )}
-                  </div>
-
-                  {/* Right Column - Info Sidebar */}
-                  <div className="space-y-6">
-                    {/* Quick Info */}
-                    <div className="bg-white border border-gray-200 rounded-xl p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                        Event Information
-                      </h3>
-
-                      <div className="space-y-4">
-                        <div className="flex items-start gap-3">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <Calendar
-                              className="text-blue-600"
-                              size={20}
-                            />
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-600">
-                              Date & Time
-                            </p>
-                            <p className="font-medium text-gray-900">
-                              {format(
-                                new Date(
-                                  selectedEvent.date
-                                ),
-                                "EEEE, MMMM dd, yyyy"
-                              )}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              {format(
-                                new Date(
-                                  selectedEvent.date
-                                ),
-                                "h:mm a"
-                              )}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-start gap-3">
-                          <div className="p-2 bg-red-100 rounded-lg">
-                            <MapPin
-                              className="text-red-600"
-                              size={20}
-                            />
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-600">
-                              Location
-                            </p>
-                            <p className="font-medium text-gray-900">
-                              {
-                                selectedEvent.location
-                              }
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-start gap-3">
-                          <div className="p-2 bg-green-100 rounded-lg">
-                            <Users
-                              className="text-green-600"
-                              size={20}
-                            />
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-600">
-                              Capacity
-                            </p>
-                            <p className="font-medium text-gray-900">
-                              {
-                                selectedEvent.maxParticipants
-                              }{" "}
-                              participants
-                            </p>
-                          </div>
-                        </div>
-
-                        {selectedEvent.donationDeadline && (
-                          <div className="flex items-start gap-3">
-                            <div className="p-2 bg-purple-100 rounded-lg">
-                              <Clock
-                                className="text-purple-600"
-                                size={20}
-                              />
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-600">
-                                Registration
-                                Deadline
-                              </p>
-                              <p className="font-medium text-gray-900">
-                                {format(
-                                  new Date(
-                                    selectedEvent.donationDeadline
-                                  ),
-                                  "MMM dd, yyyy"
-                                )}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="space-y-3">
-                      <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3.5 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl">
-                        Register Now
-                      </button>
-                      <button className="w-full bg-white border border-gray-300 text-gray-700 py-3.5 rounded-xl font-medium hover:bg-gray-50 transition-colors">
-                        Add to Calendar
-                      </button>
-                      <button className="w-full bg-white border border-gray-300 text-gray-700 py-3.5 rounded-xl font-medium hover:bg-gray-50 transition-colors">
-                        Get Directions
-                      </button>
-                    </div>
-
-                    {/* Share Event */}
-                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                        Share Event
-                      </h3>
-                      <div className="flex gap-3">
-                        <button className="flex-1 flex items-center justify-center gap-2 bg-blue-500 text-white py-2.5 rounded-lg hover:bg-blue-600 transition-colors">
-                          <svg
-                            className="w-5 h-5"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                          </svg>
-                          Facebook
-                        </button>
-                        <button className="flex-1 flex items-center justify-center gap-2 bg-blue-400 text-white py-2.5 rounded-lg hover:bg-blue-500 transition-colors">
-                          <svg
-                            className="w-5 h-5"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.213c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
-                          </svg>
-                          Twitter
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          // Events List View
-          <div>
-            {/* Results Count */}
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Discover Events
-                </h1>
-                <p className="text-gray-600">
-                  {filteredEvents.length}{" "}
-                  {filteredEvents.length === 1
-                    ? "event"
-                    : "events"}{" "}
-                  found
-                </p>
-              </div>
-              <div className="text-sm text-gray-600">
-                Showing{" "}
-                {Math.min(
-                  filteredEvents.length,
-                  12
-                )}{" "}
-                of {filteredEvents.length}
-              </div>
-            </div>
-
-            {/* Events Grid/List */}
-            {filteredEvents.length === 0 ? (
-              <div className="text-center py-20 bg-white rounded-2xl border border-gray-200">
-                <div className="inline-flex p-4 bg-gray-100 rounded-2xl mb-6">
-                  <Calendar
-                    size={48}
-                    className="text-gray-400"
-                  />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  No events found
-                </h3>
-                <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                  Try adjusting your search
-                  filters or check back later for
-                  new events.
-                </p>
-                <button
-                  onClick={() => {
-                    setSearchTerm("");
-                    setFilterCategory("all");
-                    setFilterDate("all");
-                  }}
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
-                >
-                  <Search size={20} />
-                  Clear All Filters
-                </button>
-              </div>
-            ) : (
-              <>
-                <div
-                  className={`gap-6 ${layoutMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "flex flex-col"}`}
-                >
-                  {filteredEvents
-                    .slice(0, 12)
-                    .map((event) => (
-                      <div
-                        key={event._id}
-                        className={`bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl hover:border-blue-200 transition-all duration-500 ${
-                          layoutMode === "list"
-                            ? "flex"
-                            : ""
-                        }`}
-                      >
-                        {/* Event Image */}
-                        <div
-                          className={`relative ${layoutMode === "list" ? "w-48 flex-shrink-0" : "h-48"}`}
-                        >
-                          {event.files &&
-                          event.files.length >
-                            0 ? (
-                            <Image
-                              src={
-                                event.files[0].url
-                              }
-                              alt={event.title}
-                              fill
-                              className="object-cover"
-                            />
-                          ) : (
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                              <Calendar
-                                size={48}
-                                className="text-white/30"
-                              />
-                            </div>
-                          )}
-
-                          {/* Category Badge */}
-                          <div className="absolute top-4 left-4">
-                            <span
-                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${getCategoryColor(event.category)}`}
-                            >
-                              {getCategoryIcon(
-                                event.category
-                              )}
-                              {event.category}
-                            </span>
-                          </div>
-
-                          {/* Featured Badge */}
-                          {event.isFeatured && (
-                            <div className="absolute top-4 right-4">
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold shadow-lg">
-                                <Star size={12} />
-                                Featured
-                              </span>
-                            </div>
-                          )}
-
-                          {/* Date Badge */}
-                          <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg">
-                            <div className="text-sm font-bold text-gray-900">
-                              {formatDateDisplay(
-                                event.date
-                              )}
-                            </div>
-                            <div className="text-xs text-gray-600">
-                              {formatTimeDisplay(
-                                event.date
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Event Content */}
-                        <div
-                          className={`p-6 ${layoutMode === "list" ? "flex-1" : ""}`}
-                        >
-                          <div className="flex justify-between items-start mb-4">
-                            <div>
-                              <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
-                                {event.title}
-                              </h3>
-                              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                                {
-                                  event.description
-                                }
-                              </p>
-                            </div>
-                            {layoutMode ===
-                              "list" && (
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() =>
-                                    handleBookmarkToggle(
-                                      event._id
-                                    )
-                                  }
-                                  className={`p-2 rounded-lg transition-colors ${
-                                    bookmarkedEvents.includes(
-                                      event._id
-                                    )
-                                      ? "text-red-600 bg-red-50 hover:bg-red-100"
-                                      : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                                  }`}
-                                >
-                                  <Bookmark
-                                    size={18}
-                                    fill={
-                                      bookmarkedEvents.includes(
-                                        event._id
-                                      )
-                                        ? "currentColor"
-                                        : "none"
-                                    }
-                                  />
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setSelectedEvent(
-                                      event
-                                    );
-                                    setViewMode(
-                                      "details"
-                                    );
-                                  }}
-                                  className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                >
-                                  <Eye
-                                    size={18}
-                                  />
-                                </button>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Details Grid */}
-                          <div className="grid grid-cols-2 gap-4 mb-6">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-blue-50 rounded-lg">
-                                <MapPin
-                                  size={16}
-                                  className="text-blue-600"
-                                />
-                              </div>
-                              <div>
-                                <p className="text-xs text-gray-500">
-                                  Location
-                                </p>
-                                <p className="text-sm font-medium text-gray-900 line-clamp-1">
-                                  {event.location}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-green-50 rounded-lg">
-                                <Users
-                                  size={16}
-                                  className="text-green-600"
-                                />
-                              </div>
-                              <div>
-                                <p className="text-xs text-gray-500">
-                                  Capacity
-                                </p>
-                                <p className="text-sm font-medium text-gray-900">
-                                  {
-                                    event.maxParticipants
-                                  }
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Action Buttons */}
-                          <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                            <div className="flex items-center gap-3">
-                              <button
-                                onClick={() => {
-                                  setSelectedEvent(
-                                    event
-                                  );
-                                  setViewMode(
-                                    "details"
-                                  );
-                                }}
-                                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium hover:underline"
-                              >
-                                <Eye size={16} />
-                                View Details
-                              </button>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() =>
-                                  handleBookmarkToggle(
-                                    event._id
-                                  )
-                                }
-                                className={`p-2 rounded-lg transition-colors ${
-                                  bookmarkedEvents.includes(
-                                    event._id
-                                  )
-                                    ? "text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                                }`}
-                                title={
-                                  bookmarkedEvents.includes(
-                                    event._id
-                                  )
-                                    ? "Remove bookmark"
-                                    : "Save event"
-                                }
-                              >
-                                <Bookmark
-                                  size={18}
-                                  fill={
-                                    bookmarkedEvents.includes(
-                                      event._id
-                                    )
-                                      ? "currentColor"
-                                      : "none"
-                                  }
-                                />
-                              </button>
-                              <button
-                                onClick={() =>
-                                  handleLikeToggle(
-                                    event._id
-                                  )
-                                }
-                                className={`p-2 rounded-lg transition-colors ${
-                                  likedEvents.includes(
-                                    event._id
-                                  )
-                                    ? "text-pink-600 hover:text-pink-700 hover:bg-pink-50"
-                                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                                }`}
-                                title={
-                                  likedEvents.includes(
-                                    event._id
-                                  )
-                                    ? "Unlike"
-                                    : "Like"
-                                }
-                              >
-                                <Heart
-                                  size={18}
-                                  fill={
-                                    likedEvents.includes(
-                                      event._id
-                                    )
-                                      ? "currentColor"
-                                      : "none"
-                                  }
-                                />
-                              </button>
-                              <button
-                                onClick={() =>
-                                  handleShare(
-                                    event
-                                  )
-                                }
-                                className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                title="Share"
-                              >
-                                <Share
-                                  size={18}
-                                />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-
-                {/* Pagination */}
-                {filteredEvents.length > 12 && (
-                  <div className="flex justify-center items-center gap-4 mt-10">
-                    <button className="flex items-center gap-2 px-5 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                      <ChevronLeft size={20} />
-                      Previous
-                    </button>
-
-                    <div className="flex items-center gap-2">
-                      {[1, 2, 3].map((page) => (
-                        <button
-                          key={page}
-                          className={`w-12 h-12 rounded-xl transition-all duration-300 ${
-                            page === 1
-                              ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
-                              : "border border-gray-300 hover:bg-gray-50"
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      ))}
-                      <span className="text-gray-400">
-                        ...
-                      </span>
-                      <button className="w-12 h-12 rounded-xl border border-gray-300 hover:bg-gray-50 transition-colors">
-                        5
-                      </button>
-                    </div>
-
-                    <button className="flex items-center gap-2 px-5 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
-                      Next
-                      <ChevronRight size={20} />
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
-                  <Calendar className="h-6 w-6 text-white" />
-                </div>
-                <span className="text-xl font-bold text-gray-900">
-                  EventHub
-                </span>
-              </div>
-              <p className="text-gray-600">
-                Discover and join amazing events
-                in your community.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-4">
-                Categories
-              </h4>
-              <ul className="space-y-2">
-                {categories
-                  .slice(1, 6)
-                  .map((cat) => (
-                    <li key={cat}>
-                      <button
-                        onClick={() =>
-                          setFilterCategory(cat)
-                        }
-                        className="text-gray-600 hover:text-blue-600 transition-colors"
-                      >
-                        {cat}
-                      </button>
+                        {link}
+                      </Link>
                     </li>
                   ))}
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-4">
-                Quick Links
-              </h4>
-              <ul className="space-y-2">
-                <li>
-                  <Link
-                    href="/about"
-                    className="text-gray-600 hover:text-blue-600 transition-colors"
-                  >
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/contact"
-                    className="text-gray-600 hover:text-blue-600 transition-colors"
-                  >
-                    Contact
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/faq"
-                    className="text-gray-600 hover:text-blue-600 transition-colors"
-                  >
-                    FAQ
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/privacy"
-                    className="text-gray-600 hover:text-blue-600 transition-colors"
-                  >
-                    Privacy Policy
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-4">
-                Follow Us
-              </h4>
-              <div className="flex space-x-4">
-                <a
-                  href="#"
-                  className="text-gray-600 hover:text-blue-600 transition-colors"
-                >
-                  Facebook
-                </a>
-                <a
-                  href="#"
-                  className="text-gray-600 hover:text-blue-600 transition-colors"
-                >
-                  Twitter
-                </a>
-                <a
-                  href="#"
-                  className="text-gray-600 hover:text-blue-600 transition-colors"
-                >
-                  Instagram
-                </a>
+                </ul>
               </div>
-            </div>
+            ))}
           </div>
 
-          <div className="border-t border-gray-200 pt-8 text-center">
-            <p className="text-gray-600">
-              © {new Date().getFullYear()}{" "}
-              EventHub. All rights reserved.
+          <div className="border-t border-gray-800 pt-8 text-center">
+            <p className="text-gray-400 text-sm">
+              © {new Date().getFullYear()} Nutii
+              Dhaabbati Gurmuu Tola Oltummaa.
+              Hundumtuu mirga ofii isaati.
+            </p>
+            <p className="text-gray-500 text-xs mt-2 italic">
+              "Nami maqaa isaa xureessitan
+              dhaloota ijjeesa waan jirtanuuf
+              dhiifama gaafanna"
             </p>
           </div>
         </div>
       </footer>
 
-      {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 px-4">
-        <div className="grid grid-cols-5">
-          {tabs.slice(0, 5).map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-col items-center justify-center p-2 rounded-lg transition-colors ${
-                activeTab === tab.id
-                  ? "text-blue-600 bg-blue-50"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
+      {/* Login Modal */}
+      <AnimatePresence>
+        {showLoginModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-white rounded-2xl shadow-2xl max-w-md w-full"
             >
-              {tab.icon}
-              <span className="text-xs mt-1">
-                {tab.label}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
+              <div className="p-8">
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">
+                      Seeni
+                    </h3>
+                    <p className="text-gray-600">
+                      Account keessan seenaa
+                    </p>
+                  </div>
+                  <button
+                    onClick={() =>
+                      setShowLoginModal(false)
+                    }
+                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <form
+                  onSubmit={handleLogin}
+                  className="space-y-6"
+                >
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) =>
+                        setEmail(e.target.value)
+                      }
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      placeholder="email@example.com"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={
+                          showPassword
+                            ? "text"
+                            : "password"
+                        }
+                        value={password}
+                        onChange={(e) =>
+                          setPassword(
+                            e.target.value
+                          )
+                        }
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all pr-12"
+                        placeholder="••••••••"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowPassword(
+                            !showPassword
+                          )
+                        }
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                  >
+                    Seeni
+                  </button>
+
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowLoginModal(false);
+                        setShowRegisterModal(
+                          true
+                        );
+                      }}
+                      className="text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      Account hin qabduu? Galmaa'i
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Register Modal */}
+      <AnimatePresence>
+        {showRegisterModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-white rounded-2xl shadow-2xl max-w-md w-full"
+            >
+              <div className="p-8">
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">
+                      Galmaa'i
+                    </h3>
+                    <p className="text-gray-600">
+                      Account haaraa uumaa
+                    </p>
+                  </div>
+                  <button
+                    onClick={() =>
+                      setShowRegisterModal(false)
+                    }
+                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <form
+                  onSubmit={handleRegister}
+                  className="space-y-6"
+                >
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Maqaa
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="Maqaa"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Maqaa Abbaa
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="Maqaa Abbaa"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) =>
+                        setEmail(e.target.value)
+                      }
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      placeholder="email@example.com"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={
+                          showPassword
+                            ? "text"
+                            : "password"
+                        }
+                        value={password}
+                        onChange={(e) =>
+                          setPassword(
+                            e.target.value
+                          )
+                        }
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all pr-12"
+                        placeholder="••••••••"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowPassword(
+                            !showPassword
+                          )
+                        }
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                  >
+                    Galmaa'i
+                  </button>
+
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowRegisterModal(
+                          false
+                        );
+                        setShowLoginModal(true);
+                      }}
+                      className="text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      Account qabduu? Seeni
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Scroll to Top Button */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            onClick={scrollToTop}
+            className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-blue-600 to-green-600 text-white rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 z-50 flex items-center justify-center hover:scale-110"
+          >
+            <ChevronUp className="w-6 h-6" />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

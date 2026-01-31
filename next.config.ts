@@ -19,11 +19,38 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Add Unsplash domains
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+      // Add any other domains you might use
+      {
+        protocol: 'https',
+        hostname: '**.githubusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.googleusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
     // Allow unoptimized images as fallback
-    unoptimized: false,
+    unoptimized: true,
     // Enable CORS for images
     dangerouslyAllowSVG: true,
+    // Optional: Add content security policy
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 };
