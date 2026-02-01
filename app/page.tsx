@@ -125,42 +125,52 @@ import {
   Mountain as MountainIcon,
   Trees as TreesIcon,
   Flower as FlowerIcon,
+  LogOut,
+  UserCircle,
 } from "lucide-react";
 import {
   motion,
   AnimatePresence,
 } from "framer-motion";
+import { useEvents } from "@/lib/hooks/useEvents";
+import { EventData } from "@/lib/types/event";
+import { useAuthStore } from "@/lib/store/auth.store";
+import Image from "next/image";
 
 // Enhanced content data
 const heroData = {
-  title: "Nutii Dhaabbati Gurmuu Tola Oltummaa",
-  subtitle: "Abbooti Muldhataa Dammassitu",
+  title:
+    "Empowering Communities Through Volunteerism",
+  subtitle:
+    "Building a Stronger and More Inclusive Society",
   description:
-    "Woggaa saddeen darbaan keessatti dhaloota kana gorsaa ture. Baroota 2014 hanga ammatti dhaloota barsiisuu, qotee bulaan, horiissee bulan, hojjataan mootummaa fi kkf kaayyoo isaanirratti dammaqanii socho'an.",
+    "Nutii Organization is dedicated to empowering youth and communities through training, guidance, and impactful volunteer programs that create lasting social change.",
   cta: {
-    primary: "Makkana Keessatti Hirmaadhaa",
-    secondary: "Waa'ee Keenya Beekuuf",
+    primary: "Join as a Volunteer",
+    secondary: "Learn More",
   },
   stats: [
     {
+      icon: <Users className="w-6 h-6" />,
       value: "10+",
-      label: "Woggaa Oolcha",
-      icon: <CalendarDays className="w-5 h-5" />,
+      label: "Years of Service",
     },
     {
-      value: "5000+",
-      label: "Dhaloota Gorsame",
-      icon: <Users className="w-5 h-5" />,
+      icon: (
+        <HeartHandshake className="w-6 h-6" />
+      ),
+      value: "5,000+",
+      label: "Youth Mentored",
     },
     {
-      value: "100+",
-      label: "Leenjii Addaa",
-      icon: <BookOpen className="w-5 h-5" />,
+      icon: <GraduationCap className="w-6 h-6" />,
+      value: "50+",
+      label: "Special Trainings",
     },
     {
-      value: "All",
-      label: "Magaalaa Oromiyaa",
-      icon: <MapPin className="w-5 h-5" />,
+      icon: <Globe className="w-6 h-6" />,
+      value: "All Regions",
+      label: "Nationwide Reach",
     },
   ],
 };
@@ -217,68 +227,6 @@ const coreValues = [
   },
 ];
 
-// Programs
-const programs = [
-  {
-    title: "Leenjii Barataa",
-    description:
-      "Barataan barnootaa fi kaayyoo qabachuuf leenjii addaa kenna. Baroota 10 ol oolchaa ture.",
-    icon: <Brain className="w-10 h-10" />,
-    stats: "10,000+ Students",
-    color: "bg-blue-500/10",
-    duration: "12 Months",
-    features: [
-      "Online Courses",
-      "Mentorship",
-      "Career Guidance",
-    ],
-  },
-  {
-    title: "Horsiisaa Qotee Bulaa",
-    description:
-      "Qotee bulaan, horsiissee bulan hundaaf gargaarsa qabatamaa fi leenjii kenna.",
-    icon: (
-      <HeartHandshake className="w-10 h-10" />
-    ),
-    stats: "5,000+ Helped",
-    color: "bg-green-500/10",
-    duration: "Ongoing",
-    features: [
-      "Financial Aid",
-      "Counseling",
-      "Skill Training",
-    ],
-  },
-  {
-    title: "Hojjataa Mootummaa",
-    description:
-      "Hojjataan mootummaa waliin hojjachuun dhalootaf gargaarsa sirnaa fi malaawwan kenna.",
-    icon: <AwardIcon className="w-10 h-10" />,
-    stats: "50+ Partners",
-    color: "bg-purple-500/10",
-    duration: "Continuous",
-    features: [
-      "Government Partnerships",
-      "Policy Advocacy",
-      "Community Programs",
-    ],
-  },
-  {
-    title: "Oltummaa fi Wal-simatu",
-    description:
-      "Nama amantaa fi gosaan nama gargar hin baanyee. Oromiyaa keessatti hunda wal-simachuuf.",
-    icon: <Globe className="w-10 h-10" />,
-    stats: "All Regions",
-    color: "bg-amber-500/10",
-    duration: "Year-round",
-    features: [
-      "Cultural Events",
-      "Interfaith Dialogue",
-      "Community Building",
-    ],
-  },
-];
-
 // Success Stories
 const successStories = [
   {
@@ -320,58 +268,6 @@ const successStories = [
     year: "2021",
     achievement: "Education",
     icon: <GraduationCap className="w-6 h-6" />,
-  },
-];
-
-// Upcoming Events
-const upcomingEvents = [
-  {
-    id: 1,
-    title: "Leenjii Tech for Youth",
-    date: "December 15, 2024",
-    time: "9:00 AM - 4:00 PM",
-    location: "Addis Ababa",
-    description:
-      "Dhalootaaf leenjii technology fi programming. Barataan university fi high school hundaaf.",
-    seats: "150/200",
-    category: "Technology",
-    price: "Free",
-  },
-  {
-    id: 2,
-    title: "Wal-gahii Oltummaa",
-    date: "December 20, 2024",
-    time: "10:00 AM - 2:00 PM",
-    location: "Jimma",
-    description:
-      "Gosoota, amantoota fi hawaasa hundaa wal-simachuuf wal-gahii guddaa.",
-    seats: "300/500",
-    category: "Community",
-    price: "Free",
-  },
-  {
-    id: 3,
-    title: "Career Fair 2024",
-    date: "January 10, 2025",
-    time: "8:00 AM - 6:00 PM",
-    location: "Adama",
-    description:
-      "Dhalootaaf iddoo hojii fi internship argachuuf karriira faayya.",
-    seats: "50/100",
-    category: "Business",
-    price: "$10",
-  },
-  {
-    id: 4,
-    title: "Leadership Training",
-    date: "January 25, 2025",
-    time: "9:00 AM - 5:00 PM",
-    location: "Hawassa",
-    description:
-      "Dhalootaaf leenjii leadership fi management qabatamaa.",
-    seats: "75/100",
-    category: "Education",
-    price: "$25",
   },
 ];
 
@@ -472,14 +368,6 @@ export default function ComprehensiveHomePage() {
   ] = useState(0);
   const [showScrollTop, setShowScrollTop] =
     useState(false);
-  const [hoveredProgram, setHoveredProgram] =
-    useState<number | null>(null);
-  const [showLoginModal, setShowLoginModal] =
-    useState(false);
-  const [
-    showRegisterModal,
-    setShowRegisterModal,
-  ] = useState(false);
   const [activeFaq, setActiveFaq] = useState<
     number | null
   >(null);
@@ -487,6 +375,62 @@ export default function ComprehensiveHomePage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] =
     useState(false);
+  const [selectedProgram, setSelectedProgram] =
+    useState<EventData | null>(null);
+
+  // Auth state
+  const {
+    user,
+    isAuthenticated,
+    isLoading: authLoading,
+    logout,
+  } = useAuthStore();
+
+  // Events data
+  const {
+    getEvents,
+    loading: eventsLoading,
+    error: eventsError,
+  } = useEvents();
+  const [programs, setPrograms] = useState<
+    EventData[]
+  >([]);
+  const [upcomingEvents, setUpcomingEvents] =
+    useState<EventData[]>([]);
+
+  // Fetch programs and events
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch featured programs
+        const programsResponse = await getEvents({
+          isFeatured: true,
+          limit: 4,
+        });
+        if (programsResponse.events) {
+          setPrograms(programsResponse.events);
+        }
+
+        // Fetch upcoming events
+        const eventsResponse = await getEvents({
+          upcoming: true,
+          limit: 4,
+        });
+        if (eventsResponse.events) {
+          setUpcomingEvents(
+            eventsResponse.events
+          );
+        }
+      } catch (err) {
+        console.error(
+          "Failed to fetch data:",
+          err
+        );
+      }
+    };
+
+    fetchData();
+  }, [getEvents]);
 
   // Handle scroll
   useEffect(() => {
@@ -522,28 +466,35 @@ export default function ComprehensiveHomePage() {
     });
   };
 
-  // Handle login
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success(
-      "Welcome back! Redirecting to dashboard..."
-    );
-    setTimeout(() => {
-      router.push("/dashboard");
-    }, 1500);
-    setShowLoginModal(false);
+  // Handle login redirect
+  const handleLoginRedirect = () => {
+    router.push("/login");
   };
 
-  // Handle register
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success(
-      "Account created successfully! Welcome aboard!"
-    );
-    setTimeout(() => {
-      router.push("/dashboard");
-    }, 1500);
-    setShowRegisterModal(false);
+  // Handle register redirect
+  const handleRegisterRedirect = () => {
+    router.push("/register");
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    logout();
+    toast.success("Logged out successfully!");
+    router.push("/");
+  };
+
+  // Handle dashboard navigation
+  const handleDashboard = () => {
+    if (isAuthenticated && user) {
+      if (
+        user.role === "admin" ||
+        user.role === "superadmin"
+      ) {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/dashboard");
+      }
+    }
   };
 
   // Newsletter subscription
@@ -555,6 +506,37 @@ export default function ComprehensiveHomePage() {
       "Thank you for subscribing! Welcome to our community!"
     );
     setEmail("");
+  };
+
+  // Register for event
+  const handleEventRegister = (
+    eventId: string
+  ) => {
+    if (!isAuthenticated) {
+      toast.error(
+        "Please login to register for events"
+      );
+      handleLoginRedirect();
+      return;
+    }
+    toast.success(
+      "Successfully registered for event!"
+    );
+    // TODO: Implement actual event registration
+  };
+
+  // Format date safely
+  const formatDate = (
+    dateString: string | undefined
+  ) => {
+    if (!dateString) return "Date TBA";
+    try {
+      return new Date(
+        dateString
+      ).toLocaleDateString();
+    } catch (error) {
+      return "Invalid Date";
+    }
   };
 
   return (
@@ -611,10 +593,10 @@ export default function ComprehensiveHomePage() {
               </motion.div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-green-600 to-purple-600 bg-clip-text text-transparent">
-                  Nutii Dhaabbati
+                  Nutii Organization
                 </h1>
                 <p className="text-xs text-gray-500 font-medium">
-                  Gurmuu Tola Oltummaa
+                  Gurmuu Volunteer Association
                 </p>
               </div>
             </Link>
@@ -622,13 +604,11 @@ export default function ComprehensiveHomePage() {
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-1">
               {[
-                "Makkana",
-                "Kaayyoo",
-                "Leenjii",
-                "Oolcha",
-                "Wal-simatu",
-                "Qabsiina",
-                "Events",
+                "Home",
+                "Training",
+                "Services",
+                "Partners",
+                "Projects",
                 "Blog",
               ].map((item) => (
                 <Link
@@ -643,24 +623,58 @@ export default function ComprehensiveHomePage() {
 
             {/* Action Buttons */}
             <div className="flex items-center space-x-3">
-              <button
-                onClick={() =>
-                  setShowLoginModal(true)
-                }
-                className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 text-gray-700 font-medium rounded-xl hover:bg-gray-50/50 transition-all duration-300"
-              >
-                <LogIn className="w-4 h-4" />
-                Seeni
-              </button>
-              <button
-                onClick={() =>
-                  setShowRegisterModal(true)
-                }
-                className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/25 transition-all duration-300"
-              >
-                <UserPlus className="w-4 h-4" />
-                Galmaa'i
-              </button>
+              {isAuthenticated ? (
+                <>
+                  <div className="hidden md:flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        {user?.name?.charAt(0) ||
+                          "U"}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {user?.name}
+                        </p>
+                        <p className="text-xs text-gray-500 capitalize">
+                          {user?.role}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleDashboard}
+                      className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/25 transition-all duration-300"
+                    >
+                      Dashboard
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="px-5 py-2.5 text-gray-700 font-medium rounded-xl hover:bg-gray-50/50 transition-all duration-300 flex items-center gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={handleLoginRedirect}
+                    className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 text-gray-700 font-medium rounded-xl hover:bg-gray-50/50 transition-all duration-300"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    Login
+                  </button>
+                  <button
+                    onClick={
+                      handleRegisterRedirect
+                    }
+                    className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/25 transition-all duration-300"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Register
+                  </button>
+                </>
+              )}
 
               {/* Mobile Menu Button */}
               <button
@@ -695,12 +709,12 @@ export default function ComprehensiveHomePage() {
             >
               <div className="container mx-auto px-4 py-6 space-y-2">
                 {[
-                  "Makkana",
-                  "Kaayyoo",
-                  "Leenjii",
-                  "Oolcha",
-                  "Wal-simatu",
-                  "Qabsiina",
+                  "Home",
+                  "Mission",
+                  "Training",
+                  "Services",
+                  "Partners",
+                  "Projects",
                   "Events",
                   "Blog",
                 ].map((item) => (
@@ -715,25 +729,67 @@ export default function ComprehensiveHomePage() {
                     {item}
                   </Link>
                 ))}
+
                 <div className="pt-4 border-t border-gray-100/50 space-y-3">
-                  <button
-                    onClick={() => {
-                      setShowLoginModal(true);
-                      setMobileMenuOpen(false);
-                    }}
-                    className="block w-full py-3 text-center text-gray-700 font-medium rounded-xl border border-gray-200 hover:bg-gray-50"
-                  >
-                    Seeni
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowRegisterModal(true);
-                      setMobileMenuOpen(false);
-                    }}
-                    className="block w-full py-3 text-center bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-lg"
-                  >
-                    Galmaa'i
-                  </button>
+                  {isAuthenticated ? (
+                    <>
+                      <div className="px-4 py-3 bg-gray-50 rounded-xl">
+                        <p className="font-medium text-gray-900">
+                          {user?.name}
+                        </p>
+                        <p className="text-sm text-gray-500 capitalize">
+                          {user?.role}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          handleDashboard();
+                          setMobileMenuOpen(
+                            false
+                          );
+                        }}
+                        className="block w-full py-3 text-center bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-lg"
+                      >
+                        Dashboard
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setMobileMenuOpen(
+                            false
+                          );
+                        }}
+                        className="block w-full py-3 text-center text-gray-700 font-medium rounded-xl border border-gray-200 hover:bg-gray-50"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => {
+                          handleLoginRedirect();
+                          setMobileMenuOpen(
+                            false
+                          );
+                        }}
+                        className="block w-full py-3 text-center text-gray-700 font-medium rounded-xl border border-gray-200 hover:bg-gray-50"
+                      >
+                        Login
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleRegisterRedirect();
+                          setMobileMenuOpen(
+                            false
+                          );
+                        }}
+                        className="block w-full py-3 text-center bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-lg"
+                      >
+                        Register
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -742,127 +798,155 @@ export default function ComprehensiveHomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 lg:py-32">
-        {/* Background elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-green-50/30 to-purple-50/50" />
-        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-blue-400/10 to-green-400/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-purple-400/10 to-blue-400/10 rounded-full blur-3xl" />
+      <section className="relative overflow-hidden py-28 lg:py-40">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/70 via-green-50/40 to-purple-50/70" />
+
+        {/* Floating glow blobs */}
+        <div className="absolute -top-24 -left-24 w-[28rem] h-[28rem] bg-blue-400/10 rounded-full blur-[120px] animate-[pulse_8s_ease-in-out_infinite]" />
+        <div className="absolute top-1/3 -right-24 w-[30rem] h-[30rem] bg-green-400/10 rounded-full blur-[140px] animate-[pulse_10s_ease-in-out_infinite]" />
+        <div className="absolute -bottom-24 left-1/4 w-[32rem] h-[32rem] bg-purple-400/10 rounded-full blur-[160px] animate-[pulse_12s_ease-in-out_infinite]" />
 
         <div className="container mx-auto px-4 lg:px-8 relative">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              {/* Left Column */}
-              <div>
-                {/* Badge */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-200/50 mb-8 shadow-lg"
-                >
-                  <Sparkle className="w-4 h-4 text-blue-500" />
-                  <span className="text-sm font-semibold text-gray-700">
-                    Woggaa 10 Oolcha
-                  </span>
-                </motion.div>
+          <div className="max-w-5xl mx-auto text-center">
+            {/* Accent Line */}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.8 }}
+              className="mx-auto mb-10 h-1 w-24 rounded-full bg-gradient-to-r from-blue-600 via-green-600 to-purple-600"
+            />
 
-                {/* Main Title */}
-                <motion.h1
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="text-5xl lg:text-6xl font-bold mb-6"
-                >
-                  <span className="bg-gradient-to-r from-blue-600 via-green-600 to-purple-600 bg-clip-text text-transparent">
-                    {heroData.title}
-                  </span>
-                </motion.h1>
+            {/* Main Title */}
+            <motion.h1
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-5xl lg:text-7xl font-extrabold mb-8 leading-tight tracking-tight"
+            >
+              <span className="bg-gradient-to-r from-blue-600 via-green-600 to-purple-600 bg-clip-text text-transparent drop-shadow-md">
+                Empowering Communities
+              </span>
+              <br />
+              <span className="text-gray-900">
+                Through Volunteerism
+              </span>
+            </motion.h1>
 
-                {/* Subtitle */}
-                <motion.h2
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-2xl lg:text-3xl text-gray-800 mb-8 font-semibold"
-                >
-                  {heroData.subtitle}
-                </motion.h2>
+            {/* Subtitle */}
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-2xl lg:text-3xl text-gray-700 mb-10 font-semibold"
+            >
+              Building a Stronger and More
+              Inclusive Society
+            </motion.h2>
 
-                {/* Description */}
-                <motion.p
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-lg text-gray-600 mb-8 leading-relaxed"
-                >
-                  {heroData.description}
-                </motion.p>
+            {/* Description */}
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-lg lg:text-xl text-gray-600 mb-14 leading-relaxed max-w-4xl mx-auto"
+            >
+              Nutii Organization is dedicated to
+              empowering youth and communities
+              through training, guidance, and
+              impactful volunteer programs that
+              create lasting social change.
+            </motion.p>
 
-                {/* CTA Buttons */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="flex flex-wrap gap-4"
-                >
-                  <button
-                    onClick={() =>
-                      setShowRegisterModal(true)
-                    }
-                    className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 flex items-center gap-3"
+            {/* Stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12 max-w-4xl mx-auto"
+            >
+              {heroData.stats.map(
+                (stat, index) => (
+                  <div
+                    key={index}
+                    className="text-center"
                   >
-                    {heroData.cta.primary}
+                    <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                      {stat.value}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {stat.label}
+                    </div>
+                  </div>
+                )
+              )}
+            </motion.div>
+
+            {/* CTA Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="flex flex-wrap justify-center gap-8"
+            >
+              {isAuthenticated ? (
+                <button
+                  onClick={handleDashboard}
+                  className="group relative px-10 py-4 rounded-2xl font-semibold text-white
+            bg-gradient-to-r from-blue-600 to-green-600
+            hover:shadow-2xl hover:shadow-blue-500/40
+            transition-all duration-300 overflow-hidden"
+                >
+                  <span className="relative z-10 flex items-center gap-3">
+                    Go to Dashboard
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
-                  </button>
-                  <button
-                    onClick={() =>
-                      document
-                        .getElementById("about")
-                        ?.scrollIntoView({
-                          behavior: "smooth",
-                        })
-                    }
-                    className="px-8 py-4 bg-white text-gray-700 font-semibold rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
-                  >
-                    {heroData.cta.secondary}
-                  </button>
-                </motion.div>
-              </div>
+                  </span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-green-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleRegisterRedirect}
+                  className="group relative px-10 py-4 rounded-2xl font-semibold text-white
+            bg-gradient-to-r from-blue-600 to-green-600
+            hover:shadow-2xl hover:shadow-blue-500/40
+            transition-all duration-300 overflow-hidden"
+                >
+                  <span className="relative z-10 flex items-center gap-3">
+                    Join as a Volunteer
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                  </span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-green-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              )}
 
-              {/* Right Column - Stats */}
-              <div className="grid grid-cols-2 gap-6">
-                {heroData.stats.map(
-                  (stat, index) => (
-                    <motion.div
-                      key={stat.label}
-                      initial={{
-                        opacity: 0,
-                        y: 30,
-                      }}
-                      animate={{
-                        opacity: 1,
-                        y: 0,
-                      }}
-                      transition={{
-                        delay: 0.5 + index * 0.1,
-                      }}
-                      className="bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-6 hover:shadow-xl hover:border-blue-200/50 transition-all duration-300"
-                    >
-                      <div className="inline-flex p-3 bg-gradient-to-br from-blue-100 to-green-100 rounded-xl mb-4">
-                        <div className="text-blue-600">
-                          {stat.icon}
-                        </div>
-                      </div>
-                      <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent mb-2">
-                        {stat.value}
-                      </div>
-                      <div className="text-gray-700 font-medium">
-                        {stat.label}
-                      </div>
-                    </motion.div>
-                  )
-                )}
+              <button
+                onClick={() =>
+                  document
+                    .getElementById("about")
+                    ?.scrollIntoView({
+                      behavior: "smooth",
+                    })
+                }
+                className="px-10 py-4 rounded-2xl font-semibold text-gray-800
+            bg-white/80 backdrop-blur-md border border-gray-200
+            hover:bg-white hover:border-blue-300 hover:shadow-xl transition-all duration-300"
+              >
+                Learn More
+              </button>
+            </motion.div>
+
+            {/* Scroll Hint */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="mt-16 flex justify-center"
+            >
+              <div className="flex flex-col items-center text-gray-400 text-sm">
+                <span>Scroll</span>
+                <div className="mt-2 h-6 w-0.5 bg-gray-300 rounded-full animate-bounce" />
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -870,36 +954,45 @@ export default function ComprehensiveHomePage() {
       {/* About Section */}
       <section
         id="about"
-        className="py-20 bg-white"
+        className="relative py-24 lg:py-32 bg-white overflow-hidden"
       >
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
+        {/* Soft background accents */}
+        <div className="absolute -top-32 -left-32 w-[28rem] h-[28rem] bg-blue-100/40 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 -right-32 w-[30rem] h-[30rem] bg-green-100/40 rounded-full blur-[140px]" />
+
+        <div className="container mx-auto px-4 lg:px-8 relative">
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto mb-20">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-green-50 rounded-full mb-6"
+              className="inline-flex items-center gap-2 px-5 py-2.5
+          bg-gradient-to-r from-blue-50 to-green-50
+          rounded-full mb-8 shadow-sm"
             >
               <Info className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-semibold text-blue-700">
+              <span className="text-sm font-semibold text-blue-700 tracking-wide">
                 Waa'ee Keenya
               </span>
             </motion.div>
+
             <motion.h2
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
+              className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-8"
             >
               Maaliif Nuti?
             </motion.h2>
+
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="text-lg text-gray-600"
+              className="text-lg lg:text-xl text-gray-600 leading-relaxed"
             >
               Woggaa saddeen darbaan dhaloota kana
               keessatti baroota 2014 hanga ammatti
@@ -909,7 +1002,8 @@ export default function ComprehensiveHomePage() {
             </motion.p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          {/* Core Values */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {coreValues.map((value, index) => (
               <motion.div
                 key={value.title}
@@ -917,33 +1011,55 @@ export default function ComprehensiveHomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{
-                  delay: index * 0.1,
+                  delay: index * 0.12,
                 }}
                 className="group relative"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-50 rounded-3xl border border-gray-200/50 group-hover:border-blue-200/50 transition-all duration-500" />
-                <div className="relative p-8">
+                {/* Card Glow */}
+                <div
+                  className="absolute inset-0 rounded-3xl bg-gradient-to-br
+              from-blue-100/20 via-white to-green-100/20
+              opacity-0 group-hover:opacity-100
+              blur-xl transition-opacity duration-500"
+                />
+
+                {/* Card */}
+                <div
+                  className="relative h-full p-8 rounded-3xl
+              bg-white/80 backdrop-blur-sm border border-gray-200/60
+              shadow-sm group-hover:shadow-2xl group-hover:border-blue-200/60
+              transition-all duration-500"
+                >
+                  {/* Icon */}
                   <div
-                    className={`inline-flex p-4 bg-gradient-to-br ${value.color} rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300`}
+                    className={`inline-flex p-4 bg-gradient-to-br ${value.color}
+                rounded-2xl mb-6 group-hover:scale-110 group-hover:rotate-3
+                transition-transform duration-300`}
                   >
                     <div className="text-white">
                       {value.icon}
                     </div>
                   </div>
+
+                  {/* Title */}
                   <h3 className="text-xl font-bold text-gray-900 mb-4">
                     {value.title}
                   </h3>
-                  <p className="text-gray-600 leading-relaxed mb-4">
+
+                  {/* Description */}
+                  <p className="text-gray-600 leading-relaxed mb-5">
                     {value.description}
                   </p>
-                  <ul className="space-y-2">
+
+                  {/* Benefits */}
+                  <ul className="space-y-3">
                     {value.benefits.map(
                       (benefit, i) => (
                         <li
                           key={i}
-                          className="flex items-center gap-2 text-sm text-gray-500"
+                          className="flex items-start gap-2 text-sm text-gray-600"
                         >
-                          <Check className="w-4 h-4 text-green-500" />
+                          <Check className="w-4 h-4 mt-0.5 text-green-500 shrink-0" />
                           {benefit}
                         </li>
                       )
@@ -959,114 +1075,104 @@ export default function ComprehensiveHomePage() {
       {/* Programs Section */}
       <section
         id="programs"
-        className="py-20 bg-gradient-to-b from-gray-50 to-white"
+        className="py-28 bg-gradient-to-b from-gray-50 to-white"
       >
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto mb-24">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-50 to-blue-50 rounded-full mb-6"
+              className="inline-flex items-center gap-3 px-5 py-2 bg-gradient-to-r from-green-50 to-blue-50 rounded-full mb-6 shadow-sm"
             >
-              <BookOpen className="w-4 h-4 text-green-600" />
-              <span className="text-sm font-semibold text-green-700">
+              <BookOpen className="w-5 h-5 text-green-600" />
+              <span className="text-sm font-semibold text-green-700 uppercase tracking-wider">
                 Leenjii fi Gorsa
               </span>
             </motion.div>
+
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
+              className="text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight"
             >
-              Leenjii Addaa fi Gorsa
+              Leenjii Addaa{" "}
+              <span className="bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent">
+                fi Gorsa
+              </span>
             </motion.h2>
+
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-lg text-gray-600"
+              className="text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed"
             >
               Baroota 10 ol oolchaa ture. Dhaloota
               kana keessatti leenjii addaa fi
               gorsaa kennuu keenya irra
               deddeebi'anii socho'aa jirra.
+              Jijjiirama ifaa fi milkaa’ina dhala
+              namaa fiduuf.
             </motion.p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          {/* Programs Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
             {programs.map((program, index) => (
               <motion.div
-                key={program.title}
+                key={program._id}
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -10 }}
+                whileHover={{
+                  y: -8,
+                  scale: 1.03,
+                }}
                 viewport={{ once: true }}
                 transition={{
                   delay: index * 0.1,
                 }}
-                onMouseEnter={() =>
-                  setHoveredProgram(index)
+                onClick={() =>
+                  setSelectedProgram(program)
                 }
-                onMouseLeave={() =>
-                  setHoveredProgram(null)
-                }
-                className="relative group"
+                className="relative cursor-pointer group"
               >
-                <div className="absolute inset-0 bg-white rounded-3xl border border-gray-200/50 shadow-lg group-hover:shadow-2xl group-hover:border-blue-300/50 transition-all duration-500" />
+                <div className="absolute inset-0 bg-white rounded-3xl border border-gray-200 shadow-lg group-hover:shadow-2xl group-hover:border-blue-300 transition-all duration-500" />
+
                 <div className="relative p-8 h-full flex flex-col">
-                  <div
-                    className={`inline-flex p-4 ${program.color} rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300 self-start`}
-                  >
-                    {program.icon}
+                  <div className="inline-flex p-5 bg-gradient-to-br from-blue-500 to-green-400 rounded-2xl mb-6 shadow-md text-white text-xl">
+                    <BookOpen className="w-6 h-6" />
                   </div>
-                  <div className="mb-4">
-                    <div className="text-sm font-semibold text-gray-500 mb-2">
-                      {program.duration}
+
+                  <div className="mb-6 flex-1">
+                    <div className="text-sm font-semibold text-gray-500 mb-2 tracking-wide uppercase">
+                      {formatDate(program.date)} -{" "}
+                      {program.location || "TBA"}
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">
+
+                    <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-3 leading-snug group-hover:text-blue-600 transition-colors">
                       {program.title}
                     </h3>
-                    <p className="text-gray-600 leading-relaxed mb-6">
-                      {program.description}
+
+                    <p className="text-gray-600 text-sm lg:text-base leading-relaxed">
+                      {program.description?.substring(
+                        0,
+                        120
+                      ) ||
+                        "No description available"}
+                      ...
                     </p>
                   </div>
 
-                  <div className="mt-auto">
-                    <div className="text-lg font-bold text-gray-900 mb-4">
-                      {program.stats}
-                    </div>
-                    <div className="space-y-2">
-                      {program.features.map(
-                        (feature, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center gap-2 text-sm text-gray-500"
-                          >
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                            {feature}
-                          </div>
-                        )
-                      )}
-                    </div>
+                  <div className="flex items-center justify-between mt-auto">
+                    <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-semibold rounded-full tracking-wide">
+                      {program.category ||
+                        "General"}
+                    </span>
+                    <ChevronRight className="w-5 h-5 text-blue-500 group-hover:translate-x-2 transition-transform" />
                   </div>
-
-                  {hoveredProgram === index && (
-                    <motion.div
-                      initial={{
-                        opacity: 0,
-                        scale: 0.8,
-                      }}
-                      animate={{
-                        opacity: 1,
-                        scale: 1,
-                      }}
-                      className="absolute bottom-6 right-6"
-                    >
-                      <ChevronRight className="w-6 h-6 text-blue-500" />
-                    </motion.div>
-                  )}
                 </div>
               </motion.div>
             ))}
@@ -1075,42 +1181,47 @@ export default function ComprehensiveHomePage() {
       </section>
 
       {/* Success Stories */}
-      <section className="py-20 bg-white">
+      <section className="py-28 bg-white">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="text-center max-w-3xl mx-auto mb-24">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-full mb-6"
+              className="inline-flex items-center gap-3 px-5 py-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-full mb-6 shadow-sm"
             >
-              <Trophy className="w-4 h-4 text-amber-600" />
-              <span className="text-sm font-semibold text-amber-700">
+              <Trophy className="w-5 h-5 text-amber-600" />
+              <span className="text-sm font-semibold text-amber-700 uppercase tracking-wider">
                 Milkaa'inaa
               </span>
             </motion.div>
+
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
+              className="text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight"
             >
-              Ijoo Dhalootaa
+              Ijoo{" "}
+              <span className="bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
+                Dhalootaa
+              </span>
             </motion.h2>
+
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-lg text-gray-600"
+              className="text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed"
             >
               Dhaloota keenya irra deebi'anii maal
               hojjachaa jiran? Akkaataa leenjii
-              keenyaan jireenya isaanii
-              jijjiirran.
+              keenyaan jireenya isaanii jijjiirran
+              fi milkaa'ina argatan.
             </motion.p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
             {successStories.map(
               (story, index) => (
                 <motion.div
@@ -1124,28 +1235,30 @@ export default function ComprehensiveHomePage() {
                   transition={{
                     delay: index * 0.1,
                   }}
-                  className="group"
+                  className="group cursor-pointer"
                 >
-                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl border border-gray-200/50 p-8 hover:shadow-xl hover:border-blue-200/50 transition-all duration-500 h-full">
+                  <div className="bg-white rounded-3xl border border-gray-200 shadow-lg p-8 hover:shadow-2xl transition-all duration-500 h-full flex flex-col">
                     <div className="flex items-center justify-between mb-6">
-                      <div className="p-3 bg-gradient-to-br from-blue-100 to-green-100 rounded-xl">
+                      <div className="p-4 bg-gradient-to-br from-blue-100 to-green-100 rounded-2xl shadow-sm">
                         {story.icon}
                       </div>
-                      <span className="text-sm font-semibold text-gray-500">
+                      <span className="text-sm font-semibold text-gray-500 tracking-wide">
                         {story.year}
                       </span>
                     </div>
-                    <div className="mb-6">
-                      <div className="text-lg font-bold text-gray-900 mb-1">
+
+                    <div className="mb-6 flex-1">
+                      <div className="text-lg lg:text-xl font-bold text-gray-900 mb-1 leading-snug">
                         {story.name}
                       </div>
-                      <div className="text-sm text-gray-600 mb-4">
+                      <div className="text-sm text-gray-600 mb-3">
                         {story.role}
                       </div>
-                      <p className="text-gray-700 italic">
+                      <p className="text-gray-700 italic text-sm lg:text-base leading-relaxed">
                         "{story.story}"
                       </p>
                     </div>
+
                     <div className="px-4 py-2 bg-gradient-to-r from-blue-50 to-green-50 rounded-full inline-block">
                       <span className="text-sm font-semibold text-blue-700">
                         {story.achievement}
@@ -1159,12 +1272,13 @@ export default function ComprehensiveHomePage() {
         </div>
       </section>
 
-      {/* Upcoming Events */}
+      {/* Upcoming Events Section - FIXED */}
       <section
         id="events"
         className="py-20 bg-gradient-to-b from-gray-50 to-white"
       >
         <div className="container mx-auto px-4 lg:px-8">
+          {/* Section Header */}
           <div className="text-center max-w-3xl mx-auto mb-16">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1177,122 +1291,186 @@ export default function ComprehensiveHomePage() {
                 Oolcha Dhihoo
               </span>
             </motion.div>
+
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
             >
-              Oolcha Dhihoo
-            </motion.h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-12">
-            {upcomingEvents.map(
-              (event, index) => (
-                <motion.div
-                  key={event.id}
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{
-                    opacity: 1,
-                    y: 0,
-                  }}
-                  viewport={{ once: true }}
-                  transition={{
-                    delay: index * 0.1,
-                  }}
-                  className="group"
-                >
-                  <div className="bg-white rounded-3xl border border-gray-200/50 p-6 hover:shadow-xl hover:border-blue-200/50 transition-all duration-500 h-full">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="px-3 py-1 bg-gradient-to-r from-blue-50 to-green-50 rounded-full text-sm font-semibold text-blue-700">
-                        {event.category}
-                      </span>
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                          event.price === "Free"
-                            ? "bg-green-50 text-green-700"
-                            : "bg-amber-50 text-amber-700"
-                        }`}
-                      >
-                        {event.price}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">
-                      {event.title}
-                    </h3>
-                    <p className="text-gray-600 mb-6">
-                      {event.description}
-                    </p>
-
-                    <div className="space-y-3 mb-6">
-                      <div className="flex items-center gap-2 text-gray-500">
-                        <Calendar className="w-4 h-4" />
-                        <span className="text-sm">
-                          {event.date}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-500">
-                        <Clock className="w-4 h-4" />
-                        <span className="text-sm">
-                          {event.time}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-500">
-                        <MapPin className="w-4 h-4" />
-                        <span className="text-sm">
-                          {event.location}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm text-gray-600">
-                        {event.seats} seats
-                      </div>
-                      <button
-                        onClick={() =>
-                          setShowRegisterModal(
-                            true
-                          )
-                        }
-                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-green-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all"
-                      >
-                        Register
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              )
-            )}
-          </div>
-
-          <div className="text-center">
-            <button className="inline-flex items-center gap-2 px-8 py-4 bg-white text-gray-700 font-semibold rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
-              <Calendar className="w-5 h-5" />
-              Oolcha Hundaa Ilaaluuf
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Partners */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center mb-12">
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6"
-            >
-              Hiriyaa fi Waliigaltee
+              Upcoming Events
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-gray-600 max-w-2xl mx-auto"
+              className="text-lg text-gray-600"
+            >
+              Explore our latest events,
+              workshops, and conferences. Don't
+              miss the chance to participate and
+              connect with the community.
+            </motion.p>
+          </div>
+
+          {/* Loading/Error States */}
+          {eventsLoading && (
+            <p className="text-center text-gray-500 text-lg font-medium">
+              Loading events...
+            </p>
+          )}
+          {eventsError && (
+            <p className="text-center text-red-500 text-lg font-medium">
+              Error loading events
+            </p>
+          )}
+
+          {/* Events Grid */}
+          {upcomingEvents.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+              {upcomingEvents.map(
+                (event, index) => (
+                  <motion.div
+                    key={event._id}
+                    initial={{
+                      opacity: 0,
+                      y: 40,
+                    }}
+                    whileInView={{
+                      opacity: 1,
+                      y: 0,
+                    }}
+                    viewport={{ once: true }}
+                    transition={{
+                      delay: index * 0.1,
+                    }}
+                    className="group"
+                  >
+                    <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-200 transition-all hover:shadow-2xl hover:scale-105 duration-500 h-full flex flex-col">
+                      {/* Image */}
+                      <div className="h-40 w-full bg-gray-100 flex items-center justify-center">
+                        {event.files &&
+                        event.files.length > 0 ? (
+                          <div className="relative w-full h-full">
+                            <Image
+                              src={
+                                event.files[0].url
+                              }
+                              alt={event.title}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <Calendar className="w-12 h-12 text-gray-300" />
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="px-3 py-1 rounded-full text-sm font-semibold bg-gradient-to-r from-blue-50 to-green-50 text-blue-700">
+                              {event.category ||
+                                "Event"}
+                            </span>
+                            <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-50 text-green-700">
+                              Free
+                            </span>
+                          </div>
+
+                          <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
+                            {event.title}
+                          </h3>
+                          <p className="text-gray-600 text-sm mb-6 line-clamp-3">
+                            {event.description ||
+                              "No description available."}
+                          </p>
+
+                          <div className="space-y-2 mb-4 text-gray-500 text-sm">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4" />
+                              {formatDate(
+                                event.date
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4" />
+                              {event.time ||
+                                "All day"}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-4 h-4" />
+                              {event.location ||
+                                "Location TBA"}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Conditional Button */}
+                        {isAuthenticated ? (
+                          <Link
+                            href={`/events/${event._id}`}
+                            className="mt-auto w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 text-center"
+                          >
+                            View Details
+                          </Link>
+                        ) : (
+                          <Link
+                            href="/login"
+                            className="mt-auto w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 text-center"
+                          >
+                            Login to Register
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              )}
+            </div>
+          ) : (
+            !eventsLoading && (
+              <p className="text-center text-gray-500 text-lg font-medium">
+                No upcoming events at the moment.
+              </p>
+            )
+          )}
+
+          {/* View All Button */}
+          <div className="text-center">
+            <Link
+              href="/events"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-white text-gray-700 font-semibold rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
+            >
+              <Calendar className="w-5 h-5" />
+              View All Events
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Partners Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4 lg:px-8">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4 leading-tight"
+            >
+              Hiriyaa fi{" "}
+              <span className="bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent">
+                Waliigaltee
+              </span>
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-gray-600 max-w-2xl mx-auto text-lg"
             >
               Waliin hojjachuun dhalootaf
               gargaaruuf hiriyaa fi waliigaltee
@@ -1300,26 +1478,21 @@ export default function ComprehensiveHomePage() {
             </motion.p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+          {/* Partners Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8">
             {partners.map((partner, index) => (
               <motion.div
                 key={partner.name}
-                initial={{
-                  opacity: 0,
-                  scale: 0.8,
-                }}
-                whileInView={{
-                  opacity: 1,
-                  scale: 1,
-                }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{
                   delay: index * 0.1,
                 }}
                 className="group"
               >
-                <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-200/50 p-6 hover:shadow-lg hover:border-blue-200/50 transition-all duration-300">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-green-500 rounded-xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 hover:shadow-lg hover:scale-105 transition-transform duration-300 flex flex-col items-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-green-500 rounded-xl flex items-center justify-center text-white text-2xl font-bold mb-4 shadow-sm group-hover:shadow-md transition-shadow duration-300">
                     {partner.logo}
                   </div>
                   <div className="text-center">
@@ -1337,70 +1510,103 @@ export default function ComprehensiveHomePage() {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Testimonials Section */}
       <section
         id="testimonials"
-        className="py-20 bg-gradient-to-b from-white to-gray-50"
+        className="py-24 bg-gradient-to-b from-white to-gray-50"
       >
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto mb-16 relative">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-50 to-pink-50 rounded-full mb-6"
+              className="inline-flex items-center gap-3 px-5 py-2 bg-gradient-to-r from-rose-50 to-pink-50 rounded-full mb-6 shadow-md"
             >
-              <Quote className="w-4 h-4 text-rose-600" />
-              <span className="text-sm font-semibold text-rose-700">
+              <Quote className="w-5 h-5 text-rose-600" />
+              <span className="text-sm font-semibold text-rose-700 tracking-wide">
                 Ijoo fi Madaala
               </span>
             </motion.div>
+
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
+              className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-6 leading-tight"
             >
-              Namootni Maal Jettu
+              Namootni{" "}
+              <span className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent animate-pulse">
+                Maal Jettu
+              </span>
             </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-gray-600 max-w-2xl mx-auto text-lg"
+            >
+              Dhaloota keenya irraa dhugaa fi
+              madaala: namootni maal jedhani fi
+              jireenya isaanii akkamitti
+              jijjiirran.
+            </motion.p>
           </div>
 
+          {/* Testimonial Card */}
           <div className="relative max-w-4xl mx-auto">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTestimonial}
-                initial={{ opacity: 0, x: 100 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                className="bg-gradient-to-br from-white to-gray-50 rounded-3xl border border-gray-200/50 p-8 lg:p-12 shadow-xl"
+                initial={{
+                  opacity: 0,
+                  x: 100,
+                  scale: 0.95,
+                }}
+                animate={{
+                  opacity: 1,
+                  x: 0,
+                  scale: 1,
+                }}
+                exit={{
+                  opacity: 0,
+                  x: -100,
+                  scale: 0.95,
+                }}
+                transition={{ duration: 0.5 }}
+                className="bg-white rounded-3xl border border-gray-200/30 p-8 lg:p-12 shadow-xl hover:shadow-2xl transition-all duration-500"
               >
                 <div className="flex flex-col lg:flex-row items-center gap-8">
-                  <div className="lg:w-1/4">
+                  {/* Avatar */}
+                  <div className="lg:w-1/4 flex justify-center lg:justify-start">
                     <div className="relative">
-                      <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+                      <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg transform hover:scale-105 transition-transform duration-500">
                         {
                           testimonials[
                             activeTestimonial
                           ].avatar
                         }
                       </div>
-                      <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                      <div className="absolute -bottom-3 -right-3 w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg animate-bounce">
                         <Quote className="w-6 h-6" />
                       </div>
                     </div>
                   </div>
+
+                  {/* Content */}
                   <div className="lg:w-3/4">
-                    <div className="flex items-center gap-1 mb-6">
+                    <div className="flex items-center gap-2 mb-6">
                       {[...Array(5)].map(
                         (_, i) => (
                           <Star
                             key={i}
-                            className="w-5 h-5 text-amber-500 fill-amber-500"
+                            className="w-5 h-5 text-amber-500 fill-amber-500 animate-pulse"
                           />
                         )
                       )}
                     </div>
-                    <p className="text-lg lg:text-xl text-gray-700 italic mb-8 leading-relaxed">
+                    <p className="text-lg lg:text-xl text-gray-700 italic mb-8 leading-relaxed tracking-wide">
                       "
                       {
                         testimonials[
@@ -1430,17 +1636,18 @@ export default function ComprehensiveHomePage() {
               </motion.div>
             </AnimatePresence>
 
-            <div className="flex justify-center items-center gap-3 mt-8">
+            {/* Navigation Dots */}
+            <div className="flex justify-center items-center gap-4 mt-10">
               {testimonials.map((_, index) => (
                 <button
                   key={index}
                   onClick={() =>
                     setActiveTestimonial(index)
                   }
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  className={`rounded-full transition-all duration-500 ${
                     index === activeTestimonial
-                      ? "bg-gradient-to-r from-blue-600 to-green-600 w-8"
-                      : "bg-gray-300 hover:bg-gray-400"
+                      ? "w-8 h-3 bg-gradient-to-r from-blue-600 to-green-500 shadow-lg"
+                      : "w-3 h-3 bg-gray-300 hover:bg-gray-400"
                   }`}
                 />
               ))}
@@ -1449,227 +1656,183 @@ export default function ComprehensiveHomePage() {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-16">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-full mb-6"
-              >
-                <HelpCircle className="w-4 h-4 text-indigo-600" />
-                <span className="text-sm font-semibold text-indigo-700">
-                  Gaaffii fi Deebii
-                </span>
-              </motion.div>
-              <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
-              >
-                Gaaffiiwwan Dhihoo
-              </motion.h2>
-            </div>
 
-            <div className="space-y-4">
-              {faqs.map((faq, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{
-                    opacity: 1,
-                    y: 0,
-                  }}
-                  viewport={{ once: true }}
-                  transition={{
-                    delay: index * 0.1,
-                  }}
-                  className="border border-gray-200/50 rounded-2xl overflow-hidden"
-                >
-                  <button
-                    onClick={() =>
-                      setActiveFaq(
-                        activeFaq === index
-                          ? null
-                          : index
-                      )
-                    }
-                    className="w-full px-6 py-4 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors"
-                  >
-                    <span className="text-lg font-semibold text-gray-900 text-left">
-                      {faq.question}
-                    </span>
-                    <ChevronRight
-                      className={`w-5 h-5 text-gray-500 transition-transform ${
-                        activeFaq === index
-                          ? "rotate-90"
-                          : ""
-                      }`}
-                    />
-                  </button>
-                  <AnimatePresence>
-                    {activeFaq === index && (
-                      <motion.div
-                        initial={{
-                          height: 0,
-                          opacity: 0,
-                        }}
-                        animate={{
-                          height: "auto",
-                          opacity: 1,
-                        }}
-                        exit={{
-                          height: 0,
-                          opacity: 0,
-                        }}
-                        className="overflow-hidden"
-                      >
-                        <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-200/50">
-                          <p className="text-gray-700">
-                            {faq.answer}
-                          </p>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+{/* FAQ Section */}
+<section className="py-24 bg-gray-50">
+  <div className="container mx-auto px-4 lg:px-8">
+    <div className="max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-full mb-6 shadow-sm"
+        >
+          <HelpCircle className="w-5 h-5 text-indigo-600" />
+          <span className="text-sm font-semibold text-indigo-700 tracking-wide">
+            Gaaffii fi Deebii
+          </span>
+        </motion.div>
 
-      {/* Newsletter */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 via-green-600 to-purple-600">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center text-white">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-8"
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-6 leading-tight"
+        >
+          Gaaffiiwwan <span className="text-blue-600">Dhihoo fi Barbaachisaa</span>
+        </motion.h2>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-gray-600 text-lg"
+        >
+          Gaaffilee yeroo hedduu ka’aman fi deebii isaanii sirrii fi ifaa ta’e argachuuf.
+        </motion.p>
+      </div>
+
+      {/* FAQ Items */}
+      <div className="space-y-5">
+        {faqs.map((faq, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.1 }}
+            className="bg-white rounded-3xl shadow-md border border-gray-200 hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+          >
+            <button
+              onClick={() => setActiveFaq(activeFaq === index ? null : index)}
+              className="w-full px-6 py-5 flex items-center justify-between text-left bg-white hover:bg-gray-50 transition-colors"
             >
-              <Mail className="w-4 h-4" />
-              <span className="text-sm font-semibold">
-                Oduu fi Oolcha
+              <span className="text-lg font-semibold text-gray-900">
+                {faq.question}
               </span>
-            </motion.div>
-
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-4xl lg:text-5xl font-bold mb-6"
-            >
-              Oduu fi Oolcha Argadhu
-            </motion.h2>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-xl text-blue-100 mb-12 max-w-2xl mx-auto"
-            >
-              Oduu dhihoo, oolcha fi leenjii addaa
-              email keessanitti argadhaa.
-            </motion.p>
-
-            <motion.form
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              onSubmit={handleNewsletter}
-              className="flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto"
-            >
-              <input
-                type="email"
-                value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
-                placeholder="Email keessan galchaa..."
-                className="flex-1 px-6 py-4 bg-white/20 backdrop-blur-sm border-2 border-white/30 rounded-xl text-white placeholder-white/70 focus:outline-none focus:border-white/50"
-                required
-              />
-              <button
-                type="submit"
-                className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl hover:bg-gray-50 hover:shadow-2xl transition-all duration-300 whitespace-nowrap"
+              <motion.div
+                animate={{ rotate: activeFaq === index ? 90 : 0 }}
+                transition={{ duration: 0.3 }}
               >
-                Galchaa
-              </button>
-            </motion.form>
-          </div>
-        </div>
-      </section>
+                <ChevronRight className="w-5 h-5 text-gray-500" />
+              </motion.div>
+            </button>
 
-      {/* Final CTA */}
-      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{
-                opacity: 1,
-                scale: 1,
-              }}
-              viewport={{ once: true }}
-              className="inline-flex p-4 bg-gradient-to-br from-blue-100 to-green-100 rounded-2xl mb-8"
-            >
-              <Rocket className="w-12 h-12 text-blue-600" />
-            </motion.div>
+            <AnimatePresence>
+              {activeFaq === index && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0, paddingTop: 0, paddingBottom: 0 }}
+                  animate={{ height: "auto", opacity: 1, paddingTop: 20, paddingBottom: 20 }}
+                  exit={{ height: 0, opacity: 0, paddingTop: 0, paddingBottom: 0 }}
+                  className="px-6 bg-blue-50/20 border-t border-gray-200"
+                >
+                  <p className="text-gray-700 leading-relaxed">{faq.answer}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
 
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
-            >
-              Har'a Eegaluu!
-            </motion.h2>
+    
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto"
-            >
-              Dhaloota kana keessatti hiriyaa
-              ta'i. Leenjii argadhaa, hiriyyaa
-              argadhaa, jireenya keessan
-              jijjiradhaa.
-            </motion.p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
+
+
+     {/* Final CTA */}
+<section className="relative py-28 bg-gradient-to-br from-white to-blue-50 overflow-hidden">
+  {/* Decorative floating shapes */}
+  <div className="absolute -top-24 -left-24 w-80 h-80 bg-blue-200/20 rounded-full filter blur-3xl animate-blob"></div>
+  <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-green-200/20 rounded-full filter blur-3xl animate-blob animation-delay-2000"></div>
+  <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-purple-200/20 rounded-full filter blur-2xl animate-blob animation-delay-4000"></div>
+
+  <div className="container mx-auto px-4 lg:px-8 relative z-10">
+    <div className="max-w-4xl mx-auto text-center">
+      {/* Icon Badge */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+        whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+        viewport={{ once: true }}
+        transition={{ type: "spring", stiffness: 120 }}
+        className="inline-flex p-5 bg-gradient-to-br from-blue-400 to-green-400 rounded-3xl mb-8 shadow-2xl"
+      >
+        <Rocket className="w-16 h-16 text-white animate-bounce" />
+      </motion.div>
+
+      {/* Main Title */}
+      <motion.h2
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight"
+      >
+        Har'a <span className="text-gradient bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent">Eegaluu!</span>
+      </motion.h2>
+
+      {/* Subtitle */}
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="text-xl lg:text-2xl text-gray-700 mb-12 max-w-3xl mx-auto leading-relaxed"
+      >
+        Dhaloota kana keessatti <span className="font-bold text-blue-600">hiriyaa ta'i</span>, 
+        leenjii <span className="font-bold text-green-600">argadhaa</span>, 
+        hiriyyaa <span className="font-bold text-purple-600">argadhaa</span>, 
+        fi jireenya keessan <span className="font-extrabold text-gradient bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent">jijjiradhaa</span>.
+      </motion.p>
+
+      {/* Buttons */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="flex flex-col sm:flex-row gap-6 justify-center"
+      >
+        {isAuthenticated ? (
+          <button
+            onClick={handleDashboard}
+            className="group px-12 py-4 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-3xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg"
+          >
+            Go to Dashboard
+            <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={handleRegisterRedirect}
+              className="group px-12 py-4 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-3xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg"
             >
-              <button
-                onClick={() =>
-                  setShowRegisterModal(true)
-                }
-                className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 flex items-center justify-center gap-3"
-              >
-                Har'a Galmaa'i
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
-              </button>
-              <button
-                onClick={() =>
-                  setShowLoginModal(true)
-                }
-                className="px-8 py-4 bg-white text-gray-700 font-semibold rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
-              >
-                Seeni
-              </button>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+              Register Now
+              <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+            </button>
+            <button
+              onClick={handleLoginRedirect}
+              className="px-12 py-4 bg-white text-gray-700 font-semibold rounded-3xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
+            >
+              Login
+            </button>
+          </>
+        )}
+      </motion.div>
+
+      {/* Extra Note */}
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mt-10 text-sm text-gray-500 italic"
+      >
+        Hiriyaa fi leenjii argachuuf qophii guutuu ta'uu kee mirkaneessi.
+      </motion.p>
+    </div>
+  </div>
+</section>
 
       {/* Footer */}
       <footer className="bg-gradient-to-b from-gray-900 to-black text-white pt-16 pb-8">
@@ -1783,265 +1946,6 @@ export default function ComprehensiveHomePage() {
           </div>
         </div>
       </footer>
-
-      {/* Login Modal */}
-      <AnimatePresence>
-        {showLoginModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white rounded-2xl shadow-2xl max-w-md w-full"
-            >
-              <div className="p-8">
-                <div className="flex items-center justify-between mb-8">
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900">
-                      Seeni
-                    </h3>
-                    <p className="text-gray-600">
-                      Account keessan seenaa
-                    </p>
-                  </div>
-                  <button
-                    onClick={() =>
-                      setShowLoginModal(false)
-                    }
-                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                <form
-                  onSubmit={handleLogin}
-                  className="space-y-6"
-                >
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) =>
-                        setEmail(e.target.value)
-                      }
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                      placeholder="email@example.com"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Password
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={
-                          showPassword
-                            ? "text"
-                            : "password"
-                        }
-                        value={password}
-                        onChange={(e) =>
-                          setPassword(
-                            e.target.value
-                          )
-                        }
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all pr-12"
-                        placeholder="••••••••"
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setShowPassword(
-                            !showPassword
-                          )
-                        }
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                      >
-                        {showPassword ? (
-                          <EyeOff className="w-5 h-5" />
-                        ) : (
-                          <Eye className="w-5 h-5" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
-                  >
-                    Seeni
-                  </button>
-
-                  <div className="text-center">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowLoginModal(false);
-                        setShowRegisterModal(
-                          true
-                        );
-                      }}
-                      className="text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                      Account hin qabduu? Galmaa'i
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Register Modal */}
-      <AnimatePresence>
-        {showRegisterModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white rounded-2xl shadow-2xl max-w-md w-full"
-            >
-              <div className="p-8">
-                <div className="flex items-center justify-between mb-8">
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900">
-                      Galmaa'i
-                    </h3>
-                    <p className="text-gray-600">
-                      Account haaraa uumaa
-                    </p>
-                  </div>
-                  <button
-                    onClick={() =>
-                      setShowRegisterModal(false)
-                    }
-                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                <form
-                  onSubmit={handleRegister}
-                  className="space-y-6"
-                >
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Maqaa
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                        placeholder="Maqaa"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Maqaa Abbaa
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                        placeholder="Maqaa Abbaa"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) =>
-                        setEmail(e.target.value)
-                      }
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                      placeholder="email@example.com"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Password
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={
-                          showPassword
-                            ? "text"
-                            : "password"
-                        }
-                        value={password}
-                        onChange={(e) =>
-                          setPassword(
-                            e.target.value
-                          )
-                        }
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all pr-12"
-                        placeholder="••••••••"
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setShowPassword(
-                            !showPassword
-                          )
-                        }
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                      >
-                        {showPassword ? (
-                          <EyeOff className="w-5 h-5" />
-                        ) : (
-                          <Eye className="w-5 h-5" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
-                  >
-                    Galmaa'i
-                  </button>
-
-                  <div className="text-center">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowRegisterModal(
-                          false
-                        );
-                        setShowLoginModal(true);
-                      }}
-                      className="text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                      Account qabduu? Seeni
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
       {/* Scroll to Top Button */}
       <AnimatePresence>
