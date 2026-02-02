@@ -54,23 +54,42 @@ export default function SuperadminLayout({
     isLoading,
   } = useAuthStore();
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [hasInitialCheckPassed, setHasInitialCheckPassed] = useState(false);
+  const [sidebarOpen, setSidebarOpen] =
+    useState(false);
+  const [searchTerm, setSearchTerm] =
+    useState("");
+  const [isCheckingAuth, setIsCheckingAuth] =
+    useState(true);
+  const [
+    hasInitialCheckPassed,
+    setHasInitialCheckPassed,
+  ] = useState(false);
 
   // Debug logging
   useEffect(() => {
-    console.log("🔍 SuperadminLayout Auth State:", {
-      hasHydrated,
-      isAuthenticated,
-      user: user ? { name: user.name, role: user.role } : null,
-      isLoading,
-      pathname,
-      isCheckingAuth,
-      hasInitialCheckPassed,
-    });
-  }, [hasHydrated, isAuthenticated, user, isLoading, pathname, isCheckingAuth, hasInitialCheckPassed]);
+    console.log(
+      "🔍 SuperadminLayout Auth State:",
+      {
+        hasHydrated,
+        isAuthenticated,
+        user: user
+          ? { name: user.name, role: user.role }
+          : null,
+        isLoading,
+        pathname,
+        isCheckingAuth,
+        hasInitialCheckPassed,
+      }
+    );
+  }, [
+    hasHydrated,
+    isAuthenticated,
+    user,
+    isLoading,
+    pathname,
+    isCheckingAuth,
+    hasInitialCheckPassed,
+  ]);
 
   /* ───────────────────── NAV ITEMS (FIXED PATHS) ───────────────────── */
   const navItems = useMemo(
@@ -97,13 +116,19 @@ export default function SuperadminLayout({
       {
         name: "Events",
         icon: BarChart3,
-        path: "/dashboard/events",
+        path: "/superadmin/events",
         color: "bg-amber-50 text-amber-600",
       },
       {
         name: "Settings",
         icon: Settings,
         path: "/superadmin/settings",
+        color: "bg-gray-50 text-gray-600",
+      },
+      {
+        name: "blogs",
+        icon: Settings,
+        path: "/superadmin/blogs",
         color: "bg-gray-50 text-gray-600",
       },
     ],
@@ -155,42 +180,64 @@ export default function SuperadminLayout({
 
     // If initial check already passed, don't run again
     if (hasInitialCheckPassed) {
-      console.log("✅ Initial check already passed, skipping...");
+      console.log(
+        "✅ Initial check already passed, skipping..."
+      );
       return;
     }
 
-    console.log("🔐 Running initial authentication check...");
-    
+    console.log(
+      "🔐 Running initial authentication check..."
+    );
+
     // If not authenticated at all, redirect to login
     if (!isAuthenticated) {
-      console.log("❌ Not authenticated, redirecting to login");
+      console.log(
+        "❌ Not authenticated, redirecting to login"
+      );
       router.push("/login");
       return;
     }
-    
+
     // If authenticated but no user data, redirect to login
     if (!user) {
-      console.log("❌ No user data, redirecting to login");
+      console.log(
+        "❌ No user data, redirecting to login"
+      );
       router.push("/login");
       return;
     }
-    
+
     // If not superadmin, redirect to dashboard
     if (user.role !== "superadmin") {
-      console.log("❌ Not superadmin, redirecting to dashboard");
+      console.log(
+        "❌ Not superadmin, redirecting to dashboard"
+      );
       router.push("/dashboard");
       return;
     }
-    
+
     // All checks passed
-    console.log("✅ Initial authentication checks passed");
+    console.log(
+      "✅ Initial authentication checks passed"
+    );
     setHasInitialCheckPassed(true);
     setIsCheckingAuth(false);
-    
-  }, [isAuthenticated, user, hasHydrated, isLoading, router, hasInitialCheckPassed]);
+  }, [
+    isAuthenticated,
+    user,
+    hasHydrated,
+    isLoading,
+    router,
+    hasInitialCheckPassed,
+  ]);
 
   /* ───────────────────── LOADING STATE ───────────────────── */
-  if (!hasHydrated || isLoading || (!hasInitialCheckPassed && isCheckingAuth)) {
+  if (
+    !hasHydrated ||
+    isLoading ||
+    (!hasInitialCheckPassed && isCheckingAuth)
+  ) {
     console.log("🔄 Showing loading state...");
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -204,7 +251,11 @@ export default function SuperadminLayout({
             Loading Superadmin Panel…
           </p>
           <p className="text-xs text-gray-400 mt-2">
-            {!hasHydrated ? "Hydrating..." : isLoading ? "Loading..." : "Checking permissions..."}
+            {!hasHydrated
+              ? "Hydrating..."
+              : isLoading
+                ? "Loading..."
+                : "Checking permissions..."}
           </p>
         </div>
       </div>
@@ -213,13 +264,21 @@ export default function SuperadminLayout({
 
   // Final check before rendering - but allow rendering even if user changes
   if (!isAuthenticated || !user) {
-    console.log("🚫 No user or not authenticated");
+    console.log(
+      "🚫 No user or not authenticated"
+    );
     return null;
   }
 
   // Warn but don't block if user role changes
-  if (user.role !== "superadmin" && hasInitialCheckPassed) {
-    console.warn("⚠️ User role changed after initial check:", user.role);
+  if (
+    user.role !== "superadmin" &&
+    hasInitialCheckPassed
+  ) {
+    console.warn(
+      "⚠️ User role changed after initial check:",
+      user.role
+    );
     // Don't redirect here - let the page handle it
   }
 
@@ -228,7 +287,9 @@ export default function SuperadminLayout({
     pathname === path ||
     pathname.startsWith(`${path}/`);
 
-  const handleLogout = (e: MouseEvent<HTMLButtonElement>) => {
+  const handleLogout = (
+    e: MouseEvent<HTMLButtonElement>
+  ) => {
     e.preventDefault();
     console.log("👋 Logging out...");
     clearAuthData();
@@ -236,7 +297,9 @@ export default function SuperadminLayout({
   };
 
   /* ───────────────────── RENDER ───────────────────── */
-  console.log("🎨 Rendering Superadmin Layout...");
+  console.log(
+    "🎨 Rendering Superadmin Layout..."
+  );
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile Overlay */}
@@ -283,11 +346,15 @@ export default function SuperadminLayout({
                 <p className="text-xs text-gray-500 truncate">
                   {user.email}
                 </p>
-                <p className={`text-xs font-medium mt-1 ${
-                  user.role === "superadmin" ? "text-green-600" :
-                  user.role === "admin" ? "text-blue-600" :
-                  "text-gray-600"
-                }`}>
+                <p
+                  className={`text-xs font-medium mt-1 ${
+                    user.role === "superadmin"
+                      ? "text-green-600"
+                      : user.role === "admin"
+                        ? "text-blue-600"
+                        : "text-gray-600"
+                  }`}
+                >
                   {user.role}
                 </p>
               </div>
@@ -305,7 +372,9 @@ export default function SuperadminLayout({
                       : "text-gray-600 hover:bg-gray-50"
                   }`}
                   onClick={(e) => {
-                    console.log(`Navigating to: ${item.path}`);
+                    console.log(
+                      `Navigating to: ${item.path}`
+                    );
                   }}
                 >
                   <div className="flex items-center space-x-3">
@@ -341,9 +410,17 @@ export default function SuperadminLayout({
             <div className="px-5 py-3 flex justify-between items-center">
               <div>
                 <h2 className="text-lg font-semibold">
-                  {pathname.includes("/permissions") ? "Permissions" :
-                   pathname.includes("/users") ? "Users" :
-                   pathname.includes("/settings") ? "Settings" : "Dashboard"}
+                  {pathname.includes(
+                    "/permissions"
+                  )
+                    ? "Permissions"
+                    : pathname.includes("/users")
+                      ? "Users"
+                      : pathname.includes(
+                            "/settings"
+                          )
+                        ? "Settings"
+                        : "Dashboard"}
                 </h2>
                 <p className="text-xs text-gray-500 flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
@@ -362,7 +439,9 @@ export default function SuperadminLayout({
                   <input
                     value={searchTerm}
                     onChange={(e) =>
-                      setSearchTerm(e.target.value)
+                      setSearchTerm(
+                        e.target.value
+                      )
                     }
                     placeholder="Search…"
                     className="pl-9 pr-4 py-2 text-sm border rounded-lg"

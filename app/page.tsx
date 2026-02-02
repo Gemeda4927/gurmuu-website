@@ -1,343 +1,2306 @@
-import Link from 'next/link';
-import { 
-  ArrowRight, 
-  Users, 
-  Shield, 
-  Zap, 
-  CheckCircle, 
-  Lock, 
-  Settings, 
-  Globe, 
-  Sparkles, 
-  ShieldCheck,
-  BarChart,
-  Cloud,
-  Users as UsersIcon,
-  Server,
-  Code,
-  Sparkle,
-  Shield as ShieldIcon,
-  Zap as ZapIcon,
-  CheckCircle as CheckCircleIcon
-} from 'lucide-react';
+"use client";
 
-export default function HomePage() {
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast, Toaster } from "react-hot-toast";
+import {
+  Users,
+  Star,
+  ChevronRight,
+  Search,
+  Menu,
+  X,
+  User,
+  LogIn,
+  Sparkles,
+  Award,
+  CheckCircle,
+  Globe,
+  Target,
+  Quote,
+  Calendar,
+  GraduationCap,
+  HeartHandshake,
+  Scale,
+  BookOpen,
+  UsersRound,
+  ArrowRight,
+  ChevronUp,
+  Trophy,
+  TrendingUp,
+  Heart,
+  Info,
+  Clock,
+  LogOut,
+  UserPlus,
+  Book,
+  Code,
+  Target as TargetIcon,
+  Users as UsersIcon,
+  Calendar as CalendarIcon,
+  Clock as ClockIcon,
+  Check,
+  MapPin,
+  Eye,
+  MessageCircle,
+  Share2,
+  ExternalLink,
+  Loader2,
+  AlertCircle,
+  Bookmark,
+  ChevronLeft,
+  Filter,
+  Grid3x3,
+  List,
+  BookmarkCheck,
+  BookmarkPlus,
+  ThumbsUp,
+  MessageSquare,
+  DownloadCloud,
+  UploadCloud,
+  PieChart,
+  LineChart,
+  Activity,
+  Home as HomeIcon,
+  Settings as SettingsIcon,
+  HelpCircle as HelpCircleIcon,
+  PhoneCall,
+  Mail as MailIcon,
+  Map as MapIcon,
+  Lock,
+  EyeOff,
+  Plus,
+  Minus,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Mail,
+  Phone,
+  Video,
+  Music,
+  Coffee,
+  Dumbbell,
+  Palette,
+  Briefcase,
+  Mic,
+  Camera,
+  Cloud,
+  Zap,
+  Rocket,
+  Sun,
+  Moon,
+  Gift,
+  Bell,
+  Download,
+  Upload,
+  Globe as GlobeIcon,
+  UserCircle,
+  Leaf,
+  Wind,
+  Waves,
+  Mountain,
+  Trees,
+  Flower,
+  Sunrise,
+  Sunset,
+  CloudRain,
+  CloudSnow,
+  CloudLightning,
+  Droplets,
+  Thermometer,
+} from "lucide-react";
+import {
+  motion,
+  AnimatePresence,
+} from "framer-motion";
+import { useEvents } from "@/lib/hooks/useEvents";
+import { useBlogs } from "@/lib/hooks/useBlogs";
+import { EventData } from "@/lib/types/event";
+import { Blog } from "@/lib/types/blog.types";
+import { useAuthStore } from "@/lib/store/auth.store";
+import Image from "next/image";
+
+// Enhanced content data
+const heroData = {
+  title: "You are OK",
+  subtitle:
+    "Building a Stronger and More Inclusive Society",
+  description:
+    "Nutii Organization is dedicated to empowering youth and communities through training, guidance, and impactful volunteer programs that create lasting social change.",
+  cta: {
+    primary: "Join as a Volunteer",
+    secondary: "Learn More",
+  },
+  stats: [
+    {
+      icon: <Users className="w-6 h-6" />,
+      value: "10+",
+      label: "Years of Service",
+      link: "/about",
+    },
+    {
+      icon: (
+        <HeartHandshake className="w-6 h-6" />
+      ),
+      value: "5,000+",
+      label: "Youth Mentored",
+      link: "/success-stories",
+    },
+    {
+      icon: <GraduationCap className="w-6 h-6" />,
+      value: "50+",
+      label: "Special Trainings",
+      link: "/training",
+    },
+    {
+      icon: <BookOpen className="w-6 h-6" />,
+      value: "100+",
+      label: "Blog Articles",
+      link: "/blog",
+    },
+  ],
+};
+
+// Core Values
+const coreValues = [
+  {
+    title: "Dhaloota Gorsuu",
+    description:
+      "Woggaa saddeen darbaan dhaloota kana gorsaa ture. Barataan, qotee bulaan, horiissee bulan hundaaf.",
+    icon: <GraduationCap className="w-8 h-8" />,
+    color: "from-blue-600 to-cyan-500",
+    benefits: [
+      "Gorsaa Addummaa",
+      "Leenjii Qabatamaa",
+      "Hordoffii Dheeressaa",
+    ],
+  },
+  {
+    title: "Oltummaa",
+    description:
+      "Nama amantaa fi gosaan nama gargar hin baanyee. Oromiyaa keessatti bakka kamiiyyuu deeme.",
+    icon: <UsersRound className="w-8 h-8" />,
+    color: "from-green-600 to-emerald-500",
+    benefits: [
+      "Wal-simannaa",
+      "Hawaasa",
+      "Gosoota Hundaa",
+    ],
+  },
+  {
+    title: "Kaayyoo Qabatamaa",
+    description:
+      "Kaayyoo isaanirratti dammaqanii socho'an. Dhaloota ijjeessuu waan jirtan dhiifama gaafanna.",
+    icon: <Target className="w-8 h-8" />,
+    color: "from-purple-600 to-pink-500",
+    benefits: [
+      "Kaayyoo Qulqulluu",
+      "Socho'ina",
+      "Gumaa Mul'ataa",
+    ],
+  },
+  {
+    title: "Sirna fi Hawaasa",
+    description:
+      "Hojjataan mootummaa fi kkf waliin hojjachuun dhalootaf gargaaruuf.",
+    icon: <Scale className="w-8 h-8" />,
+    color: "from-orange-600 to-amber-500",
+    benefits: [
+      "Waliigaltee",
+      "Hojii Waliin",
+      "Misooma Hawaasaa",
+    ],
+  },
+];
+
+// Success Stories
+const successStories = [
+  {
+    id: 1,
+    name: "Tolasa Bekele",
+    role: "Software Engineer @ Google",
+    story:
+      "Dhaabbata kanaa keessatti leenjii irra deebi'anii barnoota Computer Science kootti guddaa na gargaare. Amma Silicon Valley keessatti hojjachaa jira.",
+    year: "2018",
+    achievement: "Tech Career",
+    icon: <Code className="w-6 h-6" />,
+  },
+  {
+    id: 2,
+    name: "Hirut Abebe",
+    role: "Social Entrepreneur",
+    story:
+      "Gorsaa fi gargaarsa dhaabbata kanaa irra deebi'anii dhaabbata NGO guddaa ijare. Har'a dhaloota 500 ol gargaara.",
+    year: "2019",
+    achievement: "Social Impact",
+    icon: <HeartHandshake className="w-6 h-6" />,
+  },
+  {
+    id: 3,
+    name: "Kebede Hailu",
+    role: "Public Servant",
+    story:
+      "Leenjii hojjataa mootummaa irra deebi'anii ministeera keessatti hojii argadhe. Amma dhaloota biraaf gargaara.",
+    year: "2020",
+    achievement: "Leadership",
+    icon: <Award className="w-6 h-6" />,
+  },
+  {
+    id: 4,
+    name: "Mekdes Tadesse",
+    role: "University Professor",
+    story:
+      "Gorsaa fi leenjii dhaabbata kanaa irra deebi'anii PhD argadhe. Amma university keessatti barsiisaa jira.",
+    year: "2021",
+    achievement: "Education",
+    icon: <GraduationCap className="w-6 h-6" />,
+  },
+];
+
+// Partners
+const partners = [
+  {
+    name: "Ministry of Education",
+    logo: "ME",
+    type: "Government",
+  },
+  {
+    name: "Ethiopian Universities",
+    logo: "EU",
+    type: "Education",
+  },
+  {
+    name: "Local NGOs",
+    logo: "NGO",
+    type: "Non-profit",
+  },
+  {
+    name: "Community Leaders",
+    logo: "CL",
+    type: "Community",
+  },
+  {
+    name: "Private Sector",
+    logo: "PS",
+    type: "Business",
+  },
+  {
+    name: "International Donors",
+    logo: "ID",
+    type: "Funding",
+  },
+];
+
+// Testimonials
+const testimonials = [
+  {
+    id: 1,
+    name: "Obbo Mi'eessaa Goollo",
+    role: "Hojjataa Mootummaa",
+    content:
+      "Dhaabbanni kun dhaloota kanaaf gorsaa addaa fi leenjii kennuu isaa bayyee guddaadha. Woggaa saddeen darbaan oolchaa ture.",
+    avatar: "MG",
+  },
+  {
+    id: 2,
+    name: "Dr. Alemayehu Teklu",
+    role: "University President",
+    content:
+      "Dhaabbata kana waliin hojjachuun barataan keenyaaf guddaa ta'e. Leenjii isaanii barataan hundaa naannoo keenyaa keessatti mul'ata.",
+    avatar: "AT",
+  },
+  {
+    id: 3,
+    name: "W/ro Selamawit Bekele",
+    role: "Community Leader",
+    content:
+      "Oltummaa fi wal-simannaa dhaabbata kanaa naannoo keenyaa keessatti bareedha. Gosoota hundaa waliin hojjachuu danda'an.",
+    avatar: "SB",
+  },
+];
+
+// FAQ Section
+const faqs = [
+  {
+    question: "Dhaabbanni kun maalii?",
+    answer:
+      "Nutii Dhaabbati Gurmuu Tola Oltummaa dha. Dhaloota kana gorsuu, leenjii kennuu fi wal-simachuuf kaayyoo qabna.",
+  },
+  {
+    question:
+      "Maaliif makkana keessatti hirmaadhu?",
+    answer:
+      "Hirmaachuun sirratti guddaadha: leenjii argatta, hiriyyaa argatta, kaayyoo qabachuuf gargaarsa argatta.",
+  },
+  {
+    question: "Kessatti maalii argatta?",
+    answer:
+      "Leenjii addaa, gorsaa, hiriyyaa, iddoo hojii, internship, fi gargaarsa qabatamaa argattu.",
+  },
+  {
+    question: "Maaliif kan dhaloota qofa?",
+    answer:
+      "Dhaloota kana gorsuuf kaayyoo qabna, garuu hawaasa hundaa waliin hojjachuu danda'anna.",
+  },
+];
+
+export default function ComprehensiveHomePage() {
+  const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] =
+    useState(false);
+  const [
+    activeTestimonial,
+    setActiveTestimonial,
+  ] = useState(0);
+  const [showScrollTop, setShowScrollTop] =
+    useState(false);
+  const [activeFaq, setActiveFaq] = useState<
+    number | null
+  >(null);
+  const [selectedProgram, setSelectedProgram] =
+    useState<EventData | null>(null);
+  const [likedBlogs, setLikedBlogs] = useState<
+    string[]
+  >([]);
+  const [bookmarkedBlogs, setBookmarkedBlogs] =
+    useState<string[]>([]);
+
+  // Auth state
+  const {
+    user,
+    isAuthenticated,
+    isLoading: authLoading,
+    logout,
+  } = useAuthStore();
+
+  // Events data
+  const {
+    getEvents,
+    loading: eventsLoading,
+    error: eventsError,
+  } = useEvents();
+
+  // Blogs data
+  const { blogsQuery } = useBlogs();
+
+  const [programs, setPrograms] = useState<
+    EventData[]
+  >([]);
+  const [upcomingEvents, setUpcomingEvents] =
+    useState<EventData[]>([]);
+  const [featuredBlogs, setFeaturedBlogs] =
+    useState<Blog[]>([]);
+
+  // Fetch programs, events, and blogs
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch featured programs
+        const programsResponse = await getEvents({
+          isFeatured: true,
+          limit: 4,
+        });
+        if (programsResponse.events) {
+          setPrograms(programsResponse.events);
+        }
+
+        // Fetch upcoming events
+        const eventsResponse = await getEvents({
+          upcoming: true,
+          limit: 4,
+        });
+        if (eventsResponse.events) {
+          setUpcomingEvents(
+            eventsResponse.events
+          );
+        }
+      } catch (err) {
+        console.error(
+          "Failed to fetch data:",
+          err
+        );
+      }
+    };
+
+    fetchData();
+  }, [getEvents]);
+
+  // Filter featured blogs
+  useEffect(() => {
+    if (blogsQuery.data) {
+      const featured = blogsQuery.data
+        .filter(
+          (blog) =>
+            blog.status === "published" &&
+            !blog.isDeleted &&
+            blog.isFeatured
+        )
+        .slice(0, 3);
+      setFeaturedBlogs(featured);
+    }
+  }, [blogsQuery.data]);
+
+  // Handle scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 500);
+    };
+    window.addEventListener(
+      "scroll",
+      handleScroll
+    );
+    return () =>
+      window.removeEventListener(
+        "scroll",
+        handleScroll
+      );
+  }, []);
+
+  // Auto-rotate testimonials
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveTestimonial(
+        (prev) => (prev + 1) % testimonials.length
+      );
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Scroll to top
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  // Handle login redirect
+  const handleLoginRedirect = () => {
+    router.push("/login");
+  };
+
+  // Handle register redirect
+  const handleRegisterRedirect = () => {
+    router.push("/register");
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    logout();
+    toast.success("Logged out successfully!");
+    router.push("/");
+  };
+
+  // Handle dashboard navigation
+  const handleDashboard = () => {
+    if (isAuthenticated && user) {
+      if (
+        user.role === "admin" ||
+        user.role === "superadmin"
+      ) {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/dashboard");
+      }
+    }
+  };
+
+  // Newsletter subscription
+  const handleNewsletter = (
+    e: React.FormEvent
+  ) => {
+    e.preventDefault();
+    toast.success(
+      "Thank you for subscribing! Welcome to our community!"
+    );
+  };
+
+  // Register for event
+  const handleEventRegister = (
+    eventId: string
+  ) => {
+    if (!isAuthenticated) {
+      toast.error(
+        "Please login to register for events"
+      );
+      handleLoginRedirect();
+      return;
+    }
+    toast.success(
+      "Successfully registered for event!"
+    );
+    // TODO: Implement actual event registration
+  };
+
+  // Format date safely
+  const formatDate = (
+    dateString: string | undefined
+  ) => {
+    if (!dateString) return "Date TBA";
+    try {
+      return new Date(
+        dateString
+      ).toLocaleDateString();
+    } catch (error) {
+      return "Invalid Date";
+    }
+  };
+
+  // Format blog date
+  const formatBlogDate = (
+    dateString?: string
+  ) => {
+    if (!dateString) return "Recently";
+    return new Date(
+      dateString
+    ).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  // Handle blog like
+  const handleBlogLike = (blogId: string) => {
+    setLikedBlogs((prev) =>
+      prev.includes(blogId)
+        ? prev.filter((id) => id !== blogId)
+        : [...prev, blogId]
+    );
+    toast.success(
+      likedBlogs.includes(blogId)
+        ? "Removed like"
+        : "Liked blog!"
+    );
+  };
+
+  // Handle blog bookmark
+  const handleBlogBookmark = (blogId: string) => {
+    setBookmarkedBlogs((prev) =>
+      prev.includes(blogId)
+        ? prev.filter((id) => id !== blogId)
+        : [...prev, blogId]
+    );
+    toast.success(
+      bookmarkedBlogs.includes(blogId)
+        ? "Removed bookmark"
+        : "Bookmarked!"
+    );
+  };
+
+  // Handle blog share
+  const handleBlogShare = (blog: Blog) => {
+    const url = `${window.location.origin}/blog/${blog.slug}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Link copied to clipboard!");
+  };
+
+  // Stats calculation
+  const blogStats = {
+    total:
+      blogsQuery.data?.filter(
+        (b) =>
+          b.status === "published" && !b.isDeleted
+      ).length || 0,
+    featured:
+      blogsQuery.data?.filter(
+        (b) =>
+          b.isFeatured &&
+          b.status === "published" &&
+          !b.isDeleted
+      ).length || 0,
+    views:
+      blogsQuery.data
+        ?.filter(
+          (b) =>
+            b.status === "published" &&
+            !b.isDeleted
+        )
+        .reduce(
+          (sum, blog) => sum + (blog.views || 0),
+          0
+        ) || 0,
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-blue-50 text-gray-900">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
+    <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            borderRadius: "16px",
+            background: "#1f2937",
+            color: "#f9fafb",
+            border: "1px solid #374151",
+          },
+        }}
+      />
+
+      {/* Progress bar */}
+      <div className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-green-500 to-purple-500 z-50">
+        <motion.div
+          className="h-full bg-white"
+          style={{ width: "100%" }}
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{
+            duration: 0.5,
+            ease: "easeInOut",
+          }}
+        />
+      </div>
+
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-gray-100/50">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            {/* Logo */}
+            <Link
+              href="/"
+              className="flex items-center space-x-3 group"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 200,
+                }}
+                className="relative"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-green-500 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity" />
+                <div className="relative w-12 h-12 bg-gradient-to-br from-blue-600 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Users className="w-7 h-7 text-white" />
+                </div>
+              </motion.div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-green-600 to-purple-600 bg-clip-text text-transparent">
+                  Nutii Organization
+                </h1>
+                <p className="text-xs text-gray-500 font-medium">
+                  Gurmuu Volunteer Association
+                </p>
+              </div>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center space-x-1">
+              {[
+                { name: "Home", href: "/" },
+                {
+                  name: "Training",
+                  href: "/training",
+                },
+                {
+                  name: "Services",
+                  href: "/services",
+                },
+                {
+                  name: "Partners",
+                  href: "/partners",
+                },
+                {
+                  name: "Projects",
+                  href: "/projects",
+                },
+                { name: "Blog", href: "/blog" },
+                {
+                  name: "Events",
+                  href: "/events",
+                },
+              ].map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="px-4 py-2.5 text-gray-700 hover:text-blue-600 font-medium rounded-xl hover:bg-gray-50/50 transition-all duration-300 text-sm"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Action Buttons */}
             <div className="flex items-center space-x-3">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl blur opacity-30"></div>
-                <div className="relative bg-white p-2 rounded-lg shadow-md">
-                  <Shield className="h-7 w-7 text-gradient-to-r from-blue-600 to-purple-600" />
+              {isAuthenticated ? (
+                <>
+                  <div className="hidden md:flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        {user?.name?.charAt(0) ||
+                          "U"}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {user?.name}
+                        </p>
+                        <p className="text-xs text-gray-500 capitalize">
+                          {user?.role}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleDashboard}
+                      className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/25 transition-all duration-300"
+                    >
+                      Dashboard
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="px-5 py-2.5 text-gray-700 font-medium rounded-xl hover:bg-gray-50/50 transition-all duration-300 flex items-center gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={handleLoginRedirect}
+                    className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 text-gray-700 font-medium rounded-xl hover:bg-gray-50/50 transition-all duration-300"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    Login
+                  </button>
+                  <button
+                    onClick={
+                      handleRegisterRedirect
+                    }
+                    className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/25 transition-all duration-300"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Register
+                  </button>
+                </>
+              )}
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() =>
+                  setMobileMenuOpen(
+                    !mobileMenuOpen
+                  )
+                }
+                className="lg:hidden p-2.5 text-gray-700 hover:text-blue-600 hover:bg-gray-50/50 rounded-xl transition-colors"
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{
+                opacity: 1,
+                height: "auto",
+              }}
+              exit={{ opacity: 0, height: 0 }}
+              className="lg:hidden border-t border-gray-100/50 bg-white/95 backdrop-blur-xl overflow-hidden"
+            >
+              <div className="container mx-auto px-4 py-6 space-y-2">
+                {[
+                  { name: "Home", href: "/" },
+                  {
+                    name: "Mission",
+                    href: "/mission",
+                  },
+                  {
+                    name: "Training",
+                    href: "/training",
+                  },
+                  {
+                    name: "Services",
+                    href: "/services",
+                  },
+                  {
+                    name: "Partners",
+                    href: "/partners",
+                  },
+                  {
+                    name: "Projects",
+                    href: "/projects",
+                  },
+                  {
+                    name: "Events",
+                    href: "/events",
+                  },
+                  { name: "Blog", href: "/blog" },
+                ].map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className="block py-3 text-gray-700 hover:text-blue-600 font-medium hover:bg-gray-50/50 rounded-xl px-4 transition-colors text-sm"
+                    onClick={() =>
+                      setMobileMenuOpen(false)
+                    }
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+
+                <div className="pt-4 border-t border-gray-100/50 space-y-3">
+                  {isAuthenticated ? (
+                    <>
+                      <div className="px-4 py-3 bg-gray-50 rounded-xl">
+                        <p className="font-medium text-gray-900">
+                          {user?.name}
+                        </p>
+                        <p className="text-sm text-gray-500 capitalize">
+                          {user?.role}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          handleDashboard();
+                          setMobileMenuOpen(
+                            false
+                          );
+                        }}
+                        className="block w-full py-3 text-center bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-lg"
+                      >
+                        Dashboard
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setMobileMenuOpen(
+                            false
+                          );
+                        }}
+                        className="block w-full py-3 text-center text-gray-700 font-medium rounded-xl border border-gray-200 hover:bg-gray-50"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => {
+                          handleLoginRedirect();
+                          setMobileMenuOpen(
+                            false
+                          );
+                        }}
+                        className="block w-full py-3 text-center text-gray-700 font-medium rounded-xl border border-gray-200 hover:bg-gray-50"
+                      >
+                        Login
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleRegisterRedirect();
+                          setMobileMenuOpen(
+                            false
+                          );
+                        }}
+                        className="block w-full py-3 text-center bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-lg"
+                      >
+                        Register
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                AuthShield
-              </span>
-            </div>
-            <div className="flex items-center space-x-6">
-              <Link 
-                href="/features" 
-                className="text-gray-600 hover:text-blue-600 font-medium transition-colors"
-              >
-                Features
-              </Link>
-              <Link 
-                href="/pricing" 
-                className="text-gray-600 hover:text-blue-600 font-medium transition-colors"
-              >
-                Pricing
-              </Link>
-              <Link 
-                href="/docs" 
-                className="text-gray-600 hover:text-blue-600 font-medium transition-colors"
-              >
-                Docs
-              </Link>
-              <Link 
-                href="/signup" 
-                className="relative overflow-hidden group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-6 py-2.5 rounded-xl font-semibold text-white transition-all shadow-lg hover:shadow-xl hover:scale-105"
-              >
-                <span className="relative flex items-center">
-                  Get Started Free
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-16 pb-32">
-        <div className="absolute top-0 left-0 right-0 h-96 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 opacity-70"></div>
-        <div className="container relative mx-auto px-6 py-20 text-center">
-          <div className="max-w-4xl mx-auto">
-            <div className="inline-flex items-center px-4 py-2.5 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 border border-blue-200 mb-6 shadow-sm">
-              <Sparkle className="h-4 w-4 mr-2 text-blue-500" />
-              <span className="text-sm font-medium text-blue-700">Enterprise-Grade Access Control</span>
-            </div>
-            
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              Modern
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500"> Role-Based </span>
-              Access Control
-            </h1>
-            
-            <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Build secure applications with our three-tier access control system. 
-              Perfect for teams that need granular permissions without complexity.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link 
-                href="/signup" 
-                className="group relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 rounded-xl font-semibold text-white shadow-xl hover:shadow-2xl transition-all duration-300 inline-flex items-center justify-center min-w-[200px]"
-              >
-                <span className="relative flex items-center">
-                  Start Free Trial
-                  <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-2 transition-transform" />
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              </Link>
-              
-              <Link 
-                href="#features" 
-                className="group bg-white hover:bg-gray-50 px-8 py-4 rounded-xl font-semibold text-gray-700 border border-gray-300 hover:border-blue-300 shadow-md hover:shadow-lg transition-all duration-300 inline-flex items-center justify-center min-w-[200px]"
-              >
-                <svg className="w-5 h-5 mr-3 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 10v4a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Watch Demo
-              </Link>
-            </div>
+      <section className="relative overflow-hidden py-28 lg:py-40">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/70 via-green-50/40 to-purple-50/70" />
+        <div className="absolute -top-24 -left-24 w-[28rem] h-[28rem] bg-blue-400/10 rounded-full blur-[120px] animate-[pulse_8s_ease-in-out_infinite]" />
+        <div className="absolute top-1/3 -right-24 w-[30rem] h-[30rem] bg-green-400/10 rounded-full blur-[140px] animate-[pulse_10s_ease-in-out_infinite]" />
+        <div className="absolute -bottom-24 left-1/4 w-[32rem] h-[32rem] bg-purple-400/10 rounded-full blur-[160px] animate-[pulse_12s_ease-in-out_infinite]" />
 
-            {/* Stats Bar */}
-            <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
-              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm">
-                <div className="text-3xl font-bold text-blue-600">3K+</div>
-                <div className="text-gray-600">Active Teams</div>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm">
-                <div className="text-3xl font-bold text-purple-600">99.9%</div>
-                <div className="text-gray-600">Uptime</div>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm">
-                <div className="text-3xl font-bold text-pink-600">50K+</div>
-                <div className="text-gray-600">Users Managed</div>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm">
-                <div className="text-3xl font-bold text-green-600">24/7</div>
-                <div className="text-gray-600">Support</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+        <div className="container mx-auto px-4 lg:px-8 relative">
+          <div className="max-w-5xl mx-auto text-center">
+            {/* Accent Line */}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.8 }}
+              className="mx-auto mb-10 h-1 w-24 rounded-full bg-gradient-to-r from-blue-600 via-green-600 to-purple-600"
+            />
 
-      {/* Features Section */}
-      <section id="features" className="py-24 bg-gradient-to-b from-white to-gray-50">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Everything You Need</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              A complete solution for modern application security and user management
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Feature 1 */}
-            <div className="group bg-white p-8 rounded-2xl border border-gray-200 hover:border-blue-300 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <UsersIcon className="h-7 w-7 text-blue-600" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3 text-gray-800">Three User Roles</h3>
-              <p className="text-gray-600 mb-4 leading-relaxed">
-                User, Admin, and Superadmin with distinct permissions and access levels.
-                Perfect for scalable applications of any size.
-              </p>
-              <ul className="space-y-2 mt-4">
-                <li className="flex items-center text-gray-600">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                  Granular permissions
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                  Role inheritance
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                  Custom roles support
-                </li>
-              </ul>
-            </div>
+            {/* Main Title */}
+            <motion.h1
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-5xl lg:text-7xl font-extrabold mb-8 leading-tight tracking-tight"
+            >
+              <span className="bg-gradient-to-r from-blue-600 via-green-600 to-purple-600 bg-clip-text text-transparent drop-shadow-md">
+                Dhaloota Jajjabeesina
+              </span>
+              <br />
+              <span className="text-gray-900">
+                Through Volunteerism
+              </span>
+            </motion.h1>
 
-            {/* Feature 2 */}
-            <div className="group bg-white p-8 rounded-2xl border border-gray-200 hover:border-purple-300 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
-              <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-purple-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <ShieldCheck className="h-7 w-7 text-purple-600" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3 text-gray-800">Secure Authentication</h3>
-              <p className="text-gray-600 mb-4 leading-relaxed">
-                JWT-based authentication with role-based middleware protection.
-                Your data stays secure and accessible only to authorized users.
-              </p>
-              <ul className="space-y-2 mt-4">
-                <li className="flex items-center text-gray-600">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                  Multi-factor auth
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                  Session management
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                  Audit logs
-                </li>
-              </ul>
-            </div>
+            {/* Subtitle */}
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-2xl lg:text-3xl text-gray-700 mb-10 font-semibold"
+            >
+              Building a Stronger and More
+              Inclusive Society
+            </motion.h2>
 
-            {/* Feature 3 */}
-            <div className="group bg-white p-8 rounded-2xl border border-gray-200 hover:border-pink-300 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
-              <div className="w-14 h-14 bg-gradient-to-br from-pink-100 to-pink-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Code className="h-7 w-7 text-pink-600" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3 text-gray-800">Easy Integration</h3>
-              <p className="text-gray-600 mb-4 leading-relaxed">
-                RESTful API ready to integrate with your frontend. 
-                Built with Next.js, TypeScript, and modern technologies.
-              </p>
-              <ul className="space-y-2 mt-4">
-                <li className="flex items-center text-gray-600">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                  TypeScript support
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                  Webhooks
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                  SDK libraries
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
+            {/* Description */}
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-lg lg:text-xl text-gray-600 mb-14 leading-relaxed max-w-4xl mx-auto"
+            >
+              Nutii Organization is dedicated to
+              empowering youth and communities
+              through training, guidance, and
+              impactful volunteer programs that
+              create lasting social change.
+            </motion.p>
 
-      {/* CTA Section */}
-      <section className="py-24">
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl p-12 md:p-16 text-center border border-gray-200 shadow-2xl relative overflow-hidden">
-            {/* Background elements */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-400/20 to-transparent rounded-full -translate-y-32 translate-x-32"></div>
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-purple-400/20 to-transparent rounded-full translate-y-32 -translate-x-32"></div>
-            
-            <div className="relative">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to Secure Your Application?</h2>
-              <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-                Join thousands of developers who trust AuthShield for their user management needs.
-                Start building securely today.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Link 
-                  href="/signup" 
-                  className="group relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 rounded-xl font-semibold text-white shadow-xl hover:shadow-2xl transition-all duration-300 inline-flex items-center justify-center"
+            {/* Stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12 max-w-4xl mx-auto"
+            >
+              {heroData.stats.map(
+                (stat, index) => (
+                  <div
+                    key={index}
+                    className="text-center group cursor-pointer"
+                    onClick={() =>
+                      stat.link &&
+                      router.push(stat.link)
+                    }
+                  >
+                    <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                      {stat.value}
+                    </div>
+                    <div className="text-sm text-gray-600 group-hover:text-blue-500 transition-colors">
+                      {stat.label}
+                    </div>
+                  </div>
+                )
+              )}
+            </motion.div>
+
+            {/* CTA Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="flex flex-wrap justify-center gap-8"
+            >
+              {isAuthenticated ? (
+                <button
+                  onClick={handleDashboard}
+                  className="group relative px-10 py-4 rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-green-600 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 overflow-hidden"
                 >
-                  <span className="relative flex items-center">
-                    Create Free Account
-                    <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-2 transition-transform" />
+                  <span className="relative z-10 flex items-center gap-3">
+                    Go to Dashboard
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
                   </span>
-                </Link>
-                <Link 
-                  href="/contact" 
-                  className="group bg-white hover:bg-gray-50 px-8 py-4 rounded-xl font-semibold text-gray-700 border border-gray-300 hover:border-blue-300 shadow-md hover:shadow-lg transition-all duration-300 inline-flex items-center"
+                  <span className="absolute inset-0 bg-gradient-to-r from-green-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleRegisterRedirect}
+                  className="group relative px-10 py-4 rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-green-600 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 overflow-hidden"
                 >
-                  <Settings className="h-5 w-5 mr-3 text-gray-500" />
-                  Contact Sales
-                </Link>
+                  <span className="relative z-10 flex items-center gap-3">
+                    Join as a Volunteer
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                  </span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-green-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              )}
+
+              <Link
+                href="/blog"
+                className="px-10 py-4 rounded-2xl font-semibold text-gray-800 bg-white/80 backdrop-blur-md border border-gray-200 hover:bg-white hover:border-blue-300 hover:shadow-xl transition-all duration-300 flex items-center gap-2"
+              >
+                <BookOpen className="w-5 h-5" />
+                Read Our Blog
+              </Link>
+            </motion.div>
+
+            {/* Scroll Hint */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="mt-16 flex justify-center"
+            >
+              <div className="flex flex-col items-center text-gray-400 text-sm">
+                <span>Scroll</span>
+                <div className="mt-2 h-6 w-0.5 bg-gray-300 rounded-full animate-bounce" />
               </div>
-              <p className="text-gray-500 text-sm mt-6">
-                No credit card required • 14-day free trial • Cancel anytime
-              </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section
+        id="about"
+        className="relative py-24 lg:py-32 bg-white overflow-hidden"
+      >
+        <div className="absolute -top-32 -left-32 w-[28rem] h-[28rem] bg-blue-100/40 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 -right-32 w-[30rem] h-[30rem] bg-green-100/40 rounded-full blur-[140px]" />
+
+        <div className="container mx-auto px-4 lg:px-8 relative">
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-50 to-green-50 rounded-full mb-8 shadow-sm"
+            >
+              <Info className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-semibold text-blue-700 tracking-wide">
+                Waa'ee Keenya
+              </span>
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-8"
+            >
+              Maaliif Nuti?
+            </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="text-lg lg:text-xl text-gray-600 leading-relaxed"
+            >
+              Woggaa saddeen darbaan dhaloota kana
+              keessatti baroota 2014 hanga ammatti
+              kaayyoo addaa waliin oolchaa ture.
+              Dhaloota ijjeessuu waan jirtan
+              dhiifama gaafanna.
+            </motion.p>
+          </div>
+
+          {/* Core Values */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {coreValues.map((value, index) => (
+              <motion.div
+                key={value.title}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{
+                  delay: index * 0.12,
+                }}
+                className="group relative"
+              >
+                {/* Card Glow */}
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-100/20 via-white to-green-100/20 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500" />
+
+                {/* Card */}
+                <div className="relative h-full p-8 rounded-3xl bg-white/80 backdrop-blur-sm border border-gray-200/60 shadow-sm group-hover:shadow-2xl group-hover:border-blue-200/60 transition-all duration-500">
+                  {/* Icon */}
+                  <div
+                    className={`inline-flex p-4 bg-gradient-to-br ${value.color} rounded-2xl mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}
+                  >
+                    <div className="text-white">
+                      {value.icon}
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    {value.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-gray-600 leading-relaxed mb-5">
+                    {value.description}
+                  </p>
+
+                  {/* Benefits */}
+                  <ul className="space-y-3">
+                    {value.benefits.map(
+                      (benefit, i) => (
+                        <li
+                          key={i}
+                          className="flex items-start gap-2 text-sm text-gray-600"
+                        >
+                          <Check className="w-4 h-4 mt-0.5 text-green-500 shrink-0" />
+                          {benefit}
+                        </li>
+                      )
+                    )}
+                  </ul>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Blog Section */}
+      <section
+        id="blog"
+        className="py-28 bg-gradient-to-b from-gray-50 via-white to-white"
+      >
+        <div className="container mx-auto px-4 lg:px-8">
+          {/* Header */}
+          <div className="max-w-3xl mx-auto text-center mb-20">
+            <span className="inline-flex items-center gap-2 px-5 py-2 mb-6 text-sm font-semibold rounded-full bg-indigo-50 text-indigo-600">
+              From the Blog
+            </span>
+
+            <h2 className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-6">
+              Latest{" "}
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Articles
+              </span>
+            </h2>
+
+            <p className="text-lg text-gray-600">
+              Stay inspired and informed! Read our
+              latest insights, tutorials, and
+              stories from the community.
+            </p>
+          </div>
+
+          {/* Blog Cards */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+            {blogsQuery.isLoading ? (
+              [...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-96 bg-gray-200 animate-pulse rounded-2xl"
+                />
+              ))
+            ) : blogsQuery.isError ||
+              !blogsQuery.data ||
+              blogsQuery.data.length === 0 ? (
+              <div className="text-center col-span-3 py-24 text-gray-500">
+                No blogs found
+              </div>
+            ) : (
+              blogsQuery.data.map((blog) => (
+                <motion.article
+                  key={blog._id}
+                  whileHover={{ y: -6 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 18,
+                  }}
+                  className="group relative bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-2xl"
+                >
+                  {/* Image */}
+                  <div className="relative h-60 overflow-hidden">
+                    {blog.coverImage?.url ? (
+                      <>
+                        <Image
+                          src={
+                            blog.coverImage.url
+                          }
+                          alt={blog.title}
+                          fill
+                          className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-500" />
+                      </>
+                    ) : (
+                      <div className="h-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
+                        <BookOpen className="w-12 h-12 text-indigo-500" />
+                      </div>
+                    )}
+
+                    {/* Badges */}
+                    <div className="absolute inset-x-5 top-5 flex items-center justify-between">
+                      <span className="px-3 py-1 text-xs font-bold rounded-full bg-white/90 backdrop-blur text-indigo-600">
+                        {blog.category}
+                      </span>
+                      {blog.isFeatured && (
+                        <span className="px-3 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+                          Featured
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-7 flex flex-col justify-between h-[calc(100%-15rem)]">
+                    <div>
+                      {/* Meta Top */}
+                      <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                        <span className="flex items-center gap-1">
+                          <User className="w-4 h-4" />{" "}
+                          {blog.author.name}
+                        </span>
+                        {blog.publishedAt && (
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />{" "}
+                            {new Date(
+                              blog.publishedAt
+                            ).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="text-2xl font-bold text-gray-900 mb-3 leading-snug group-hover:text-indigo-600 transition">
+                        {blog.title}
+                      </h3>
+
+                      <p className="text-gray-600 line-clamp-3 mb-5">
+                        {blog.excerpt ||
+                          blog.content.substring(
+                            0,
+                            120
+                          ) + "..."}
+                      </p>
+
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-2 mb-5">
+                        {blog.tags
+                          ?.slice(0, 3)
+                          .map((tag) => (
+                            <span
+                              key={tag}
+                              className="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition"
+                            >
+                              #{tag}
+                            </span>
+                          ))}
+                      </div>
+
+                      {/* Stats */}
+                      <div className="flex items-center gap-5 text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-4 h-4" />{" "}
+                          {blog.views} views
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />{" "}
+                          {Math.ceil(
+                            blog.content.length /
+                              800
+                          )}{" "}
+                          min read
+                        </span>
+                      </div>
+                    </div>
+                    {/* CTA */}
+
+                    <div className="mt-6 pt-6 border-t border-gray-100">
+                      <Link
+                        href={`/blog/${blog.slug}`}
+                        className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium group"
+                      >
+                        <span>
+                          Read full story
+                        </span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    </div>
+                  </div>
+                </motion.article>
+              ))
+            )}
+          </div>
+
+          {/* View All */}
+          <div className="text-center mt-24">
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-3 px-10 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:shadow-xl hover:scale-105 transition"
+            >
+              View all articles
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Programs Section */}
+      <section
+        id="programs"
+        className="py-28 bg-gradient-to-b from-gray-50 to-white"
+      >
+        <div className="container mx-auto px-4 lg:px-8">
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto mb-24">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-3 px-5 py-2 bg-gradient-to-r from-green-50 to-blue-50 rounded-full mb-6 shadow-sm"
+            >
+              <BookOpen className="w-5 h-5 text-green-600" />
+              <span className="text-sm font-semibold text-green-700 uppercase tracking-wider">
+                Leenjii fi Gorsa
+              </span>
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight"
+            >
+              Leenjii Addaa{" "}
+              <span className="bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent">
+                fi Gorsa
+              </span>
+            </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed"
+            >
+              Baroota 10 ol oolchaa ture. Dhaloota
+              kana keessatti leenjii addaa fi
+              gorsaa kennuu keenya irra
+              deddeebi'anii socho'aa jirra.
+              Jijjiirama ifaa fi milkaa'ina dhala
+              namaa fiduuf.
+            </motion.p>
+          </div>
+
+          {/* Programs Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
+            {programs.map((program, index) => (
+              <motion.div
+                key={program._id}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{
+                  y: -8,
+                  scale: 1.05,
+                }}
+                viewport={{ once: true }}
+                transition={{
+                  delay: index * 0.1,
+                  duration: 0.5,
+                }}
+                onClick={() =>
+                  setSelectedProgram(program)
+                }
+                className="relative cursor-pointer group"
+              >
+                {/* Card Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-3xl border border-gray-200 shadow-md group-hover:shadow-2xl transition-all duration-500" />
+
+                {/* Card Content */}
+                <div className="relative p-6 flex flex-col h-full">
+                  {/* Icon */}
+                  <div className="flex items-center justify-center w-16 h-16 mb-5 rounded-xl bg-gradient-to-tr from-pink-500 via-orange-400 to-yellow-400 text-white shadow-lg transform group-hover:rotate-6 transition-transform duration-500">
+                    <BookOpen className="w-7 h-7" />
+                  </div>
+
+                  {/* Program Info */}
+                  <div className="flex-1 mb-5">
+                    <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">
+                      {formatDate(program.date)} •{" "}
+                      {program.location || "TBA"}
+                    </div>
+
+                    <h3 className="text-lg lg:text-xl font-bold text-gray-900 mb-2 leading-snug group-hover:text-pink-600 transition-colors duration-300">
+                      {program.title}
+                    </h3>
+
+                    <p className="text-gray-700 text-sm lg:text-base line-clamp-4">
+                      {program.description ||
+                        "No description available."}
+                    </p>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between mt-auto">
+                    <span className="px-3 py-1 bg-pink-50 text-pink-700 text-xs font-medium rounded-full shadow-sm">
+                      {program.category ||
+                        "General"}
+                    </span>
+                    <ChevronRight className="w-5 h-5 text-pink-500 group-hover:translate-x-2 transition-transform duration-300" />
+                  </div>
+                </div>
+
+                {/* Hover Shine Effect */}
+                <div className="absolute top-0 left-0 w-full h-full rounded-3xl pointer-events-none opacity-0 group-hover:opacity-25 bg-gradient-to-r from-white/20 via-white/10 to-white/20 animate-shine"></div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Success Stories */}
+      <section className="py-28 bg-white">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-24">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-3 px-5 py-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-full mb-6 shadow-sm"
+            >
+              <Trophy className="w-5 h-5 text-amber-600" />
+              <span className="text-sm font-semibold text-amber-700 uppercase tracking-wider">
+                Milkaa'inaa
+              </span>
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight"
+            >
+              Ijoo{" "}
+              <span className="bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
+                Dhalootaa
+              </span>
+            </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed"
+            >
+              Dhaloota keenya irra deebi'anii maal
+              hojjachaa jiran? Akkaataa leenjii
+              keenyaan jireenya isaanii jijjiirran
+              fi milkaa'ina argatan.
+            </motion.p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
+            {successStories.map(
+              (story, index) => (
+                <motion.div
+                  key={story.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  viewport={{ once: true }}
+                  transition={{
+                    delay: index * 0.1,
+                  }}
+                  className="group cursor-pointer"
+                >
+                  <div className="bg-white rounded-3xl border border-gray-200 shadow-lg p-8 hover:shadow-2xl transition-all duration-500 h-full flex flex-col">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="p-4 bg-gradient-to-br from-blue-100 to-green-100 rounded-2xl shadow-sm">
+                        {story.icon}
+                      </div>
+                      <span className="text-sm font-semibold text-gray-500 tracking-wide">
+                        {story.year}
+                      </span>
+                    </div>
+
+                    <div className="mb-6 flex-1">
+                      <div className="text-lg lg:text-xl font-bold text-gray-900 mb-1 leading-snug">
+                        {story.name}
+                      </div>
+                      <div className="text-sm text-gray-600 mb-3">
+                        {story.role}
+                      </div>
+                      <p className="text-gray-700 italic text-sm lg:text-base leading-relaxed">
+                        "{story.story}"
+                      </p>
+                    </div>
+
+                    <div className="px-4 py-2 bg-gradient-to-r from-blue-50 to-green-50 rounded-full inline-block">
+                      <span className="text-sm font-semibold text-blue-700">
+                        {story.achievement}
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+              )
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Upcoming Events Section */}
+      <section
+        id="events"
+        className="py-20 bg-gradient-to-b from-gray-50 to-white"
+      >
+        <div className="container mx-auto px-4 lg:px-8">
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-50 to-pink-50 rounded-full mb-6"
+            >
+              <Calendar className="w-4 h-4 text-purple-600" />
+              <span className="text-sm font-semibold text-purple-700">
+                Oolcha Dhihoo
+              </span>
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
+            >
+              Upcoming Events
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-lg text-gray-600"
+            >
+              Explore our latest events,
+              workshops, and conferences. Don't
+              miss the chance to participate and
+              connect with the community.
+            </motion.p>
+          </div>
+
+          {/* Loading/Error States */}
+          {eventsLoading && (
+            <p className="text-center text-gray-500 text-lg font-medium">
+              Loading events...
+            </p>
+          )}
+          {eventsError && (
+            <p className="text-center text-red-500 text-lg font-medium">
+              Error loading events
+            </p>
+          )}
+
+          {/* Events Grid */}
+          {upcomingEvents.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+              {upcomingEvents.map(
+                (event, index) => (
+                  <motion.div
+                    key={event._id}
+                    initial={{
+                      opacity: 0,
+                      y: 40,
+                    }}
+                    whileInView={{
+                      opacity: 1,
+                      y: 0,
+                    }}
+                    viewport={{ once: true }}
+                    transition={{
+                      delay: index * 0.1,
+                    }}
+                    className="group"
+                  >
+                    <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-200 transition-all hover:shadow-2xl hover:scale-105 duration-500 h-full flex flex-col">
+                      {/* Image */}
+                      <div className="h-40 w-full bg-gray-100 flex items-center justify-center">
+                        {event.files &&
+                        event.files.length > 0 ? (
+                          <div className="relative w-full h-full">
+                            <Image
+                              src={
+                                event.files[0].url
+                              }
+                              alt={event.title}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <Calendar className="w-12 h-12 text-gray-300" />
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="px-3 py-1 rounded-full text-sm font-semibold bg-gradient-to-r from-blue-50 to-green-50 text-blue-700">
+                              {event.category ||
+                                "Event"}
+                            </span>
+                            <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-50 text-green-700">
+                              Free
+                            </span>
+                          </div>
+
+                          <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
+                            {event.title}
+                          </h3>
+                          <p className="text-gray-600 text-sm mb-6 line-clamp-3">
+                            {event.description ||
+                              "No description available."}
+                          </p>
+
+                          <div className="space-y-2 mb-4 text-gray-500 text-sm">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4" />
+                              {formatDate(
+                                event.date
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4" />
+                              {event.time ||
+                                "All day"}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-4 h-4" />
+                              {event.location ||
+                                "Location TBA"}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Conditional Button */}
+                        {isAuthenticated ? (
+                          <Link
+                            href={`/events/${event._id}`}
+                            className="mt-auto w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 text-center"
+                          >
+                            View Details
+                          </Link>
+                        ) : (
+                          <Link
+                            href="/login"
+                            className="mt-auto w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 text-center"
+                          >
+                            Login to Register
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              )}
             </div>
+          ) : (
+            !eventsLoading && (
+              <p className="text-center text-gray-500 text-lg font-medium">
+                No upcoming events at the moment.
+              </p>
+            )
+          )}
+
+          {/* View All Button */}
+          <div className="text-center">
+            <Link
+              href="/events"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-white text-gray-700 font-semibold rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
+            >
+              <Calendar className="w-5 h-5" />
+              View All Events
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Partners Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4 lg:px-8">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4 leading-tight"
+            >
+              Hiriyaa fi{" "}
+              <span className="bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent">
+                Waliigaltee
+              </span>
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-gray-600 max-w-2xl mx-auto text-lg"
+            >
+              Waliin hojjachuun dhalootaf
+              gargaaruuf hiriyaa fi waliigaltee
+              hedduu waliin hojjachaa jirra.
+            </motion.p>
+          </div>
+
+          {/* Partners Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8">
+            {partners.map((partner, index) => (
+              <motion.div
+                key={partner.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{
+                  delay: index * 0.1,
+                }}
+                className="group"
+              >
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 hover:shadow-lg hover:scale-105 transition-transform duration-300 flex flex-col items-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-green-500 rounded-xl flex items-center justify-center text-white text-2xl font-bold mb-4 shadow-sm group-hover:shadow-md transition-shadow duration-300">
+                    {partner.logo}
+                  </div>
+                  <div className="text-center">
+                    <div className="font-semibold text-gray-900 mb-1">
+                      {partner.name}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {partner.type}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section
+        id="testimonials"
+        className="py-24 bg-gradient-to-b from-white to-gray-50"
+      >
+        <div className="container mx-auto px-4 lg:px-8">
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto mb-16 relative">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-3 px-5 py-2 bg-gradient-to-r from-rose-50 to-pink-50 rounded-full mb-6 shadow-md"
+            >
+              <Quote className="w-5 h-5 text-rose-600" />
+              <span className="text-sm font-semibold text-rose-700 tracking-wide">
+                Ijoo fi Madaala
+              </span>
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-6 leading-tight"
+            >
+              Namootni{" "}
+              <span className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent animate-pulse">
+                Maal Jettu
+              </span>
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-gray-600 max-w-2xl mx-auto text-lg"
+            >
+              Dhaloota keenya irraa dhugaa fi
+              madaala: namootni maal jedhani fi
+              jireenya isaanii akkamitti
+              jijjiirran.
+            </motion.p>
+          </div>
+
+          {/* Testimonial Card */}
+          <div className="relative max-w-4xl mx-auto">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTestimonial}
+                initial={{
+                  opacity: 0,
+                  x: 100,
+                  scale: 0.95,
+                }}
+                animate={{
+                  opacity: 1,
+                  x: 0,
+                  scale: 1,
+                }}
+                exit={{
+                  opacity: 0,
+                  x: -100,
+                  scale: 0.95,
+                }}
+                transition={{ duration: 0.5 }}
+                className="bg-white rounded-3xl border border-gray-200/30 p-8 lg:p-12 shadow-xl hover:shadow-2xl transition-all duration-500"
+              >
+                <div className="flex flex-col lg:flex-row items-center gap-8">
+                  {/* Avatar */}
+                  <div className="lg:w-1/4 flex justify-center lg:justify-start">
+                    <div className="relative">
+                      <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg transform hover:scale-105 transition-transform duration-500">
+                        {
+                          testimonials[
+                            activeTestimonial
+                          ].avatar
+                        }
+                      </div>
+                      <div className="absolute -bottom-3 -right-3 w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg animate-bounce">
+                        <Quote className="w-6 h-6" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="lg:w-3/4">
+                    <div className="flex items-center gap-2 mb-6">
+                      {[...Array(5)].map(
+                        (_, i) => (
+                          <Star
+                            key={i}
+                            className="w-5 h-5 text-amber-500 fill-amber-500 animate-pulse"
+                          />
+                        )
+                      )}
+                    </div>
+                    <p className="text-lg lg:text-xl text-gray-700 italic mb-8 leading-relaxed tracking-wide">
+                      "
+                      {
+                        testimonials[
+                          activeTestimonial
+                        ].content
+                      }
+                      "
+                    </p>
+                    <div>
+                      <div className="font-bold text-gray-900 text-lg">
+                        {
+                          testimonials[
+                            activeTestimonial
+                          ].name
+                        }
+                      </div>
+                      <div className="text-gray-600">
+                        {
+                          testimonials[
+                            activeTestimonial
+                          ].role
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Navigation Dots */}
+            <div className="flex justify-center items-center gap-4 mt-10">
+              {testimonials.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() =>
+                    setActiveTestimonial(index)
+                  }
+                  className={`rounded-full transition-all duration-500 ${
+                    index === activeTestimonial
+                      ? "w-8 h-3 bg-gradient-to-r from-blue-600 to-green-500 shadow-lg"
+                      : "w-3 h-3 bg-gray-300 hover:bg-gray-400"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-24 bg-gray-50">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-16">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-full mb-6 shadow-sm"
+              >
+                <HelpCircleIcon className="w-5 h-5 text-indigo-600" />
+                <span className="text-sm font-semibold text-indigo-700 tracking-wide">
+                  Gaaffii fi Deebii
+                </span>
+              </motion.div>
+
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-6 leading-tight"
+              >
+                Gaaffiiwwan{" "}
+                <span className="text-blue-600">
+                  Dhihoo fi Barbaachisaa
+                </span>
+              </motion.h2>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-gray-600 text-lg"
+              >
+                Gaaffilee yeroo hedduu ka'aman fi
+                deebii isaanii sirrii fi ifaa ta'e
+                argachuuf.
+              </motion.p>
+            </div>
+
+            {/* FAQ Items */}
+            <div className="space-y-5">
+              {faqs.map((faq, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  viewport={{ once: true }}
+                  transition={{
+                    delay: index * 0.1,
+                  }}
+                  className="bg-white rounded-3xl shadow-md border border-gray-200 hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+                >
+                  <button
+                    onClick={() =>
+                      setActiveFaq(
+                        activeFaq === index
+                          ? null
+                          : index
+                      )
+                    }
+                    className="w-full px-6 py-5 flex items-center justify-between text-left bg-white hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="text-lg font-semibold text-gray-900">
+                      {faq.question}
+                    </span>
+                    <motion.div
+                      animate={{
+                        rotate:
+                          activeFaq === index
+                            ? 90
+                            : 0,
+                      }}
+                      transition={{
+                        duration: 0.3,
+                      }}
+                    >
+                      <ChevronRight className="w-5 h-5 text-gray-500" />
+                    </motion.div>
+                  </button>
+
+                  <AnimatePresence>
+                    {activeFaq === index && (
+                      <motion.div
+                        initial={{
+                          height: 0,
+                          opacity: 0,
+                          paddingTop: 0,
+                          paddingBottom: 0,
+                        }}
+                        animate={{
+                          height: "auto",
+                          opacity: 1,
+                          paddingTop: 20,
+                          paddingBottom: 20,
+                        }}
+                        exit={{
+                          height: 0,
+                          opacity: 0,
+                          paddingTop: 0,
+                          paddingBottom: 0,
+                        }}
+                        className="px-6 bg-blue-50/20 border-t border-gray-200"
+                      >
+                        <p className="text-gray-700 leading-relaxed">
+                          {faq.answer}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="relative py-28 bg-gradient-to-br from-white to-blue-50 overflow-hidden">
+        {/* Decorative floating shapes */}
+        <div className="absolute -top-24 -left-24 w-80 h-80 bg-blue-200/20 rounded-full filter blur-3xl animate-blob"></div>
+        <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-green-200/20 rounded-full filter blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-purple-200/20 rounded-full filter blur-2xl animate-blob animation-delay-4000"></div>
+
+        <div className="container mx-auto px-4 lg:px-8 relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Icon Badge */}
+            <motion.div
+              initial={{
+                opacity: 0,
+                scale: 0.8,
+                rotate: -10,
+              }}
+              whileInView={{
+                opacity: 1,
+                scale: 1,
+                rotate: 0,
+              }}
+              viewport={{ once: true }}
+              transition={{
+                type: "spring",
+                stiffness: 120,
+              }}
+              className="inline-flex p-5 bg-gradient-to-br from-blue-400 to-green-400 rounded-3xl mb-8 shadow-2xl"
+            >
+              <Rocket className="w-16 h-16 text-white animate-bounce" />
+            </motion.div>
+
+            {/* Main Title */}
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight"
+            >
+              Har'a{" "}
+              <span className="text-gradient bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent">
+                Eegaluu!
+              </span>
+            </motion.h2>
+
+            {/* Subtitle */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-xl lg:text-2xl text-gray-700 mb-12 max-w-3xl mx-auto leading-relaxed"
+            >
+              Dhaloota kana keessatti{" "}
+              <span className="font-bold text-blue-600">
+                hiriyaa ta'i
+              </span>
+              , leenjii{" "}
+              <span className="font-bold text-green-600">
+                argadhaa
+              </span>
+              , hiriyyaa{" "}
+              <span className="font-bold text-purple-600">
+                argadhaa
+              </span>
+              , fi jireenya keessan{" "}
+              <span className="font-extrabold text-gradient bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent">
+                jijjiradhaa
+              </span>
+              .
+            </motion.p>
+
+            {/* Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="flex flex-col sm:flex-row gap-6 justify-center"
+            >
+              {isAuthenticated ? (
+                <button
+                  onClick={handleDashboard}
+                  className="group px-12 py-4 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-3xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg"
+                >
+                  Go to Dashboard
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={
+                      handleRegisterRedirect
+                    }
+                    className="group px-12 py-4 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-3xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg"
+                  >
+                    Register Now
+                    <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                  </button>
+                  <button
+                    onClick={handleLoginRedirect}
+                    className="px-12 py-4 bg-white text-gray-700 font-semibold rounded-3xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
+                  >
+                    Login
+                  </button>
+                </>
+              )}
+            </motion.div>
+
+            {/* Extra Note */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="mt-10 text-sm text-gray-500 italic"
+            >
+              Hiriyaa fi leenjii argachuuf qophii
+              guutuu ta'uu kee mirkaneessi.
+            </motion.p>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-b from-white to-gray-100 border-t border-gray-200 py-12">
-        <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
+      <footer className="bg-gradient-to-b from-gray-900 to-black text-white pt-16 pb-8">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
             <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
-                  <Shield className="h-6 w-6 text-white" />
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-green-500 rounded-2xl flex items-center justify-center">
+                  <Users className="w-7 h-7 text-white" />
                 </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  AuthShield
-                </span>
+                <div>
+                  <h3 className="text-xl font-bold">
+                    Nutii Dhaabbati
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    Gurmuu Tola Oltummaa
+                  </p>
+                </div>
               </div>
-              <p className="text-gray-600">
-                Enterprise-grade access control for modern applications
+              <p className="text-gray-400 mb-6 text-sm leading-relaxed">
+                Woggaa saddeen darbaan dhaloota
+                kana keessatti baroota 2014 hanga
+                ammatti kaayyoo addaa waliin
+                oolchaa ture. Dhaloota ijjeessuu
+                waan jirtan dhiifama gaafanna.
               </p>
+              <div className="flex gap-4">
+                {[
+                  Facebook,
+                  Twitter,
+                  Instagram,
+                  Linkedin,
+                ].map((Icon, i) => (
+                  <a
+                    key={i}
+                    href="#"
+                    className="w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded-xl flex items-center justify-center transition-colors"
+                  >
+                    <Icon className="w-5 h-5" />
+                  </a>
+                ))}
+              </div>
             </div>
-            
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-4">Product</h4>
-              <ul className="space-y-2">
-                <li><Link href="/features" className="text-gray-600 hover:text-blue-600 transition-colors">Features</Link></li>
-                <li><Link href="/pricing" className="text-gray-600 hover:text-blue-600 transition-colors">Pricing</Link></li>
-                <li><Link href="/security" className="text-gray-600 hover:text-blue-600 transition-colors">Security</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-4">Resources</h4>
-              <ul className="space-y-2">
-                <li><Link href="/docs" className="text-gray-600 hover:text-blue-600 transition-colors">Documentation</Link></li>
-                <li><Link href="/blog" className="text-gray-600 hover:text-blue-600 transition-colors">Blog</Link></li>
-                <li><Link href="/support" className="text-gray-600 hover:text-blue-600 transition-colors">Support</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-4">Company</h4>
-              <ul className="space-y-2">
-                <li><Link href="/about" className="text-gray-600 hover:text-blue-600 transition-colors">About</Link></li>
-                <li><Link href="/careers" className="text-gray-600 hover:text-blue-600 transition-colors">Careers</Link></li>
-                <li><Link href="/contact" className="text-gray-600 hover:text-blue-600 transition-colors">Contact</Link></li>
-              </ul>
-            </div>
+
+            {[
+              {
+                title: "Leenjii",
+                links: [
+                  "Barataa",
+                  "Qotee Bulaa",
+                  "Horsiisaa",
+                  "Hojjataa",
+                  "Technology",
+                  "Business",
+                ],
+              },
+              {
+                title: "Kaayyoo",
+                links: [
+                  "Dhaloota Gorsuu",
+                  "Oltummaa",
+                  "Wal-simatu",
+                  "Hawaasa",
+                  "Sirna",
+                  "Misooma",
+                ],
+              },
+              {
+                title: "Qabsiina",
+                links: [
+                  "Natti Bilbilaa",
+                  "Email",
+                  "Magaalaa",
+                  "Facebook",
+                  "Twitter",
+                  "Office",
+                ],
+              },
+            ].map((section) => (
+              <div key={section.title}>
+                <h4 className="font-bold text-lg mb-6">
+                  {section.title}
+                </h4>
+                <ul className="space-y-3">
+                  {section.links.map((link) => (
+                    <li key={link}>
+                      <Link
+                        href="#"
+                        className="text-gray-400 hover:text-white transition-colors text-sm"
+                      >
+                        {link}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
-          
-          <div className="border-t border-gray-200 pt-8 text-center">
-            <div className="flex flex-col md:flex-row justify-between items-center">
-              <p className="text-gray-600 mb-4 md:mb-0">
-                © {new Date().getFullYear()} AuthShield. All rights reserved.
-              </p>
-              <div className="flex space-x-6">
-                <Link href="/privacy" className="text-gray-600 hover:text-blue-600 transition-colors">
-                  Privacy Policy
-                </Link>
-                <Link href="/terms" className="text-gray-600 hover:text-blue-600 transition-colors">
-                  Terms of Service
-                </Link>
-                <Link href="/cookies" className="text-gray-600 hover:text-blue-600 transition-colors">
-                  Cookie Policy
-                </Link>
-              </div>
-            </div>
+
+          <div className="border-t border-gray-800 pt-8 text-center">
+            <p className="text-gray-400 text-sm">
+              © {new Date().getFullYear()} Nutii
+              Dhaabbati Gurmuu Tola Oltummaa.
+              Hundumtuu mirga ofii isaati.
+            </p>
+            <p className="text-gray-500 text-xs mt-2 italic">
+              "Nami maqaa isaa xureessitan
+              dhaloota ijjeesa waan jirtanuuf
+              dhiifama gaafanna"
+            </p>
           </div>
         </div>
       </footer>
+
+      {/* Scroll to Top Button */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            onClick={scrollToTop}
+            className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-blue-600 to-green-600 text-white rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 z-50 flex items-center justify-center hover:scale-110"
+          >
+            <ChevronUp className="w-6 h-6" />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
