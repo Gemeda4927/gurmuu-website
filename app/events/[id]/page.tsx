@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import {
+  useParams,
+  useRouter,
+} from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { toast, Toaster } from "react-hot-toast";
@@ -15,134 +18,51 @@ import {
   Bookmark,
   Star,
   Heart,
-  MessageCircle,
   Award,
   ArrowRight,
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin,
-  Mail,
-  Globe,
-  Map,
-  Download,
+  ExternalLink,
+  Maximize2,
+  MessageSquare,
+  Target,
+  Activity,
+  Users as Users2,
+  Hash,
+  RefreshCcw,
   Printer,
   Eye,
-  Users as UsersIcon,
-  CalendarDays,
-  Target,
-  Trophy,
-  TrendingUp,
-  BarChart3,
-  PieChart,
-  Activity,
-  Heart as HeartIcon,
-  Shield,
-  Bell,
-  Coffee,
-  Music,
-  Video,
   Camera,
-  Code,
-  Palette,
-  Dumbbell,
-  BookOpen,
-  GraduationCap,
-  Briefcase,
-  Mic,
-  Cloud,
-  Zap,
-  Rocket,
-  Sun,
-  Moon,
-  Leaf,
-  Wind,
-  Waves,
-  Mountain,
-  Trees,
-  Flower,
-  Thermometer,
-  CloudRain,
-  CloudSnow,
-  CloudLightning,
-  Droplets,
-  Sunrise,
-  Sunset,
+  Info,
+  Grid,
+  Mail,
+  Facebook,
+  Twitter,
+  Linkedin,
+  Instagram,
+  ChevronRight,
   X,
   ChevronDown,
   ChevronUp,
-  Maximize2,
-  ExternalLink,
-  Users as Users2,
-  Flag,
-  Building,
-  Home,
-  Navigation,
-  Compass,
-  Package,
-  Tag,
-  Hash,
-  Gift as GiftIcon,
-  Coffee as CoffeeIcon,
-  Music as MusicIcon,
-  Video as VideoIcon,
-  Camera as CameraIcon,
-  Code as CodeIcon,
-  Palette as PaletteIcon,
-  Dumbbell as DumbbellIcon,
-  BookOpen as BookOpenIcon,
-  GraduationCap as GraduationCapIcon,
-  Briefcase as BriefcaseIcon,
-  Mic as MicIcon,
-  Cloud as CloudIcon,
-  Zap as ZapIcon,
-  Rocket as RocketIcon,
-  Sun as SunIcon,
-  Moon as MoonIcon,
-  Leaf as LeafIcon,
-  Wind as WindIcon,
-  Waves as WavesIcon,
-  Mountain as MountainIcon,
-  Trees as TreesIcon,
-  Flower as FlowerIcon,
-  Thermometer as ThermometerIcon,
-  CloudRain as CloudRainIcon,
-  CloudSnow as CloudSnowIcon,
-  CloudLightning as CloudLightningIcon,
-  Droplets as DropletsIcon,
-  Sunrise as SunriseIcon,
-  Sunset as SunsetIcon,
-  CornerUpRight,
-  ArrowUpRight,
-  Expand,
-  ZoomIn,
-  RotateCw,
-  Eye as EyeIcon,
-  Check,
-  X as XIcon,
-  Info,
-  HelpCircle,
-  ThumbsUp,
-  MessageSquare,
-  Filter,
-  Search,
-  Package as PackageIcon,
-  Headphones,
-  LifeBuoy,
-  Volume2,
-  BellRing,
-  Clock as ClockIcon,
-  Watch,
-  Calendar as CalendarIcon,
-  ChevronRight,
-  RefreshCcw,
-  Grid,
   Sparkles,
-  Target as TargetIcon,
-  TrendingUp as TrendingUpIcon,
-  BarChart as BarChartIcon,
-  Activity as ActivityIcon,
-  Globe as GlobeIcon,
+  TrendingUp,
+  BarChart3,
+  PieChart,
+  Globe,
+  Download,
+  LifeBuoy,
+  Bell,
+  CheckCircle,
+  Shield,
+  Ticket,
+  CreditCard,
+  QrCode,
+  CalendarDays,
+  Map as MapIcon,
+  Navigation,
+  Phone,
+  Mail as MailIcon,
+  Coffee,
+  Music,
+  Leaf,
 } from "lucide-react";
 import {
   motion,
@@ -150,22 +70,25 @@ import {
 } from "framer-motion";
 import { useEvents } from "@/lib/hooks/useEvents";
 import { EventData } from "@/lib/types/event";
+import Header from "@/components/home/Header";
+import Footer from "@/components/home/Footer";
+import { useAuthStore } from "@/lib/store/auth.store";
 
-// Theme icons mapping with beautiful colors
+// Theme icons mapping with beautiful colors - Now all icons are properly imported
 const themeIcons: Record<
   string,
   { icon: React.ReactNode; color: string }
 > = {
   technology: {
-    icon: <Code className="w-6 h-6" />,
+    icon: <BarChart3 className="w-6 h-6" />,
     color: "from-blue-500 to-cyan-500",
   },
   education: {
-    icon: <GraduationCap className="w-6 h-6" />,
+    icon: <Globe className="w-6 h-6" />,
     color: "from-purple-500 to-pink-500",
   },
   business: {
-    icon: <Briefcase className="w-6 h-6" />,
+    icon: <TrendingUp className="w-6 h-6" />,
     color: "from-emerald-500 to-teal-500",
   },
   health: {
@@ -173,11 +96,11 @@ const themeIcons: Record<
     color: "from-red-500 to-rose-500",
   },
   arts: {
-    icon: <Palette className="w-6 h-6" />,
+    icon: <PieChart className="w-6 h-6" />,
     color: "from-pink-500 to-rose-500",
   },
   sports: {
-    icon: <Dumbbell className="w-6 h-6" />,
+    icon: <Award className="w-6 h-6" />,
     color: "from-orange-500 to-amber-500",
   },
   music: {
@@ -210,14 +133,23 @@ const statusColors: Record<string, string> = {
     "bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border-amber-200",
   cancelled:
     "bg-gradient-to-r from-rose-100 to-pink-100 text-rose-800 border-rose-200",
+  ongoing:
+    "bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 border-blue-200",
+  upcoming:
+    "bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 border-purple-200",
+  completed:
+    "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border-gray-300",
 };
 
 export default function EventDetailsPage() {
   const params = useParams();
+  const router = useRouter();
   const eventId = params.id as string;
 
   const { getEvent, loading, error, getEvents } =
     useEvents();
+  const { user, isAuthenticated, logout } =
+    useAuthStore();
 
   const [event, setEvent] =
     useState<EventData | null>(null);
@@ -230,6 +162,7 @@ export default function EventDetailsPage() {
     | "highlights"
     | "gallery"
     | "reviews"
+    | "register"
   >("details");
   const [
     expandedDescription,
@@ -241,6 +174,40 @@ export default function EventDetailsPage() {
     useState(0);
   const [loadingSimilar, setLoadingSimilar] =
     useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [ticketCount, setTicketCount] =
+    useState(1);
+
+  // Handle login redirect
+  const handleLoginRedirect = () => {
+    router.push("/login");
+  };
+
+  // Handle register redirect
+  const handleRegisterRedirect = () => {
+    router.push("/register");
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
+  // Handle dashboard navigation
+  const handleDashboard = () => {
+    if (isAuthenticated && user) {
+      if (
+        user.role === "admin" ||
+        user.role === "superadmin"
+      ) {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/dashboard");
+      }
+    }
+  };
 
   // Fetch event details and similar events
   useEffect(() => {
@@ -350,32 +317,14 @@ export default function EventDetailsPage() {
     }
   };
 
-  // Format currency
-  const formatCurrency = (
-    amount: number | undefined,
-    currency: string = "ETB"
-  ) => {
-    if (!amount) return `0 ${currency}`;
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency:
-        currency === "ETB" ? "ETB" : "USD",
-      minimumFractionDigits: 0,
-    })
-      .format(amount)
-      .replace("ETB", "ETB ");
-  };
-
   // Get days remaining
   const getDaysRemaining = () => {
-    if (!event?.donationDeadline) return null;
+    if (!event?.date) return null;
     try {
-      const deadline = new Date(
-        event.donationDeadline
-      );
+      const eventDate = new Date(event.date);
       const today = new Date();
       const diffTime =
-        deadline.getTime() - today.getTime();
+        eventDate.getTime() - today.getTime();
       const diffDays = Math.ceil(
         diffTime / (1000 * 60 * 60 * 24)
       );
@@ -417,7 +366,7 @@ export default function EventDetailsPage() {
       !event?.feedbacks ||
       event.feedbacks.length === 0
     )
-      return 0;
+      return "0.0";
     const total = event.feedbacks.reduce(
       (sum, feedback) => sum + feedback.rating,
       0
@@ -450,33 +399,77 @@ export default function EventDetailsPage() {
     }
   };
 
+  // Handle ticket purchase
+  const handleTicketPurchase = () => {
+    if (!isAuthenticated) {
+      toast.error(
+        "Please login to purchase tickets"
+      );
+      router.push("/login");
+      return;
+    }
+    toast.success(
+      `Successfully purchased ${ticketCount} ticket${ticketCount > 1 ? "s" : ""}!`
+    );
+    // Here you would typically redirect to payment gateway or show payment modal
+  };
+
+  // Handle save event
+  const handleSaveEvent = () => {
+    setIsSaved(!isSaved);
+    toast.success(
+      isSaved
+        ? "Removed from saved events"
+        : "Event saved to your favorites!"
+    );
+  };
+
+  // Handle like event
+  const handleLikeEvent = () => {
+    setIsLiked(!isLiked);
+    toast.success(
+      isLiked ? "Removed like" : "Event liked!"
+    );
+  };
+
   // Render loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <div className="text-center p-8 rounded-3xl shadow-xl bg-white/80 backdrop-blur-md">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{
-              duration: 1.2,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-            className="w-24 h-24 border-4 border-gray-200 border-t-blue-500 rounded-full mx-auto mb-6 shadow-md"
-          />
-          <h3 className="text-3xl font-extrabold text-gray-800 mb-2 animate-pulse">
-            Loading Event Details
-          </h3>
-          <p className="text-gray-600 text-lg">
-            Hang tight! We're fetching the latest
-            event information...
-          </p>
-          <div className="mt-6 flex justify-center space-x-2">
-            <span className="w-3 h-3 bg-blue-400 rounded-full animate-bounce"></span>
-            <span className="w-3 h-3 bg-purple-400 rounded-full animate-bounce delay-150"></span>
-            <span className="w-3 h-3 bg-pink-400 rounded-full animate-bounce delay-300"></span>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+        <Header
+          onLoginClick={handleLoginRedirect}
+          onRegisterClick={handleRegisterRedirect}
+          onDashboardClick={handleDashboard}
+          onLogoutClick={handleLogout}
+        />
+
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center p-8 rounded-3xl shadow-xl bg-white/80 backdrop-blur-md">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{
+                duration: 1.2,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+              className="w-24 h-24 border-4 border-gray-200 border-t-blue-500 rounded-full mx-auto mb-6 shadow-md"
+            />
+            <h3 className="text-3xl font-extrabold text-gray-800 mb-2 animate-pulse">
+              Loading Event Details
+            </h3>
+            <p className="text-gray-600 text-lg">
+              Hang tight! We're fetching the
+              latest event information...
+            </p>
+            <div className="mt-6 flex justify-center space-x-2">
+              <span className="w-3 h-3 bg-blue-400 rounded-full animate-bounce"></span>
+              <span className="w-3 h-3 bg-purple-400 rounded-full animate-bounce delay-150"></span>
+              <span className="w-3 h-3 bg-pink-400 rounded-full animate-bounce delay-300"></span>
+            </div>
           </div>
         </div>
+
+        <Footer />
       </div>
     );
   }
@@ -484,32 +477,43 @@ export default function EventDetailsPage() {
   // Render error state
   if (error || !event) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-red-50/30 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-8">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="w-24 h-24 bg-gradient-to-br from-red-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg"
-          >
-            <XIcon className="w-12 h-12 text-red-600" />
-          </motion.div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Event Not Found
-          </h2>
-          <p className="text-gray-600 mb-8 text-lg">
-            {error ||
-              "The event you're looking for doesn't exist or has been removed."}
-          </p>
-          <div className="space-y-4">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 shadow-lg"
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-red-50/30">
+        <Header
+          onLoginClick={handleLoginRedirect}
+          onRegisterClick={handleRegisterRedirect}
+          onDashboardClick={handleDashboard}
+          onLogoutClick={handleLogout}
+        />
+
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center max-w-md mx-auto p-8">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="w-24 h-24 bg-gradient-to-br from-red-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg"
             >
-              <ChevronLeft className="w-5 h-5" />
-              <span>Back to Home</span>
-            </Link>
+              <X className="w-12 h-12 text-red-600" />
+            </motion.div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Event Not Found
+            </h2>
+            <p className="text-gray-600 mb-8 text-lg">
+              {error ||
+                "The event you're looking for doesn't exist or has been removed."}
+            </p>
+            <div className="space-y-4">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 shadow-lg"
+              >
+                <ChevronLeft className="w-5 h-5" />
+                <span>Back to Home</span>
+              </Link>
+            </div>
           </div>
         </div>
+
+        <Footer />
       </div>
     );
   }
@@ -517,13 +521,22 @@ export default function EventDetailsPage() {
   const themeConfig = getThemeConfig(event.theme);
   const avgRating = calculateAverageRating();
   const dateDifference = getDateDifference();
+  const daysRemaining = getDaysRemaining();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-blue-50/30">
       <Toaster position="top-right" />
 
+      {/* Header Component */}
+      <Header
+        onLoginClick={handleLoginRedirect}
+        onRegisterClick={handleRegisterRedirect}
+        onDashboardClick={handleDashboard}
+        onLogoutClick={handleLogout}
+      />
+
       {/* Progress Bar */}
-      <div className="fixed top-0 left-0 right-0 h-1 bg-gray-200 z-50">
+      <div className="fixed top-16 left-0 right-0 h-1 bg-gray-200 z-50">
         <motion.div
           className="h-full bg-gradient-to-r from-blue-600 via-cyan-500 to-emerald-500"
           initial={{ width: 0 }}
@@ -537,40 +550,31 @@ export default function EventDetailsPage() {
         />
       </div>
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-lg">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      {/* Main Content */}
+      <main className="container mx-auto px-4 lg:px-8 pt-28 pb-16">
+        {/* Breadcrumb */}
+        <div className="mb-8">
+          <nav className="flex items-center space-x-2 text-sm text-gray-600">
             <Link
               href="/"
-              className="group flex items-center gap-3 px-4 py-2 text-gray-700 hover:text-blue-600 font-semibold rounded-xl hover:bg-gray-100/50 transition-all duration-300"
+              className="hover:text-blue-600 transition-colors"
             >
-              <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-              <span>Back to Home</span>
+              Home
             </Link>
-
-            <div className="flex items-center gap-3">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleShare}
-                className="p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-300"
-                title="Share Event"
-              >
-                <Share2 className="w-5 h-5" />
-              </motion.button>
-              <button
-                className="p-3 text-gray-600 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all duration-300"
-                title="Save Event"
-              >
-                <Bookmark className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+            <ChevronRight className="w-4 h-4" />
+            <Link
+              href="/events"
+              className="hover:text-blue-600 transition-colors"
+            >
+              Events
+            </Link>
+            <ChevronRight className="w-4 h-4" />
+            <span className="text-gray-900 font-medium truncate">
+              {event.title}
+            </span>
+          </nav>
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 lg:px-8 py-8">
         {/* Event Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -600,10 +604,17 @@ export default function EventDetailsPage() {
                 Urgent
               </span>
             )}
+            {daysRemaining !== null &&
+              daysRemaining <= 7 && (
+                <span className="px-4 py-2 bg-gradient-to-r from-orange-100 to-red-100 text-orange-800 border border-orange-200 rounded-full text-sm font-semibold flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  {daysRemaining} days left
+                </span>
+              )}
           </div>
 
           {/* Title */}
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-8 leading-tight tracking-tight">
+          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
             {event.title}
           </h1>
 
@@ -727,7 +738,6 @@ export default function EventDetailsPage() {
                 className="mb-12"
               >
                 <div className="relative h-[500px] w-full rounded-3xl overflow-hidden shadow-2xl mb-6 group">
-                  {/* Improved overlay */}
                   <div className="relative w-full h-full">
                     <Image
                       src={
@@ -741,17 +751,7 @@ export default function EventDetailsPage() {
                       priority
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
-                    {/* Gradient overlay for better text visibility */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    {/* Subtle pattern overlay */}
-                    <div
-                      className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500"
-                      style={{
-                        backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 2px, transparent 2px)`,
-                        backgroundSize:
-                          "30px 30px",
-                      }}
-                    />
                   </div>
 
                   <button
@@ -896,6 +896,15 @@ export default function EventDetailsPage() {
                     color:
                       "from-rose-500 to-red-500",
                   },
+                  {
+                    id: "register",
+                    label: "Register Now",
+                    icon: (
+                      <Ticket className="w-5 h-5" />
+                    ),
+                    color:
+                      "from-emerald-500 to-green-500",
+                  },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -970,7 +979,7 @@ export default function EventDetailsPage() {
                     </div>
                   </div>
 
-                  {/* Event Stats - Beautiful Card Design */}
+                  {/* Event Stats */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     {[
                       {
@@ -1079,59 +1088,84 @@ export default function EventDetailsPage() {
                       Key Highlights
                     </span>
                   </h2>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-4 p-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-100">
-                      <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center text-white flex-shrink-0">
-                        <Target className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-gray-900 mb-2 text-lg">
-                          Main Objective & Vision
-                        </h3>
-                        <p className="text-gray-700 leading-relaxed">
-                          {event.description
-                            ? event.description.substring(
-                                0,
-                                200
-                              ) +
-                              (event.description
-                                .length > 200
-                                ? "..."
-                                : "")
-                            : "This event aims to bring people together for meaningful connections and shared experiences."}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <Users className="w-4 h-4 text-blue-600" />
-                          </div>
-                          <h4 className="font-semibold text-gray-900">
-                            Community Focus
-                          </h4>
+                  <div className="space-y-6">
+                    {[
+                      {
+                        title: "Expert Speakers",
+                        description:
+                          "Learn from industry leaders and subject matter experts",
+                        icon: (
+                          <Users className="w-6 h-6" />
+                        ),
+                        color:
+                          "from-blue-500 to-cyan-500",
+                      },
+                      {
+                        title:
+                          "Networking Opportunities",
+                        description:
+                          "Connect with professionals and like-minded individuals",
+                        icon: (
+                          <Users2 className="w-6 h-6" />
+                        ),
+                        color:
+                          "from-purple-500 to-pink-500",
+                      },
+                      {
+                        title:
+                          "Hands-on Workshops",
+                        description:
+                          "Practical sessions to enhance your skills",
+                        icon: (
+                          <Target className="w-6 h-6" />
+                        ),
+                        color:
+                          "from-emerald-500 to-green-500",
+                      },
+                      {
+                        title:
+                          "Resource Materials",
+                        description:
+                          "Access to exclusive content and learning resources",
+                        icon: (
+                          <Download className="w-6 h-6" />
+                        ),
+                        color:
+                          "from-amber-500 to-orange-500",
+                      },
+                    ].map((highlight, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{
+                          opacity: 0,
+                          x: -20,
+                        }}
+                        animate={{
+                          opacity: 1,
+                          x: 0,
+                        }}
+                        transition={{
+                          delay: index * 0.1,
+                        }}
+                        className="flex items-start gap-4 p-6 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-200 hover:border-gray-300 transition-all duration-300 group"
+                      >
+                        <div
+                          className={`p-3 bg-gradient-to-br ${highlight.color} rounded-xl text-white group-hover:scale-110 transition-transform duration-300`}
+                        >
+                          {highlight.icon}
                         </div>
-                        <p className="text-sm text-gray-600">
-                          Open to all community
-                          members
-                        </p>
-                      </div>
-                      <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-100">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="p-2 bg-purple-100 rounded-lg">
-                            <Calendar className="w-4 h-4 text-purple-600" />
-                          </div>
-                          <h4 className="font-semibold text-gray-900">
-                            Flexible Schedule
-                          </h4>
+                        <div className="flex-1">
+                          <h3 className="font-bold text-gray-900 mb-2 text-lg group-hover:text-gray-800 transition-colors">
+                            {highlight.title}
+                          </h3>
+                          <p className="text-gray-600 leading-relaxed">
+                            {
+                              highlight.description
+                            }
+                          </p>
                         </div>
-                        <p className="text-sm text-gray-600">
-                          Multiple sessions
-                          available
-                        </p>
-                      </div>
-                    </div>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -1174,7 +1208,7 @@ export default function EventDetailsPage() {
                               className="object-cover group-hover/gallery:scale-110 transition-transform duration-500"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/gallery:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                              <EyeIcon className="w-6 h-6 text-white mb-1" />
+                              <Eye className="w-6 h-6 text-white mb-1" />
                             </div>
                           </motion.div>
                         )
@@ -1220,16 +1254,7 @@ export default function EventDetailsPage() {
                                 (_, i) => (
                                   <Star
                                     key={i}
-                                    className={`w-6 h-6 ${
-                                      i <
-                                      Math.floor(
-                                        parseFloat(
-                                          avgRating
-                                        )
-                                      )
-                                        ? "text-amber-500 fill-amber-500"
-                                        : "text-gray-300"
-                                    }`}
+                                    className={`w-6 h-6 ${i < Math.floor(parseFloat(avgRating)) ? "text-amber-500 fill-amber-500" : "text-gray-300"}`}
                                   />
                                 )
                               )}
@@ -1309,12 +1334,7 @@ export default function EventDetailsPage() {
                                     (_, i) => (
                                       <Star
                                         key={i}
-                                        className={`w-4 h-4 ${
-                                          i <
-                                          feedback.rating
-                                            ? "text-amber-500 fill-amber-500"
-                                            : "text-gray-300"
-                                        }`}
+                                        className={`w-4 h-4 ${i < feedback.rating ? "text-amber-500 fill-amber-500" : "text-gray-300"}`}
                                       />
                                     )
                                   )}
@@ -1346,13 +1366,163 @@ export default function EventDetailsPage() {
                   )}
                 </div>
               )}
+
+              {activeTab === "register" && (
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg">
+                      <Ticket className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                      Register Now
+                    </span>
+                  </h2>
+                  <div className="space-y-8">
+                    {/* Registration Status */}
+                    <div className="bg-gradient-to-r from-emerald-50 to-green-50 p-6 rounded-2xl border border-emerald-100">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900 mb-2">
+                            Registration Open
+                          </h3>
+                          <p className="text-emerald-600">
+                            Secure your spot
+                            before it's too late!
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-3xl font-bold text-emerald-600">
+                            {event.maxParticipants ||
+                              100}
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            Total spots available
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Ticket Selection */}
+                    <div className="space-y-6">
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                          Select Number of Tickets
+                        </h4>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() =>
+                                setTicketCount(
+                                  Math.max(
+                                    1,
+                                    ticketCount -
+                                      1
+                                  )
+                                )
+                              }
+                              className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                            >
+                              <span className="text-xl">
+                                -
+                              </span>
+                            </button>
+                            <span className="text-2xl font-bold text-gray-900 w-12 text-center">
+                              {ticketCount}
+                            </span>
+                            <button
+                              onClick={() =>
+                                setTicketCount(
+                                  ticketCount + 1
+                                )
+                              }
+                              className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                            >
+                              <span className="text-xl">
+                                +
+                              </span>
+                            </button>
+                          </div>
+                          <span className="text-gray-600">
+                            ticket
+                            {ticketCount > 1
+                              ? "s"
+                              : ""}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Payment Methods */}
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                          Payment Method
+                        </h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <button className="p-4 border border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all duration-300 flex items-center justify-center gap-3">
+                            <CreditCard className="w-6 h-6 text-gray-600" />
+                            <span className="font-medium">
+                              Credit Card
+                            </span>
+                          </button>
+                          <button className="p-4 border border-gray-200 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition-all duration-300 flex items-center justify-center gap-3">
+                            <QrCode className="w-6 h-6 text-gray-600" />
+                            <span className="font-medium">
+                              Mobile Payment
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Register Button */}
+                      <button
+                        onClick={
+                          handleTicketPurchase
+                        }
+                        className="w-full py-4 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-bold text-lg rounded-2xl hover:shadow-xl hover:scale-105 transition-all duration-300 shadow-lg flex items-center justify-center gap-3"
+                      >
+                        <Ticket className="w-6 h-6" />
+                        {isAuthenticated
+                          ? `Register Now - ${ticketCount} Ticket${ticketCount > 1 ? "s" : ""}`
+                          : "Login to Register"}
+                      </button>
+
+                      {/* Registration Benefits */}
+                      <div className="pt-6 border-t border-gray-200">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                          Registration Benefits
+                        </h4>
+                        <div className="space-y-3">
+                          {[
+                            "Access to all sessions and workshops",
+                            "Networking opportunities with speakers",
+                            "Digital certificate of participation",
+                            "Event merchandise (if applicable)",
+                            "Refreshments and meals included",
+                          ].map(
+                            (benefit, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center gap-3"
+                              >
+                                <CheckCircle className="w-5 h-5 text-emerald-500" />
+                                <span className="text-gray-700">
+                                  {benefit}
+                                </span>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </motion.div>
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-8">
-              {/* Event Summary Card - Beautiful Design */}
+            <div className="sticky top-32 space-y-8">
+              {/* Event Summary Card */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -1452,27 +1622,31 @@ export default function EventDetailsPage() {
                     Share This Event
                   </button>
                   <button
-                    onClick={() => window.print()}
-                    className="w-full py-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-sm"
+                    onClick={handleSaveEvent}
+                    className={`w-full py-3 ${isSaved ? "bg-rose-500/20 text-rose-300" : "bg-white/10 hover:bg-white/20 text-white"} font-medium rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-sm`}
                   >
-                    <Printer className="w-5 h-5" />
-                    Print Details
+                    <Bookmark
+                      className={`w-5 h-5 ${isSaved ? "fill-rose-300" : ""}`}
+                    />
+                    {isSaved
+                      ? "Saved"
+                      : "Save for Later"}
                   </button>
                   <button
-                    onClick={() =>
-                      toast.success(
-                        "Event saved to your favorites!"
-                      )
-                    }
-                    className="w-full py-3 bg-white/10 hover:bg-rose-500/20 hover:text-rose-300 text-white font-medium rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-sm"
+                    onClick={handleLikeEvent}
+                    className={`w-full py-3 ${isLiked ? "bg-rose-500/20 text-rose-300" : "bg-white/10 hover:bg-white/20 text-white"} font-medium rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-sm`}
                   >
-                    <Heart className="w-5 h-5" />
-                    Save for Later
+                    <Heart
+                      className={`w-5 h-5 ${isLiked ? "fill-rose-300" : ""}`}
+                    />
+                    {isLiked
+                      ? "Liked"
+                      : "Like Event"}
                   </button>
                 </div>
               </motion.div>
 
-              {/* Stay Connected Card */}
+              {/* Organizer Info */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -1480,89 +1654,56 @@ export default function EventDetailsPage() {
                 className="bg-gradient-to-br from-white to-gray-50 rounded-3xl border border-gray-200 shadow-xl p-6"
               >
                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <Users className="w-5 h-5 text-blue-500" />
-                  <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                    Stay Connected
+                  <Users2 className="w-5 h-5 text-purple-500" />
+                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    Organizer Info
                   </span>
                 </h3>
 
                 <div className="space-y-4">
-                  {/* Email Updates */}
-                  <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-100 hover:border-blue-200 transition-all duration-300 cursor-pointer group/email">
-                    <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg group-hover/email:scale-110 transition-transform duration-300">
-                      <Mail className="w-5 h-5 text-white" />
+                  <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-100">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white">
+                      <Users2 className="w-6 h-6" />
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">
-                        Get Email Updates
+                        Event Organizer
                       </p>
-                      <p className="text-sm text-blue-600">
-                        Stay informed about event
-                        changes
+                      <p className="text-sm text-purple-600">
+                        Professional Event Team
                       </p>
                     </div>
                   </div>
 
-                  {/* Social Share */}
-                  <div>
-                    <p className="text-sm text-gray-600 font-medium mb-3">
-                      Share with Friends
-                    </p>
-                    <div className="flex gap-3">
-                      {[
-                        {
-                          platform: "facebook",
-                          icon: Facebook,
-                          color:
-                            "bg-blue-600 hover:bg-blue-700",
-                        },
-                        {
-                          platform: "twitter",
-                          icon: Twitter,
-                          color:
-                            "bg-cyan-500 hover:bg-cyan-600",
-                        },
-                        {
-                          platform: "linkedin",
-                          icon: Linkedin,
-                          color:
-                            "bg-blue-700 hover:bg-blue-800",
-                        },
-                        {
-                          platform: "instagram",
-                          icon: Instagram,
-                          color:
-                            "bg-pink-600 hover:bg-pink-700",
-                        },
-                      ].map((social) => (
-                        <button
-                          key={social.platform}
-                          onClick={() =>
-                            window.open(
-                              social.platform ===
-                                "facebook"
-                                ? `https://facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`
-                                : social.platform ===
-                                    "twitter"
-                                  ? `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(event.title)}`
-                                  : social.platform ===
-                                      "linkedin"
-                                    ? `https://linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`
-                                    : "#",
-                              "_blank"
-                            )
-                          }
-                          className={`flex-1 p-3 ${social.color} text-white rounded-xl hover:scale-105 transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg`}
-                        >
-                          <social.icon className="w-5 h-5" />
-                        </button>
-                      ))}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <MailIcon className="w-5 h-5 text-gray-400" />
+                      <span className="text-gray-600">
+                        events@example.com
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Phone className="w-5 h-5 text-gray-400" />
+                      <span className="text-gray-600">
+                        +1 (555) 123-4567
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Globe className="w-5 h-5 text-gray-400" />
+                      <span className="text-gray-600">
+                        www.example.com
+                      </span>
                     </div>
                   </div>
+
+                  <button className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium rounded-2xl hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
+                    <Mail className="w-5 h-5" />
+                    Contact Organizer
+                  </button>
                 </div>
               </motion.div>
 
-              {/* Similar Events Card */}
+              {/* Similar Events */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -1667,7 +1808,6 @@ export default function EventDetailsPage() {
                   e.stopPropagation()
                 }
               >
-                {/* Enhanced overlay for better image display */}
                 <div className="relative w-full h-full bg-gradient-to-br from-black/80 to-gray-900/80 flex items-center justify-center">
                   <Image
                     src={
@@ -1682,7 +1822,6 @@ export default function EventDetailsPage() {
                   />
                 </div>
 
-                {/* Close Button */}
                 <button
                   onClick={() =>
                     setImageModalOpen(false)
@@ -1692,24 +1831,11 @@ export default function EventDetailsPage() {
                   <X className="w-6 h-6" />
                 </button>
 
-                {/* Image Counter */}
                 <div className="absolute top-6 left-6 px-4 py-2 bg-black/50 backdrop-blur-md text-white rounded-full text-sm font-medium z-10">
                   {selectedImage + 1} /{" "}
                   {event.files.length}
                 </div>
 
-                {/* Image Title */}
-                <div className="absolute bottom-6 left-6 right-6 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-6">
-                  <h3 className="text-white text-xl font-bold mb-2">
-                    {event.title}
-                  </h3>
-                  <p className="text-gray-300 text-sm">
-                    Image {selectedImage + 1} of{" "}
-                    {event.files.length}
-                  </p>
-                </div>
-
-                {/* Navigation Arrows */}
                 {event.files.length > 1 && (
                   <>
                     <button
@@ -1744,93 +1870,13 @@ export default function EventDetailsPage() {
                     </button>
                   </>
                 )}
-
-                {/* Thumbnail Strip */}
-                {event.files.length > 1 && (
-                  <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 flex gap-2 max-w-[80%] overflow-x-auto py-2 scrollbar-hide">
-                    {event.files.map(
-                      (file, index) => (
-                        <button
-                          key={file._id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedImage(
-                              index
-                            );
-                          }}
-                          className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-300 hover:scale-110 ${
-                            selectedImage ===
-                            index
-                              ? "border-white ring-2 ring-white ring-opacity-50"
-                              : "border-white/30 hover:border-white/50"
-                          }`}
-                        >
-                          <div className="relative w-full h-full">
-                            <Image
-                              src={file.url}
-                              alt={`Thumbnail ${index + 1}`}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        </button>
-                      )
-                    )}
-                  </div>
-                )}
               </motion.div>
             </motion.div>
           )}
       </AnimatePresence>
 
-      {/* Footer */}
-      <footer className="mt-20 py-12 bg-gradient-to-b from-gray-50 to-gray-100 border-t border-gray-200">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <Calendar className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Public Event Information
-            </h3>
-            <p className="text-gray-600 max-w-2xl mx-auto mb-8 text-lg">
-              This event page is publicly
-              accessible. All information
-              displayed here is available to
-              everyone. For questions or
-              clarifications, please reach out
-              through official channels.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-gray-500">
-              <span>
-                Event ID:{" "}
-                <span className="font-mono text-blue-600">
-                  #{event._id.slice(-8)}
-                </span>
-              </span>
-              <span className="hidden sm:inline">
-                •
-              </span>
-              <span>
-                Last Updated:{" "}
-                <span className="font-medium">
-                  {formatDate(event.updatedAt)}
-                </span>
-              </span>
-              <span className="hidden sm:inline">
-                •
-              </span>
-              <span>
-                Category:{" "}
-                <span className="font-medium capitalize">
-                  {event.category}
-                </span>
-              </span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      {/* Footer Component */}
+      <Footer />
     </div>
   );
 }
