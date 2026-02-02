@@ -19,45 +19,70 @@ import {
   Globe,
   Target,
   Quote,
-  Play,
+  Calendar,
+  GraduationCap,
+  HeartHandshake,
+  Scale,
+  BookOpen,
+  UsersRound,
+  ArrowRight,
+  ChevronUp,
+  Trophy,
+  TrendingUp,
+  Heart,
+  Info,
+  Clock,
+  LogOut,
+  UserPlus,
+  Book,
+  Code,
+  Target as TargetIcon,
+  Users as UsersIcon,
+  Calendar as CalendarIcon,
+  Clock as ClockIcon,
+  Check,
+  MapPin,
+  Eye,
+  MessageCircle,
+  Share2,
+  ExternalLink,
+  Loader2,
+  AlertCircle,
+  Bookmark,
+  ChevronLeft,
+  Filter,
+  Grid3x3,
+  List,
+  BookmarkCheck,
+  BookmarkPlus,
+  ThumbsUp,
+  MessageSquare,
+  DownloadCloud,
+  UploadCloud,
+  PieChart,
+  LineChart,
+  Activity,
+  Home as HomeIcon,
+  Settings as SettingsIcon,
+  HelpCircle as HelpCircleIcon,
+  PhoneCall,
+  Mail as MailIcon,
+  Map as MapIcon,
+  Lock,
+  EyeOff,
+  Plus,
+  Minus,
   Facebook,
   Twitter,
   Instagram,
   Linkedin,
   Mail,
   Phone,
-  MapPin,
-  GraduationCap,
-  HeartHandshake,
-  Scale,
-  BookOpen,
-  Brain,
-  UsersRound,
-  CalendarDays,
-  ArrowRight,
-  Sparkle,
-  ChevronUp,
-  BookCheck,
-  Award as AwardIcon,
-  Target as TargetIcon,
-  Users as UsersIcon,
-  Map,
-  Book,
-  Lightbulb,
-  Shield,
-  Clock,
-  Trophy,
-  TrendingUp,
-  Heart,
-  Home,
-  Info,
-  MessageCircle,
   Video,
   Music,
   Coffee,
   Dumbbell,
   Palette,
-  Code,
   Briefcase,
   Mic,
   Camera,
@@ -70,43 +95,8 @@ import {
   Bell,
   Download,
   Upload,
-  Settings,
-  HelpCircle,
   Globe as GlobeIcon,
-  PhoneCall,
-  Mail as MailIcon,
-  Map as MapIcon,
-  UserPlus,
-  Lock,
-  Eye,
-  EyeOff,
-  Calendar,
-  Clock as ClockIcon,
-  Check,
-  X as XIcon,
-  Plus,
-  Minus,
-  Filter,
-  Grid,
-  List,
-  Share2,
-  Bookmark,
-  Eye as EyeIcon,
-  MessageSquare,
-  ThumbsUp,
-  DownloadCloud,
-  UploadCloud,
-  BarChart3,
-  PieChart,
-  LineChart,
-  Activity,
-  Target as TargetIcon2,
-  Users as UsersIcon2,
-  Book as BookIcon,
-  Award as AwardIcon2,
-  GraduationCap as GraduationCapIcon,
-  Briefcase as BriefcaseIcon,
-  Heart as HeartIcon,
+  UserCircle,
   Leaf,
   Wind,
   Waves,
@@ -120,27 +110,23 @@ import {
   CloudLightning,
   Droplets,
   Thermometer,
-  Wind as WindIcon,
-  Waves as WavesIcon,
-  Mountain as MountainIcon,
-  Trees as TreesIcon,
-  Flower as FlowerIcon,
-  LogOut,
-  UserCircle,
 } from "lucide-react";
 import {
   motion,
   AnimatePresence,
 } from "framer-motion";
 import { useEvents } from "@/lib/hooks/useEvents";
+import { useBlogs } from "@/lib/hooks/useBlogs";
 import { EventData } from "@/lib/types/event";
+import { Blog } from "@/lib/types/blog.types";
 import { useAuthStore } from "@/lib/store/auth.store";
 import Image from "next/image";
+import Header from "@/components/home/Header";
+import Footer from "@/components/home/Footer";
 
 // Enhanced content data
 const heroData = {
-  title:
-    "Empowering Communities Through Volunteerism",
+  title: "You are OK",
   subtitle:
     "Building a Stronger and More Inclusive Society",
   description:
@@ -154,6 +140,7 @@ const heroData = {
       icon: <Users className="w-6 h-6" />,
       value: "10+",
       label: "Years of Service",
+      link: "/about",
     },
     {
       icon: (
@@ -161,16 +148,19 @@ const heroData = {
       ),
       value: "5,000+",
       label: "Youth Mentored",
+      link: "/success-stories",
     },
     {
       icon: <GraduationCap className="w-6 h-6" />,
       value: "50+",
       label: "Special Trainings",
+      link: "/training",
     },
     {
-      icon: <Globe className="w-6 h-6" />,
-      value: "All Regions",
-      label: "Nationwide Reach",
+      icon: <BookOpen className="w-6 h-6" />,
+      value: "100+",
+      label: "Blog Articles",
+      link: "/blog",
     },
   ],
 };
@@ -371,12 +361,13 @@ export default function ComprehensiveHomePage() {
   const [activeFaq, setActiveFaq] = useState<
     number | null
   >(null);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] =
-    useState(false);
   const [selectedProgram, setSelectedProgram] =
     useState<EventData | null>(null);
+  const [likedBlogs, setLikedBlogs] = useState<
+    string[]
+  >([]);
+  const [bookmarkedBlogs, setBookmarkedBlogs] =
+    useState<string[]>([]);
 
   // Auth state
   const {
@@ -392,13 +383,19 @@ export default function ComprehensiveHomePage() {
     loading: eventsLoading,
     error: eventsError,
   } = useEvents();
+
+  // Blogs data
+  const { blogsQuery } = useBlogs();
+
   const [programs, setPrograms] = useState<
     EventData[]
   >([]);
   const [upcomingEvents, setUpcomingEvents] =
     useState<EventData[]>([]);
+  const [featuredBlogs, setFeaturedBlogs] =
+    useState<Blog[]>([]);
 
-  // Fetch programs and events
+  // Fetch programs, events, and blogs
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -431,6 +428,21 @@ export default function ComprehensiveHomePage() {
 
     fetchData();
   }, [getEvents]);
+
+  // Filter featured blogs
+  useEffect(() => {
+    if (blogsQuery.data) {
+      const featured = blogsQuery.data
+        .filter(
+          (blog) =>
+            blog.status === "published" &&
+            !blog.isDeleted &&
+            blog.isFeatured
+        )
+        .slice(0, 3);
+      setFeaturedBlogs(featured);
+    }
+  }, [blogsQuery.data]);
 
   // Handle scroll
   useEffect(() => {
@@ -505,7 +517,6 @@ export default function ComprehensiveHomePage() {
     toast.success(
       "Thank you for subscribing! Welcome to our community!"
     );
-    setEmail("");
   };
 
   // Register for event
@@ -539,6 +550,82 @@ export default function ComprehensiveHomePage() {
     }
   };
 
+  // Format blog date
+  const formatBlogDate = (
+    dateString?: string
+  ) => {
+    if (!dateString) return "Recently";
+    return new Date(
+      dateString
+    ).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  // Handle blog like
+  const handleBlogLike = (blogId: string) => {
+    setLikedBlogs((prev) =>
+      prev.includes(blogId)
+        ? prev.filter((id) => id !== blogId)
+        : [...prev, blogId]
+    );
+    toast.success(
+      likedBlogs.includes(blogId)
+        ? "Removed like"
+        : "Liked blog!"
+    );
+  };
+
+  // Handle blog bookmark
+  const handleBlogBookmark = (blogId: string) => {
+    setBookmarkedBlogs((prev) =>
+      prev.includes(blogId)
+        ? prev.filter((id) => id !== blogId)
+        : [...prev, blogId]
+    );
+    toast.success(
+      bookmarkedBlogs.includes(blogId)
+        ? "Removed bookmark"
+        : "Bookmarked!"
+    );
+  };
+
+  // Handle blog share
+  const handleBlogShare = (blog: Blog) => {
+    const url = `${window.location.origin}/blog/${blog.slug}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Link copied to clipboard!");
+  };
+
+  // Stats calculation
+  const blogStats = {
+    total:
+      blogsQuery.data?.filter(
+        (b) =>
+          b.status === "published" && !b.isDeleted
+      ).length || 0,
+    featured:
+      blogsQuery.data?.filter(
+        (b) =>
+          b.isFeatured &&
+          b.status === "published" &&
+          !b.isDeleted
+      ).length || 0,
+    views:
+      blogsQuery.data
+        ?.filter(
+          (b) =>
+            b.status === "published" &&
+            !b.isDeleted
+        )
+        .reduce(
+          (sum, blog) => sum + (blog.views || 0),
+          0
+        ) || 0,
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white">
       <Toaster
@@ -568,241 +655,16 @@ export default function ComprehensiveHomePage() {
         />
       </div>
 
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-gray-100/50">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            {/* Logo */}
-            <Link
-              href="/"
-              className="flex items-center space-x-3 group"
-            >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 200,
-                }}
-                className="relative"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-green-500 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity" />
-                <div className="relative w-12 h-12 bg-gradient-to-br from-blue-600 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Users className="w-7 h-7 text-white" />
-                </div>
-              </motion.div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-green-600 to-purple-600 bg-clip-text text-transparent">
-                  Nutii Organization
-                </h1>
-                <p className="text-xs text-gray-500 font-medium">
-                  Gurmuu Volunteer Association
-                </p>
-              </div>
-            </Link>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-1">
-              {[
-                "Home",
-                "Training",
-                "Services",
-                "Partners",
-                "Projects",
-                "Blog",
-              ].map((item) => (
-                <Link
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
-                  className="px-4 py-2.5 text-gray-700 hover:text-blue-600 font-medium rounded-xl hover:bg-gray-50/50 transition-all duration-300 text-sm"
-                >
-                  {item}
-                </Link>
-              ))}
-            </nav>
-
-            {/* Action Buttons */}
-            <div className="flex items-center space-x-3">
-              {isAuthenticated ? (
-                <>
-                  <div className="hidden md:flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center text-white font-semibold">
-                        {user?.name?.charAt(0) ||
-                          "U"}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {user?.name}
-                        </p>
-                        <p className="text-xs text-gray-500 capitalize">
-                          {user?.role}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleDashboard}
-                      className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/25 transition-all duration-300"
-                    >
-                      Dashboard
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      className="px-5 py-2.5 text-gray-700 font-medium rounded-xl hover:bg-gray-50/50 transition-all duration-300 flex items-center gap-2"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Logout
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={handleLoginRedirect}
-                    className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 text-gray-700 font-medium rounded-xl hover:bg-gray-50/50 transition-all duration-300"
-                  >
-                    <LogIn className="w-4 h-4" />
-                    Login
-                  </button>
-                  <button
-                    onClick={
-                      handleRegisterRedirect
-                    }
-                    className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/25 transition-all duration-300"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    Register
-                  </button>
-                </>
-              )}
-
-              {/* Mobile Menu Button */}
-              <button
-                onClick={() =>
-                  setMobileMenuOpen(
-                    !mobileMenuOpen
-                  )
-                }
-                className="lg:hidden p-2.5 text-gray-700 hover:text-blue-600 hover:bg-gray-50/50 rounded-xl transition-colors"
-              >
-                {mobileMenuOpen ? (
-                  <X className="w-6 h-6" />
-                ) : (
-                  <Menu className="w-6 h-6" />
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{
-                opacity: 1,
-                height: "auto",
-              }}
-              exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden border-t border-gray-100/50 bg-white/95 backdrop-blur-xl overflow-hidden"
-            >
-              <div className="container mx-auto px-4 py-6 space-y-2">
-                {[
-                  "Home",
-                  "Mission",
-                  "Training",
-                  "Services",
-                  "Partners",
-                  "Projects",
-                  "Events",
-                  "Blog",
-                ].map((item) => (
-                  <Link
-                    key={item}
-                    href={`#${item.toLowerCase()}`}
-                    className="block py-3 text-gray-700 hover:text-blue-600 font-medium hover:bg-gray-50/50 rounded-xl px-4 transition-colors text-sm"
-                    onClick={() =>
-                      setMobileMenuOpen(false)
-                    }
-                  >
-                    {item}
-                  </Link>
-                ))}
-
-                <div className="pt-4 border-t border-gray-100/50 space-y-3">
-                  {isAuthenticated ? (
-                    <>
-                      <div className="px-4 py-3 bg-gray-50 rounded-xl">
-                        <p className="font-medium text-gray-900">
-                          {user?.name}
-                        </p>
-                        <p className="text-sm text-gray-500 capitalize">
-                          {user?.role}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => {
-                          handleDashboard();
-                          setMobileMenuOpen(
-                            false
-                          );
-                        }}
-                        className="block w-full py-3 text-center bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-lg"
-                      >
-                        Dashboard
-                      </button>
-                      <button
-                        onClick={() => {
-                          handleLogout();
-                          setMobileMenuOpen(
-                            false
-                          );
-                        }}
-                        className="block w-full py-3 text-center text-gray-700 font-medium rounded-xl border border-gray-200 hover:bg-gray-50"
-                      >
-                        Logout
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => {
-                          handleLoginRedirect();
-                          setMobileMenuOpen(
-                            false
-                          );
-                        }}
-                        className="block w-full py-3 text-center text-gray-700 font-medium rounded-xl border border-gray-200 hover:bg-gray-50"
-                      >
-                        Login
-                      </button>
-                      <button
-                        onClick={() => {
-                          handleRegisterRedirect();
-                          setMobileMenuOpen(
-                            false
-                          );
-                        }}
-                        className="block w-full py-3 text-center bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-xl hover:shadow-lg"
-                      >
-                        Register
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
+      <Header
+        onLoginClick={handleLoginRedirect}
+        onRegisterClick={handleRegisterRedirect}
+        onDashboardClick={handleDashboard}
+        onLogoutClick={handleLogout}
+      />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-28 lg:py-40">
-        {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/70 via-green-50/40 to-purple-50/70" />
-
-        {/* Floating glow blobs */}
         <div className="absolute -top-24 -left-24 w-[28rem] h-[28rem] bg-blue-400/10 rounded-full blur-[120px] animate-[pulse_8s_ease-in-out_infinite]" />
         <div className="absolute top-1/3 -right-24 w-[30rem] h-[30rem] bg-green-400/10 rounded-full blur-[140px] animate-[pulse_10s_ease-in-out_infinite]" />
         <div className="absolute -bottom-24 left-1/4 w-[32rem] h-[32rem] bg-purple-400/10 rounded-full blur-[160px] animate-[pulse_12s_ease-in-out_infinite]" />
@@ -825,7 +687,7 @@ export default function ComprehensiveHomePage() {
               className="text-5xl lg:text-7xl font-extrabold mb-8 leading-tight tracking-tight"
             >
               <span className="bg-gradient-to-r from-blue-600 via-green-600 to-purple-600 bg-clip-text text-transparent drop-shadow-md">
-                Empowering Communities
+                Dhaloota Jajjabeesina
               </span>
               <br />
               <span className="text-gray-900">
@@ -869,12 +731,16 @@ export default function ComprehensiveHomePage() {
                 (stat, index) => (
                   <div
                     key={index}
-                    className="text-center"
+                    className="text-center group cursor-pointer"
+                    onClick={() =>
+                      stat.link &&
+                      router.push(stat.link)
+                    }
                   >
-                    <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                    <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                       {stat.value}
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-600 group-hover:text-blue-500 transition-colors">
                       {stat.label}
                     </div>
                   </div>
@@ -892,10 +758,7 @@ export default function ComprehensiveHomePage() {
               {isAuthenticated ? (
                 <button
                   onClick={handleDashboard}
-                  className="group relative px-10 py-4 rounded-2xl font-semibold text-white
-            bg-gradient-to-r from-blue-600 to-green-600
-            hover:shadow-2xl hover:shadow-blue-500/40
-            transition-all duration-300 overflow-hidden"
+                  className="group relative px-10 py-4 rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-green-600 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 overflow-hidden"
                 >
                   <span className="relative z-10 flex items-center gap-3">
                     Go to Dashboard
@@ -906,10 +769,7 @@ export default function ComprehensiveHomePage() {
               ) : (
                 <button
                   onClick={handleRegisterRedirect}
-                  className="group relative px-10 py-4 rounded-2xl font-semibold text-white
-            bg-gradient-to-r from-blue-600 to-green-600
-            hover:shadow-2xl hover:shadow-blue-500/40
-            transition-all duration-300 overflow-hidden"
+                  className="group relative px-10 py-4 rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-green-600 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 overflow-hidden"
                 >
                   <span className="relative z-10 flex items-center gap-3">
                     Join as a Volunteer
@@ -919,20 +779,13 @@ export default function ComprehensiveHomePage() {
                 </button>
               )}
 
-              <button
-                onClick={() =>
-                  document
-                    .getElementById("about")
-                    ?.scrollIntoView({
-                      behavior: "smooth",
-                    })
-                }
-                className="px-10 py-4 rounded-2xl font-semibold text-gray-800
-            bg-white/80 backdrop-blur-md border border-gray-200
-            hover:bg-white hover:border-blue-300 hover:shadow-xl transition-all duration-300"
+              <Link
+                href="/blog"
+                className="px-10 py-4 rounded-2xl font-semibold text-gray-800 bg-white/80 backdrop-blur-md border border-gray-200 hover:bg-white hover:border-blue-300 hover:shadow-xl transition-all duration-300 flex items-center gap-2"
               >
-                Learn More
-              </button>
+                <BookOpen className="w-5 h-5" />
+                Read Our Blog
+              </Link>
             </motion.div>
 
             {/* Scroll Hint */}
@@ -956,7 +809,6 @@ export default function ComprehensiveHomePage() {
         id="about"
         className="relative py-24 lg:py-32 bg-white overflow-hidden"
       >
-        {/* Soft background accents */}
         <div className="absolute -top-32 -left-32 w-[28rem] h-[28rem] bg-blue-100/40 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 -right-32 w-[30rem] h-[30rem] bg-green-100/40 rounded-full blur-[140px]" />
 
@@ -967,9 +819,7 @@ export default function ComprehensiveHomePage() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-5 py-2.5
-          bg-gradient-to-r from-blue-50 to-green-50
-          rounded-full mb-8 shadow-sm"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-50 to-green-50 rounded-full mb-8 shadow-sm"
             >
               <Info className="w-4 h-4 text-blue-600" />
               <span className="text-sm font-semibold text-blue-700 tracking-wide">
@@ -1016,25 +866,13 @@ export default function ComprehensiveHomePage() {
                 className="group relative"
               >
                 {/* Card Glow */}
-                <div
-                  className="absolute inset-0 rounded-3xl bg-gradient-to-br
-              from-blue-100/20 via-white to-green-100/20
-              opacity-0 group-hover:opacity-100
-              blur-xl transition-opacity duration-500"
-                />
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-100/20 via-white to-green-100/20 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500" />
 
                 {/* Card */}
-                <div
-                  className="relative h-full p-8 rounded-3xl
-              bg-white/80 backdrop-blur-sm border border-gray-200/60
-              shadow-sm group-hover:shadow-2xl group-hover:border-blue-200/60
-              transition-all duration-500"
-                >
+                <div className="relative h-full p-8 rounded-3xl bg-white/80 backdrop-blur-sm border border-gray-200/60 shadow-sm group-hover:shadow-2xl group-hover:border-blue-200/60 transition-all duration-500">
                   {/* Icon */}
                   <div
-                    className={`inline-flex p-4 bg-gradient-to-br ${value.color}
-                rounded-2xl mb-6 group-hover:scale-110 group-hover:rotate-3
-                transition-transform duration-300`}
+                    className={`inline-flex p-4 bg-gradient-to-br ${value.color} rounded-2xl mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}
                   >
                     <div className="text-white">
                       {value.icon}
@@ -1068,6 +906,185 @@ export default function ComprehensiveHomePage() {
                 </div>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Blog Section */}
+      <section
+        id="blog"
+        className="py-28 bg-gradient-to-b from-gray-50 via-white to-white"
+      >
+        <div className="container mx-auto px-4 lg:px-8">
+          {/* Header */}
+          <div className="max-w-3xl mx-auto text-center mb-20">
+            <span className="inline-flex items-center gap-2 px-5 py-2 mb-6 text-sm font-semibold rounded-full bg-indigo-50 text-indigo-600">
+              From the Blog
+            </span>
+
+            <h2 className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-6">
+              Latest{" "}
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Articles
+              </span>
+            </h2>
+
+            <p className="text-lg text-gray-600">
+              Stay inspired and informed! Read our
+              latest insights, tutorials, and
+              stories from the community.
+            </p>
+          </div>
+
+          {/* Blog Cards */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+            {blogsQuery.isLoading ? (
+              [...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-96 bg-gray-200 animate-pulse rounded-2xl"
+                />
+              ))
+            ) : blogsQuery.isError ||
+              !blogsQuery.data ||
+              blogsQuery.data.length === 0 ? (
+              <div className="text-center col-span-3 py-24 text-gray-500">
+                No blogs found
+              </div>
+            ) : (
+              blogsQuery.data.map((blog) => (
+                <motion.article
+                  key={blog._id}
+                  whileHover={{ y: -6 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 18,
+                  }}
+                  className="group relative bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-2xl"
+                >
+                  {/* Image */}
+                  <div className="relative h-60 overflow-hidden">
+                    {blog.coverImage?.url ? (
+                      <>
+                        <Image
+                          src={
+                            blog.coverImage.url
+                          }
+                          alt={blog.title}
+                          fill
+                          className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-500" />
+                      </>
+                    ) : (
+                      <div className="h-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
+                        <BookOpen className="w-12 h-12 text-indigo-500" />
+                      </div>
+                    )}
+
+                    {/* Badges */}
+                    <div className="absolute inset-x-5 top-5 flex items-center justify-between">
+                      <span className="px-3 py-1 text-xs font-bold rounded-full bg-white/90 backdrop-blur text-indigo-600">
+                        {blog.category}
+                      </span>
+                      {blog.isFeatured && (
+                        <span className="px-3 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+                          Featured
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-7 flex flex-col justify-between h-[calc(100%-15rem)]">
+                    <div>
+                      {/* Meta Top */}
+                      <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                        <span className="flex items-center gap-1">
+                          <User className="w-4 h-4" />{" "}
+                          {blog.author.name}
+                        </span>
+                        {blog.publishedAt && (
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />{" "}
+                            {new Date(
+                              blog.publishedAt
+                            ).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="text-2xl font-bold text-gray-900 mb-3 leading-snug group-hover:text-indigo-600 transition">
+                        {blog.title}
+                      </h3>
+
+                      <p className="text-gray-600 line-clamp-3 mb-5">
+                        {blog.excerpt ||
+                          blog.content.substring(
+                            0,
+                            120
+                          ) + "..."}
+                      </p>
+
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-2 mb-5">
+                        {blog.tags
+                          ?.slice(0, 3)
+                          .map((tag) => (
+                            <span
+                              key={tag}
+                              className="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition"
+                            >
+                              #{tag}
+                            </span>
+                          ))}
+                      </div>
+
+                      {/* Stats */}
+                      <div className="flex items-center gap-5 text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-4 h-4" />{" "}
+                          {blog.views} views
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />{" "}
+                          {Math.ceil(
+                            blog.content.length /
+                              800
+                          )}{" "}
+                          min read
+                        </span>
+                      </div>
+                    </div>
+                    {/* CTA */}
+
+                    <div className="mt-6 pt-6 border-t border-gray-100">
+                      <Link
+                        href={`/blog/${blog.slug}`}
+                        className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium group"
+                      >
+                        <span>
+                          Read full story
+                        </span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    </div>
+                  </div>
+                </motion.article>
+              ))
+            )}
+          </div>
+
+          {/* View All */}
+          <div className="text-center mt-24">
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-3 px-10 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:shadow-xl hover:scale-105 transition"
+            >
+              View all articles
+              <ArrowRight className="w-5 h-5" />
+            </Link>
           </div>
         </div>
       </section>
@@ -1114,7 +1131,7 @@ export default function ComprehensiveHomePage() {
               kana keessatti leenjii addaa fi
               gorsaa kennuu keenya irra
               deddeebi'anii socho'aa jirra.
-              Jijjiirama ifaa fi milkaa’ina dhala
+              Jijjiirama ifaa fi milkaa'ina dhala
               namaa fiduuf.
             </motion.p>
           </div>
@@ -1124,56 +1141,52 @@ export default function ComprehensiveHomePage() {
             {programs.map((program, index) => (
               <motion.div
                 key={program._id}
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 whileHover={{
                   y: -8,
-                  scale: 1.03,
+                  scale: 1.05,
                 }}
                 viewport={{ once: true }}
                 transition={{
                   delay: index * 0.1,
+                  duration: 0.5,
                 }}
                 onClick={() =>
                   setSelectedProgram(program)
                 }
                 className="relative cursor-pointer group"
               >
-                <div className="absolute inset-0 bg-white rounded-3xl border border-gray-200 shadow-lg group-hover:shadow-2xl group-hover:border-blue-300 transition-all duration-500" />
+                {/* Card Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-3xl border border-gray-200 shadow-md group-hover:shadow-2xl transition-all duration-500" />
 
-                <div className="relative p-8 h-full flex flex-col">
-                  <div className="inline-flex p-5 bg-gradient-to-br from-blue-500 to-green-400 rounded-2xl mb-6 shadow-md text-white text-xl">
-                    <BookOpen className="w-6 h-6" />
+                {/* Card Content */}
+                <div className="relative p-6 flex flex-col h-full">
+                  {/* Icon */}
+                  <div className="flex items-center justify-center w-16 h-16 mb-5 rounded-xl bg-gradient-to-tr from-pink-500 via-orange-400 to-yellow-400 text-white shadow-lg transform group-hover:rotate-6 transition-transform duration-500">
+                    <BookOpen className="w-7 h-7" />
                   </div>
 
-                  <div className="mb-6 flex-1">
-                    <div className="text-sm font-semibold text-gray-500 mb-2 tracking-wide uppercase">
-                      {formatDate(program.date)} -{" "}
+                  {/* Program Info */}
+                  <div className="flex-1 mb-5">
+                    <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">
+                      {formatDate(program.date)} •{" "}
                       {program.location || "TBA"}
                     </div>
 
-                    <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-3 leading-snug group-hover:text-blue-600 transition-colors">
+                    <h3 className="text-lg lg:text-xl font-bold text-gray-900 mb-2 leading-snug group-hover:text-pink-600 transition-colors duration-300">
                       {program.title}
                     </h3>
 
-                    <p className="text-gray-600 text-sm lg:text-base leading-relaxed">
-                      {program.description?.substring(
-                        0,
-                        120
-                      ) ||
-                        "No description available"}
-                      ...
+                    <p className="text-gray-700 text-sm lg:text-base line-clamp-4">
+                      {program.description ||
+                        "No description available."}
                     </p>
                   </div>
-
-                  <div className="flex items-center justify-between mt-auto">
-                    <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-semibold rounded-full tracking-wide">
-                      {program.category ||
-                        "General"}
-                    </span>
-                    <ChevronRight className="w-5 h-5 text-blue-500 group-hover:translate-x-2 transition-transform" />
-                  </div>
                 </div>
+
+                {/* Hover Shine Effect */}
+                <div className="absolute top-0 left-0 w-full h-full rounded-3xl pointer-events-none opacity-0 group-hover:opacity-25 bg-gradient-to-r from-white/20 via-white/10 to-white/20 animate-shine"></div>
               </motion.div>
             ))}
           </div>
@@ -1272,7 +1285,7 @@ export default function ComprehensiveHomePage() {
         </div>
       </section>
 
-      {/* Upcoming Events Section - FIXED */}
+      {/* Upcoming Events Section */}
       <section
         id="events"
         className="py-20 bg-gradient-to-b from-gray-50 to-white"
@@ -1656,296 +1669,249 @@ export default function ComprehensiveHomePage() {
         </div>
       </section>
 
-
-{/* FAQ Section */}
-<section className="py-24 bg-gray-50">
-  <div className="container mx-auto px-4 lg:px-8">
-    <div className="max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="text-center mb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-full mb-6 shadow-sm"
-        >
-          <HelpCircle className="w-5 h-5 text-indigo-600" />
-          <span className="text-sm font-semibold text-indigo-700 tracking-wide">
-            Gaaffii fi Deebii
-          </span>
-        </motion.div>
-
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-6 leading-tight"
-        >
-          Gaaffiiwwan <span className="text-blue-600">Dhihoo fi Barbaachisaa</span>
-        </motion.h2>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-gray-600 text-lg"
-        >
-          Gaaffilee yeroo hedduu ka’aman fi deebii isaanii sirrii fi ifaa ta’e argachuuf.
-        </motion.p>
-      </div>
-
-      {/* FAQ Items */}
-      <div className="space-y-5">
-        {faqs.map((faq, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.1 }}
-            className="bg-white rounded-3xl shadow-md border border-gray-200 hover:shadow-xl transition-shadow duration-300 overflow-hidden"
-          >
-            <button
-              onClick={() => setActiveFaq(activeFaq === index ? null : index)}
-              className="w-full px-6 py-5 flex items-center justify-between text-left bg-white hover:bg-gray-50 transition-colors"
-            >
-              <span className="text-lg font-semibold text-gray-900">
-                {faq.question}
-              </span>
-              <motion.div
-                animate={{ rotate: activeFaq === index ? 90 : 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <ChevronRight className="w-5 h-5 text-gray-500" />
-              </motion.div>
-            </button>
-
-            <AnimatePresence>
-              {activeFaq === index && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0, paddingTop: 0, paddingBottom: 0 }}
-                  animate={{ height: "auto", opacity: 1, paddingTop: 20, paddingBottom: 20 }}
-                  exit={{ height: 0, opacity: 0, paddingTop: 0, paddingBottom: 0 }}
-                  className="px-6 bg-blue-50/20 border-t border-gray-200"
-                >
-                  <p className="text-gray-700 leading-relaxed">{faq.answer}</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  </div>
-</section>
-
-    
-
-
-
-
-     {/* Final CTA */}
-<section className="relative py-28 bg-gradient-to-br from-white to-blue-50 overflow-hidden">
-  {/* Decorative floating shapes */}
-  <div className="absolute -top-24 -left-24 w-80 h-80 bg-blue-200/20 rounded-full filter blur-3xl animate-blob"></div>
-  <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-green-200/20 rounded-full filter blur-3xl animate-blob animation-delay-2000"></div>
-  <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-purple-200/20 rounded-full filter blur-2xl animate-blob animation-delay-4000"></div>
-
-  <div className="container mx-auto px-4 lg:px-8 relative z-10">
-    <div className="max-w-4xl mx-auto text-center">
-      {/* Icon Badge */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
-        whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
-        viewport={{ once: true }}
-        transition={{ type: "spring", stiffness: 120 }}
-        className="inline-flex p-5 bg-gradient-to-br from-blue-400 to-green-400 rounded-3xl mb-8 shadow-2xl"
-      >
-        <Rocket className="w-16 h-16 text-white animate-bounce" />
-      </motion.div>
-
-      {/* Main Title */}
-      <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight"
-      >
-        Har'a <span className="text-gradient bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent">Eegaluu!</span>
-      </motion.h2>
-
-      {/* Subtitle */}
-      <motion.p
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="text-xl lg:text-2xl text-gray-700 mb-12 max-w-3xl mx-auto leading-relaxed"
-      >
-        Dhaloota kana keessatti <span className="font-bold text-blue-600">hiriyaa ta'i</span>, 
-        leenjii <span className="font-bold text-green-600">argadhaa</span>, 
-        hiriyyaa <span className="font-bold text-purple-600">argadhaa</span>, 
-        fi jireenya keessan <span className="font-extrabold text-gradient bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent">jijjiradhaa</span>.
-      </motion.p>
-
-      {/* Buttons */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="flex flex-col sm:flex-row gap-6 justify-center"
-      >
-        {isAuthenticated ? (
-          <button
-            onClick={handleDashboard}
-            className="group px-12 py-4 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-3xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg"
-          >
-            Go to Dashboard
-            <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
-          </button>
-        ) : (
-          <>
-            <button
-              onClick={handleRegisterRedirect}
-              className="group px-12 py-4 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-3xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg"
-            >
-              Register Now
-              <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
-            </button>
-            <button
-              onClick={handleLoginRedirect}
-              className="px-12 py-4 bg-white text-gray-700 font-semibold rounded-3xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
-            >
-              Login
-            </button>
-          </>
-        )}
-      </motion.div>
-
-      {/* Extra Note */}
-      <motion.p
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="mt-10 text-sm text-gray-500 italic"
-      >
-        Hiriyaa fi leenjii argachuuf qophii guutuu ta'uu kee mirkaneessi.
-      </motion.p>
-    </div>
-  </div>
-</section>
-
-      {/* Footer */}
-      <footer className="bg-gradient-to-b from-gray-900 to-black text-white pt-16 pb-8">
+      {/* FAQ Section */}
+      <section className="py-24 bg-gray-50">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
-            <div>
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-green-500 rounded-2xl flex items-center justify-center">
-                  <Users className="w-7 h-7 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold">
-                    Nutii Dhaabbati
-                  </h3>
-                  <p className="text-sm text-gray-400">
-                    Gurmuu Tola Oltummaa
-                  </p>
-                </div>
-              </div>
-              <p className="text-gray-400 mb-6 text-sm leading-relaxed">
-                Woggaa saddeen darbaan dhaloota
-                kana keessatti baroota 2014 hanga
-                ammatti kaayyoo addaa waliin
-                oolchaa ture. Dhaloota ijjeessuu
-                waan jirtan dhiifama gaafanna.
-              </p>
-              <div className="flex gap-4">
-                {[
-                  Facebook,
-                  Twitter,
-                  Instagram,
-                  Linkedin,
-                ].map((Icon, i) => (
-                  <a
-                    key={i}
-                    href="#"
-                    className="w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded-xl flex items-center justify-center transition-colors"
-                  >
-                    <Icon className="w-5 h-5" />
-                  </a>
-                ))}
-              </div>
+          <div className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-16">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-full mb-6 shadow-sm"
+              >
+                <HelpCircleIcon className="w-5 h-5 text-indigo-600" />
+                <span className="text-sm font-semibold text-indigo-700 tracking-wide">
+                  Gaaffii fi Deebii
+                </span>
+              </motion.div>
+
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-6 leading-tight"
+              >
+                Gaaffiiwwan{" "}
+                <span className="text-blue-600">
+                  Dhihoo fi Barbaachisaa
+                </span>
+              </motion.h2>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-gray-600 text-lg"
+              >
+                Gaaffilee yeroo hedduu ka'aman fi
+                deebii isaanii sirrii fi ifaa ta'e
+                argachuuf.
+              </motion.p>
             </div>
 
-            {[
-              {
-                title: "Leenjii",
-                links: [
-                  "Barataa",
-                  "Qotee Bulaa",
-                  "Horsiisaa",
-                  "Hojjataa",
-                  "Technology",
-                  "Business",
-                ],
-              },
-              {
-                title: "Kaayyoo",
-                links: [
-                  "Dhaloota Gorsuu",
-                  "Oltummaa",
-                  "Wal-simatu",
-                  "Hawaasa",
-                  "Sirna",
-                  "Misooma",
-                ],
-              },
-              {
-                title: "Qabsiina",
-                links: [
-                  "Natti Bilbilaa",
-                  "Email",
-                  "Magaalaa",
-                  "Facebook",
-                  "Twitter",
-                  "Office",
-                ],
-              },
-            ].map((section) => (
-              <div key={section.title}>
-                <h4 className="font-bold text-lg mb-6">
-                  {section.title}
-                </h4>
-                <ul className="space-y-3">
-                  {section.links.map((link) => (
-                    <li key={link}>
-                      <Link
-                        href="#"
-                        className="text-gray-400 hover:text-white transition-colors text-sm"
-                      >
-                        {link}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+            {/* FAQ Items */}
+            <div className="space-y-5">
+              {faqs.map((faq, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  viewport={{ once: true }}
+                  transition={{
+                    delay: index * 0.1,
+                  }}
+                  className="bg-white rounded-3xl shadow-md border border-gray-200 hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+                >
+                  <button
+                    onClick={() =>
+                      setActiveFaq(
+                        activeFaq === index
+                          ? null
+                          : index
+                      )
+                    }
+                    className="w-full px-6 py-5 flex items-center justify-between text-left bg-white hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="text-lg font-semibold text-gray-900">
+                      {faq.question}
+                    </span>
+                    <motion.div
+                      animate={{
+                        rotate:
+                          activeFaq === index
+                            ? 90
+                            : 0,
+                      }}
+                      transition={{
+                        duration: 0.3,
+                      }}
+                    >
+                      <ChevronRight className="w-5 h-5 text-gray-500" />
+                    </motion.div>
+                  </button>
 
-          <div className="border-t border-gray-800 pt-8 text-center">
-            <p className="text-gray-400 text-sm">
-              © {new Date().getFullYear()} Nutii
-              Dhaabbati Gurmuu Tola Oltummaa.
-              Hundumtuu mirga ofii isaati.
-            </p>
-            <p className="text-gray-500 text-xs mt-2 italic">
-              "Nami maqaa isaa xureessitan
-              dhaloota ijjeesa waan jirtanuuf
-              dhiifama gaafanna"
-            </p>
+                  <AnimatePresence>
+                    {activeFaq === index && (
+                      <motion.div
+                        initial={{
+                          height: 0,
+                          opacity: 0,
+                          paddingTop: 0,
+                          paddingBottom: 0,
+                        }}
+                        animate={{
+                          height: "auto",
+                          opacity: 1,
+                          paddingTop: 20,
+                          paddingBottom: 20,
+                        }}
+                        exit={{
+                          height: 0,
+                          opacity: 0,
+                          paddingTop: 0,
+                          paddingBottom: 0,
+                        }}
+                        className="px-6 bg-blue-50/20 border-t border-gray-200"
+                      >
+                        <p className="text-gray-700 leading-relaxed">
+                          {faq.answer}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
-      </footer>
+      </section>
+
+      {/* Final CTA */}
+      <section className="relative py-28 bg-gradient-to-br from-white to-blue-50 overflow-hidden">
+        {/* Decorative floating shapes */}
+        <div className="absolute -top-24 -left-24 w-80 h-80 bg-blue-200/20 rounded-full filter blur-3xl animate-blob"></div>
+        <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-green-200/20 rounded-full filter blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-purple-200/20 rounded-full filter blur-2xl animate-blob animation-delay-4000"></div>
+
+        <div className="container mx-auto px-4 lg:px-8 relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Icon Badge */}
+            <motion.div
+              initial={{
+                opacity: 0,
+                scale: 0.8,
+                rotate: -10,
+              }}
+              whileInView={{
+                opacity: 1,
+                scale: 1,
+                rotate: 0,
+              }}
+              viewport={{ once: true }}
+              transition={{
+                type: "spring",
+                stiffness: 120,
+              }}
+              className="inline-flex p-5 bg-gradient-to-br from-blue-400 to-green-400 rounded-3xl mb-8 shadow-2xl"
+            >
+              <Rocket className="w-16 h-16 text-white animate-bounce" />
+            </motion.div>
+
+            {/* Main Title */}
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight"
+            >
+              Har'a{" "}
+              <span className="text-gradient bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent">
+                Eegaluu!
+              </span>
+            </motion.h2>
+
+            {/* Subtitle */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-xl lg:text-2xl text-gray-700 mb-12 max-w-3xl mx-auto leading-relaxed"
+            >
+              Dhaloota kana keessatti{" "}
+              <span className="font-bold text-blue-600">
+                hiriyaa ta'i
+              </span>
+              , leenjii{" "}
+              <span className="font-bold text-green-600">
+                argadhaa
+              </span>
+              , hiriyyaa{" "}
+              <span className="font-bold text-purple-600">
+                argadhaa
+              </span>
+              , fi jireenya keessan{" "}
+              <span className="font-extrabold text-gradient bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent">
+                jijjiradhaa
+              </span>
+              .
+            </motion.p>
+
+            {/* Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="flex flex-col sm:flex-row gap-6 justify-center"
+            >
+              {isAuthenticated ? (
+                <button
+                  onClick={handleDashboard}
+                  className="group px-12 py-4 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-3xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg"
+                >
+                  Go to Dashboard
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={
+                      handleRegisterRedirect
+                    }
+                    className="group px-12 py-4 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-3xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg"
+                  >
+                    Register Now
+                    <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                  </button>
+                  <button
+                    onClick={handleLoginRedirect}
+                    className="px-12 py-4 bg-white text-gray-700 font-semibold rounded-3xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
+                  >
+                    Login
+                  </button>
+                </>
+              )}
+            </motion.div>
+
+            {/* Extra Note */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="mt-10 text-sm text-gray-500 italic"
+            >
+              Hiriyaa fi leenjii argachuuf qophii
+              guutuu ta'uu kee mirkaneessi.
+            </motion.p>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
 
       {/* Scroll to Top Button */}
       <AnimatePresence>
